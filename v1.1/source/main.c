@@ -14,7 +14,7 @@ volatile bool timer_run = false;
 volatile bool timer_flag = false;
 volatile int thread_num = 2;
 
-char ver[] = "v1.1.0 dev";
+char ver[] = "v1.1.0 ";
 char* battery_mark_mode[] = { "\x1b[36m   Full check   \x1b[30m","\x1b[36m  Short check   \x1b[30m","\x1b[36mVery short check\x1b[30m" };
 char* battery_mark_run_msg[] = { "\x1b[32mRunning     \x1b[30m","\x1b[32mRunning.    \x1b[30m","\x1b[32mRunning..   \x1b[30m","\x1b[32mRunning...  \x1b[30m","\x1b[32mRunning.... \x1b[30m","\x1b[32mRunning.....\x1b[30m", };
 double battery_mark_battery_voltage_start = 0;
