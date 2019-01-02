@@ -1,21 +1,18 @@
-3DS-Battery-Checker
-
+# 3DS-Battery-Checker
 Check your 3DS battery
 
--Add battery mark on ver1.1
+# Summary
 
-![pic](https://user-images.githubusercontent.com/45873899/50562547-f974ad80-0d57-11e9-8b3e-1a7a2269ce63.png)
+* -Add battery mark on ver1.1
 
+# ![pic](https://user-images.githubusercontent.com/45873899/50562547-f974ad80-0d57-11e9-8b3e-1a7a2269ce63.png)
 
--Battery level
+* -Battery level
+* -Battery voltage
+* -Battery charge
+* -Battery state save (news list)
 
--Battery voltage
+# Battery mark result
 
--Battery charge
-
--Battery state save (news list)
-
-
-credit
-
+# Credit
 Core_2_Extreme , yoruto (icon&banner)
