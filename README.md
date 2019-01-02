@@ -20,12 +20,11 @@ Check your 3DS battery
 ## Battery mark result
 
 * by Core_2_Extreme
-* |----------------------------------------------------------------------------------------------------------------------------|
 * | N3DS LL(JP) | **mode:** full | 1750mAh | **min** 0m30s | **max** 2m26s | **avg** 1m17s | **total** 1h49m23s | **note: 3 years use** |
 * | N3DS LL(JP) | **mode:** full | 1750mAh | **min** 1m15s | **max** 3m27s | **avg** 2m30s | **total** 3h33m09s | **note:** |
 * | N3DS LL(JP) | **mode:** full | 1750mAh | **min** 0m50s | **max** 2m35s | **avg** 1m49s | **total** 2h34m35s | **note:** |
 * | N3DS LL(JP) | **mode:** full | 1750mAh | **min** 0m34s | **max** 3m01s | **avg** 1m18s | **total** 1h50m40s | **note:** |
-* |----------------------------------------------------------------------------------------------------------------------------|
+
 
 ## Credit
 Core_2_Extreme , yoruto (icon&banner)
