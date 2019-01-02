@@ -1,9 +1,14 @@
 # 3DS-Battery-Checker
 Check your 3DS battery
 
-# Summary
+## Index
+* [Summary](https://github.com/Core-2-Extreme/3DS-Battery-Checker#summary)
+* [Battery mark result](https://github.com/Core-2-Extreme/3DS-Battery-Checker#battery-mark-result)
+* [Credit](https://github.com/Core-2-Extreme/3DS-Battery-Checker#credit)
 
-* -Add battery mark on ver1.1
+## Summary
+
+* **-Add battery mark on ver1.1**
 
 # ![pic](https://user-images.githubusercontent.com/45873899/50562547-f974ad80-0d57-11e9-8b3e-1a7a2269ce63.png)
 
@@ -12,7 +17,15 @@ Check your 3DS battery
 * -Battery charge
 * -Battery state save (news list)
 
-# Battery mark result
+## Battery mark result
 
-# Credit
+* by Core_2_Extreme
+* |----------------------------------------------------------------------------------------------------------------------------|
+* | N3DS LL(JP) | **mode:** full | 1750mAh | **min** 0m30s | **max** 2m26s | **avg** 1m17s | **total** 1h49m23s | **note: 3 years use** |
+* | N3DS LL(JP) | **mode:** full | 1750mAh | **min** 1m15s | **max** 3m27s | **avg** 2m30s | **total** 3h33m09s | **note:** |
+* | N3DS LL(JP) | **mode:** full | 1750mAh | **min** 0m50s | **max** 2m35s | **avg** 1m49s | **total** 2h34m35s | **note:** |
+* | N3DS LL(JP) | **mode:** full | 1750mAh | **min** 0m34s | **max** 3m01s | **avg** 1m18s | **total** 1h50m40s | **note:** |
+* |----------------------------------------------------------------------------------------------------------------------------|
+
+## Credit
 Core_2_Extreme , yoruto (icon&banner)
