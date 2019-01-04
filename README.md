@@ -8,10 +8,15 @@ Check your 3DS battery
 
 ## Summary
 
+### ver1.1.1
+* -Add battery mark preset medium & custom on ver1.1.1
+
+### ver1.1
 * **-Add battery mark on ver1.1**
 
 # ![batterymark](https://user-images.githubusercontent.com/45873899/50693476-664eb700-107a-11e9-833f-cf850933e9cd.png)
 
+### ver1.0
 * -Battery level
 * -Battery voltage
 * -Battery charge
