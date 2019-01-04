@@ -27,4 +27,4 @@ Check your 3DS battery
 
 
 ## Credit
-[Core_2_Extreme](https://twitter.com/toshi800348),[yoruto (icon&banner)](https://twitter.com/yamu_yoruto)
+[Core_2_Extreme](https://twitter.com/toshi800348) , [yoruto (icon&banner)](https://twitter.com/yamu_yoruto)
