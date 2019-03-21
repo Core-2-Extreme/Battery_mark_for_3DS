@@ -12,6 +12,9 @@ Check your 3DS battery
 * -Add -battery mark result save & view
 * -Add -battery history save & view
 
+![v1 2 0](https://user-images.githubusercontent.com/45873899/54758877-63527400-4c30-11e9-82d2-ae7ce6c46aef.png)
+
+
 ### ver1.1.1
 * -Add battery mark preset medium & custom on ver1.1.1
 
