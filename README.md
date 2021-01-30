@@ -10,5 +10,5 @@ Check your 3DS battery
 
 ### ver2.0
 * Added battery mark ranking
-* Test result will be saved to sdmc:/Battery_mark/result/ (csv format)
+* Test result will be saved to notification list and sdmc:/Battery_mark/result/ (csv format)
 * Changed battery mark test(test result is not compatible with older version)
