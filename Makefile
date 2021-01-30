@@ -41,7 +41,7 @@ GRAPHICS	:=	gfx
 ROMFS		:=	romfs
 GFXBUILD	:=	$(ROMFS)/gfx
 #---------------------------------------------------------------------------------
-APP_VER					:= 1
+APP_VER					:= 2048
 APP_TITLE				:= Battery mark v2
 APP_DESCRIPTION				:= Battery mark for 3DS
 APP_AUTHOR				:= Core_2_Extreme
