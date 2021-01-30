@@ -1,0 +1,31 @@
+﻿<0>Battery </0>
+<1>Battery time (per 1%) </1>
+<2>Do not charge!!!!!</2>
+<3>The test was aborted!!!!!</3>
+<4>Battery time max : </4>
+<5>Battery time avg : </5>
+<6>Battery time min : </6>
+<7>Elapsed time : </7>
+<8>Total elapsed time : </8>
+<9>Remaining test time(estimated) : </9>
+<10>Start(A)</10>
+<11>Stop(B)</11>
+<12>Battery marking...
+Please wait until test finished...</12>
+<13>Battery mark v2 result</13>
+<14>Calculating</14>
+<15>No enough battery</15>
+<16>You need </16>
+<17>% of battery
+please charge battery and try again.</17>
+<18>Battery voltage </18>
+<19>Send battery mark result to the ranking server : </19>
+<20>OFF</20>
+<21>ON</21>
+<22>Please input user name.</22>
+<23>Submitting result...</23>
+<24>Do NOT close the shell!!!!!</24>
+<25>Time</25>
+<26>Do you want to abort the test?</26>
+<27>Yes(A)</27>
+<28>No(B)</28>

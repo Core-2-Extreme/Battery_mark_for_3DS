@@ -1,0 +1,17 @@
+﻿<0>Model</0>
+<1>Total</1>
+<2>Avg</2>
+<3>Max</3>
+<4>Min</4>
+<5>User name</5>
+<6>App ver</6>
+<7>System ver</7>
+<8>Date</8>
+<9>Only OLD 3DS</9>
+<10>Only OLD 3DS XL</10>
+<11>Only NEW 3DS</11>
+<12>Only OLD 2DS</12>
+<13>Only NEW 3DS XL</13>
+<14>Only NEW 2DS XL</14>
+<15>All models</15>
+<16>Download ranking(B)</16>
