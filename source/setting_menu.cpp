@@ -93,11 +93,10 @@ double sem_touch_x_move_left = 0.0;
 double sem_touch_y_move_left = 0.0;
 std::string sem_lang = "en";
 std::string sem_msg[SEM_NUM_OF_MSG];
-std::string sem_newest_ver_data[10];
-std::string sem_update_dir = "GUI";
-std::string sem_update_file = "GUI.3dsx";
-std::string sem_update_url = "https://raw.githubusercontent.com/Core-2-Extreme/test/master/version/newest.txt";
-std::string sem_update_content_url = "https://raw.githubusercontent.com/Core-2-Extreme/test/master/version/gui";
+std::string sem_newest_ver_data[18];
+std::string sem_update_dir = "Battery_mark";
+std::string sem_update_file = "Battery_mark_for_3DS";
+std::string sem_update_url = "https://script.google.com/macros/s/AKfycbz8Nsobjwc9IslWkIEB_2gyc76bTyJFwod2SZJbeVuhu_HbfQiszty8/exec";
 std::string	sem_setting_folder = "/Battery_mark/";
 std::string sem_init_string = "Sem/Init";
 std::string sem_exit_string = "Sem/Exit";
@@ -1073,7 +1072,7 @@ void Sem_main(void)
 			if (sem_selected_edition_num == 0)
 			{
 				Draw(sem_msg[60], 17.5, 140.0, 0.5, 0.5, 0.0, 0.0, 0.0, 1.0);
-				Draw("sdmc:/3ds/" + sem_update_dir + "_ver_" + sem_newest_ver_data[0] + "/" + sem_update_file, 17.5, 150.0, 0.45, 0.45, 1.0, 0.0, 0.0, 1.0);
+				Draw("sdmc:/3ds/" + sem_update_dir + "_ver_" + sem_newest_ver_data[0] + "/" + sem_update_file + ".3dsx", 17.5, 150.0, 0.45, 0.45, 1.0, 0.0, 0.0, 1.0);
 			}
 
 			if(sem_update_progress == 0)
@@ -1538,14 +1537,16 @@ void Sem_check_update_thread(void* arg)
 	std::string url = "";
 	std::string last_url = "";
 	std::string parse_cache = "";
-	std::string parse_start[10] = {"<newest>", "<3dsx_available>", "<cia_32mb_ram_available>",
+	std::string parse_start[18] = {"<newest>", "<3dsx_available>", "<cia_32mb_ram_available>",
 	"<cia_64mb_ram_available>", "<cia_72mb_ram_available>", "<cia_80mb_ram_available>",
 	"<cia_96mb_ram_available>", "<cia_124mb_ram_available>", "<cia_178mb_ram_available>",
-	"<patch_note>", };
-	std::string parse_end[10] = { "</newest>", "</3dsx_available>", "</cia_32mb_ram_available>",
+	"<patch_note>", "<3dsx_url>", "<32mbcia_url>", "<64mbcia_url>", "<72mbcia_url>", "<80mbcia_url>",
+	"<96mbcia_url>", "<124mbcia_url>", "<178mbcia_url>", };
+	std::string parse_end[18] = { "</newest>", "</3dsx_available>", "</cia_32mb_ram_available>",
 	"</cia_64mb_ram_available>", "</cia_72mb_ram_available>", "</cia_80mb_ram_available>",
 	"</cia_96mb_ram_available>", "</cia_124mb_ram_available>", "</cia_178mb_ram_available>",
-	"</patch_note>", };
+	"</patch_note>", "</3dsx_url>", "</32mbcia_url>", "</64mbcia_url>", "</72mbcia_url>", "</80mbcia_url>",
+	"</96mbcia_url>", "</124mbcia_url>", "</178mbcia_url>", };
 	std::string editions[8] = { ".3dsx", "_32mb.cia", "_64mb.cia", "_72mb.cia",
 	"_80mb.cia", "_96mb.cia", "_124mb.cia", "_178mb.cia", };
 	Handle am_handle = 0;
@@ -1567,7 +1568,7 @@ void Sem_check_update_thread(void* arg)
 			}
 			else if (sem_dl_file_request)
 			{
-				url = sem_update_content_url + editions[sem_selected_edition_num];
+				url = sem_newest_ver_data[sem_selected_edition_num + 10];
 				sem_update_progress = 0;
 			}
 
@@ -1593,7 +1594,7 @@ void Sem_check_update_thread(void* arg)
 					else
 						dir_path = "/" + sem_update_dir + "/ver_" + sem_newest_ver_data[0] + "/";
 
-					file_name = "Line_for_3DS" + editions[sem_selected_edition_num];
+					file_name = sem_update_file + editions[sem_selected_edition_num];
 					File_delete_file(file_name, dir_path);//delete old file if exist
 				}
 
@@ -1619,7 +1620,7 @@ void Sem_check_update_thread(void* arg)
 					{
 						parse_cache = (char*)buffer;
 
-						for (int i = 0; i < 10; i++)
+						for (int i = 0; i < 18; i++)
 						{
 							parse_start_pos = std::string::npos;
 							parse_end_pos = std::string::npos;
