@@ -3,72 +3,67 @@
 <2>LCD</2>
 <3>Control</3>
 <4>Font</4>
-<5>Memory</5>
+<5>Wireless</5>
 <6>Advanced settings</6>
-<7>Check for updates</7>
-<8>English</8>
-<9>日本語</9>
-<10>Night mode</10>
-<11>ON</11>
-<12>OFF</12>
-<13>Flash</13>
-<14>Vsync</14>
+<7>Battery</7>
+<8>Check for updates</8>
+<9>English</9>
+<10>日本語</10>
+<11>Night mode</11>
+<12>ON</12>
+<13>OFF</13>
+<14>Flash</14>
 <15>Screen brightness : </15>
 <16>Time to turn off LCDs : </16>
 <17>s</17>
-<18>Screen brightness before turn off LCDs : </18>
-<19>Scroll speed : </19>
-<20>Default font</20>
-<21>External font</21>
-<22>System specific font</22>
-<23>JPN</23>
-<24>CHN</24>
-<25>KOR</25>
-<26>TWN</26>
-<27>Load all</27>
-<28>Unload all</28>
-<29>Line log httpc buffer size : </29>
-<30>Line log fs buffer size : </30>
-<31>Line send buffer size : </31>
-<32>Spt spt httpc buffer size : </32>
-<33>Imv image buffer size : </33>
-<34>Allow send app info</34>
-<35>ALLOW</35>
-<36>DENY</36>
-<37>Debug mode</37>
-<38>Back</38>
-<39>Checking...</39>
-<40>Check failed.</40>
-<41>Up to date.</41>
-<42>New version available.</42>
-<43>Google apps script update isn't required.</43>
-<44>Google apps script update is required.</44>
-<45>Go back (B)</45>
-<46>Go to editions select (A)</46>
-<47>.3dsx</47>
-<48>.cia  32MB of usable RAM</48>
-<49>.cia  64MB of usable RAM</49>
-<50>.cia  72MB of usable RAM</50>
-<51>.cia  80MB of usable RAM</51>
-<52>.cia  96MB of usable RAM</52>
-<53>.cia  124MB of usable RAM</53>
-<54>.cia  178MB of usable RAM</54>
-<55>(not available)</55>
-<56>* Only 124MB and 178MB of usable RAM are New 3DS's.</56>
-<57>* The .3dsx edition usually has 64MB of usable RAM on</57>
-<58>the Old 3DS, and 124MB of usable RAM on the New 3DS.</58>
-<59>(It may depend on what exploit point you are using(?))</59>
-<60>File will be saved to </60>
-<61>Downloading...</61>
-<62>Installing...</62>
-<63>Success</63>
-<64>Failed</64>
-<65>Please restart the app to apply updates.</65>
-<66>Download & install (X)</66>
-<67>Delete line image cache</67>
-<68>Delete</68>
-<69>Battery</69>
-<70>Eco mode</70>
-<71>Delete line audio cache</71>
-<72>Delete line video cache</72>
-<73>Close app</73>
+<18>Scroll speed : </18>
+<19>JPN</19>
+<20>CHN</20>
+<21>KOR</21>
+<22>TWN</22>
+<23>Load all</23>
+<24>Unload all</24>
+<25>Allow send app info</25>
+<26>ALLOW</26>
+<27>DENY</27>
+<28>Debug mode</28>
+<29>Eco mode</29>
+<30>Back</30>
+<31>Checking...</31>
+<32>Check failed.</32>
+<33>Up to date.</33>
+<34>New version available.</34>
+<35>Go back (B)</35>
+<36>Go to editions select (A)</36>
+<37>.3dsx</37>
+<38>.cia</38>
+<39>File will be saved to </39>
+<40>Downloading...</40>
+<41>Installing...</41>
+<42>Success</42>
+<43>Failed</43>
+<44>Please restart the app to apply updates.</44>
+<45>Download & install (X)</45>
+<46>Close app</46>
+<47>Wifi</47>
+<48>Connected to : </48>
+<49>Screen recording</49>
+<50>Start recording (both screen)</50>
+<51>Start recording (top screen)</51>
+<52>Start recording (bottom screen)</52>
+<53>Stop recording</53>
+<54>Screen mode(top screen)</54>
+<55>To record screen, you must
+turn off the '800px mode'
+(Settings->LCD->Screen mode).</55>
+<56>800px</56>
+<57>3D</57>
+<58>Nothing</58>
+<59>Magyar</59>
+<60>简体中文</60>
+<61>Italiano</61>
+<62>Use fake model (restart to apply
+some function may not work)</62>
+<63>Español</63>
+<64>Română</64>
+<65>Polski</65>
