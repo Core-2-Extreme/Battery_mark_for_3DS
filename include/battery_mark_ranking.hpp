@@ -1,8 +1,5 @@
 #pragma once
-
-#define BMR_NUM_OF_MSG 17
-
-#define BMR_NUM_OF_LOGS 1000
+#include "system/types.hpp"
 
 bool Bmr_query_init_flag(void);
 
@@ -13,6 +10,8 @@ Result_with_string Bmr_load_msg(std::string lang);
 void Bmr_resume(void);
 
 void Bmr_suspend(void);
+
+void Bmr_hid(Hid_info key);
 
 void Bmr_init(void);
 
