@@ -49,7 +49,7 @@
 #define DEF_BMARK_VIDEO_THREAD_STR (std::string)"Bmark/Video thread"
 #define DEF_BMARK_COPY_THREAD_STR (std::string)"Bmark/Copy thread"
 #define DEF_BMARK_UPDATE_THREAD_STR (std::string)"Bmark/Update thread"
-#define DEF_BMARK_NUM_OF_HISTORY 300
+#define DEF_BMARK_NUM_OF_HISTORY 280
 
 #define DEF_BMARK_BATTERY_MSG 0
 #define DEF_BMARK_BATTERY_TIME_MSG 1

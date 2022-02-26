@@ -1,5 +1,7 @@
 #include "system/headers.hpp"
 
+u8 bmark_battery_level_history[DEF_BMARK_NUM_OF_HISTORY];
+u8 bmark_battery_temp_history[DEF_BMARK_NUM_OF_HISTORY];
 int bmark_copied = 0;
 int bmark_cache_copied = 0;
 int bmark_fps = 0;
@@ -13,6 +15,7 @@ double bmark_avg_time = 0;
 double bmark_elapsed_time = 0;
 double bmark_total_elapsed_time = 0;
 double bmark_remain_time = 0;
+double bmark_battery_voltage_history[DEF_BMARK_NUM_OF_HISTORY];
 bool bmark_main_run = false;
 bool bmark_thread_run = false;
 bool bmark_already_init = false;
@@ -58,10 +61,14 @@ void Bmark_check_thread(void* arg)
 	int battery_level = 0;
 	int pre_battery_level = 0;
 	int test_amount = 0;
+	int rotated_screen_width = 0, rotated_screen_height = 0;
+	u8* frame_buffer = NULL;
+	u8* graph_buffer = NULL;
 	u8* data = NULL;
 	u8 shell_state = 0;
 	u16* u16_title= NULL;
 	u16* u16_message= NULL;
+	u16 screen_width = 0, screen_height = 0;
 	u32 dled_size = 0;
 	char time_cache[64];
 	std::string title = "";
@@ -96,6 +103,15 @@ void Bmark_check_thread(void* arg)
 			bmark_total_elapsed_time = 0;
 			bmark_remain_time = 1234567890;
 			test_amount = bmark_remain_test;
+			for(int i = 0; i < DEF_BMARK_NUM_OF_HISTORY; i++)
+			{
+				bmark_battery_level_history[i] = 0;
+				bmark_battery_temp_history[i] = 0;
+				bmark_battery_voltage_history[i] = 0;
+			}
+			bmark_battery_level_history[DEF_BMARK_NUM_OF_HISTORY - 1] = var_battery_level_raw;
+			bmark_battery_temp_history[DEF_BMARK_NUM_OF_HISTORY - 1] = var_battery_temp;
+			bmark_battery_voltage_history[DEF_BMARK_NUM_OF_HISTORY - 1] = var_battery_voltage;
 
 			eco_mode = var_eco_mode;
 			screen_brightness = var_lcd_brightness;
@@ -104,7 +120,7 @@ void Bmark_check_thread(void* arg)
 			var_lcd_brightness = 164;
 			var_top_lcd_brightness = var_lcd_brightness;
 			var_bottom_lcd_brightness = var_lcd_brightness;
-			night_mode = false;
+			var_night_mode = false;
 			Util_cset_set_screen_brightness(true, true, var_lcd_brightness);
 			aptSetHomeAllowed(false);
 
@@ -120,10 +136,10 @@ void Bmark_check_thread(void* arg)
 			result = Util_file_save_to_file(file_name + ".csv", DEF_MAIN_DIR + "result/", (u8*)save_data.c_str(), save_data.length(), true);
 			Util_log_save(DEF_BMARK_WATCH_THREAD_STR, "Util_file_save_to_file()..." + result.string, result.code);
 
-			if(battery_level < (bmark_remain_test + 6))
+			if(battery_level < (bmark_remain_test + 3))
 			{
 				bmark_stop_mark_request = true;
-				Util_err_set_error_message(bmark_msg[DEF_BMARK_NO_ENOUGH_BATTERY_MSG], bmark_msg[DEF_BMARK_NO_ENOUGH_BATTERY_DESCRIPTION_0_MSG] + std::to_string(bmark_remain_test + 6) + bmark_msg[DEF_BMARK_NO_ENOUGH_BATTERY_DESCRIPTION_1_MSG], DEF_BMARK_WATCH_THREAD_STR, -1);
+				Util_err_set_error_message(bmark_msg[DEF_BMARK_NO_ENOUGH_BATTERY_MSG], bmark_msg[DEF_BMARK_NO_ENOUGH_BATTERY_DESCRIPTION_0_MSG] + std::to_string(bmark_remain_test + 3) + bmark_msg[DEF_BMARK_NO_ENOUGH_BATTERY_DESCRIPTION_1_MSG], DEF_BMARK_WATCH_THREAD_STR, -1);
 				Util_err_set_error_show_flag(true);
 			}
 			else
@@ -252,6 +268,22 @@ void Bmark_check_thread(void* arg)
 							{
 								Util_err_set_error_message(result.string, result.error_description, DEF_BMARK_WATCH_THREAD_STR, result.code);
 								Util_err_set_error_show_flag(true);
+							}
+
+							//save bottom screen (graph) as png
+							frame_buffer = gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, &screen_width, &screen_height);
+							if(frame_buffer)
+							{
+								result = Util_converter_rgb888_rotate_90_degree(frame_buffer, &graph_buffer, screen_width, screen_height, &rotated_screen_width, &rotated_screen_height);
+								Util_log_save(DEF_BMARK_WATCH_THREAD_STR, "Util_converter_rgb888_rotate_90_degree()...", result.code);
+								if(result.code == 0)
+								{
+									Util_converter_rgb888be_to_rgb888le(graph_buffer, rotated_screen_width, rotated_screen_height);
+									result = Util_image_encoder_encode(DEF_MAIN_DIR + "result/" + file_name + "_graph.png", graph_buffer, rotated_screen_width, rotated_screen_height, DEF_ENCODER_IMAGE_CODEC_PNG, 0);
+									Util_log_save(DEF_BMARK_WATCH_THREAD_STR, "Util_image_encoder_encode()...", result.code);
+								}
+								Util_safe_linear_free(graph_buffer);
+								graph_buffer = NULL;
 							}
 
 							if(bmark_send_data)
@@ -498,7 +530,7 @@ void Bmark_copy_thread(void* arg)
 void Bmark_update_thread(void* arg)
 {
 	Util_log_save(DEF_BMARK_UPDATE_THREAD_STR, "Thread started.");
-	u64 performance_update_ts = -1, current_ts = -1;
+	u64 graph_update_ts = -1, performance_update_ts = -1, current_ts = -1;
 
 	while (bmark_thread_run)
 	{
@@ -515,6 +547,19 @@ void Bmark_update_thread(void* arg)
 			bmark_cache_fps = 0;
 		}
 
+		if(current_ts > graph_update_ts + 60000)
+		{
+			graph_update_ts = current_ts;
+			bmark_battery_level_history[DEF_BMARK_NUM_OF_HISTORY - 1] = var_battery_level_raw;
+			bmark_battery_temp_history[DEF_BMARK_NUM_OF_HISTORY - 1] = var_battery_temp;
+			bmark_battery_voltage_history[DEF_BMARK_NUM_OF_HISTORY - 1] = var_battery_voltage;
+			for(int i = 1; i < DEF_BMARK_NUM_OF_HISTORY; i++)
+			{
+				bmark_battery_level_history[i - 1] = bmark_battery_level_history[i];
+				bmark_battery_temp_history[i - 1] = bmark_battery_temp_history[i];
+				bmark_battery_voltage_history[i - 1] = bmark_battery_voltage_history[i];
+			}
+		}
 	}
 	Util_log_save(DEF_BMARK_UPDATE_THREAD_STR, "Thread exit.");
 	threadExit(0);
@@ -524,6 +569,7 @@ void Bmark_resume(void)
 {
 	bmark_thread_suspend = false;
 	bmark_main_run = true;
+	var_need_reflesh = true;
 	Menu_suspend();
 }
 
@@ -623,10 +669,16 @@ void Bmark_init_thread(void* arg)
 		bmark_copy_thread = threadCreate(Bmark_copy_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_LOW, 0, false);
 	}
 
-	bmark_check_thread = threadCreate(Bmark_check_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_NORMAL, 0, false);
+	bmark_check_thread = threadCreate(Bmark_check_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_HIGH, 0, false);
 	bmark_update_thread = threadCreate(Bmark_update_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_REALTIME, 0, false);
 
 	bmark_status += "\nInitializing variables...";
+	for(int i = 0; i < DEF_BMARK_NUM_OF_HISTORY; i++)
+	{
+		bmark_battery_level_history[i] = 0;
+		bmark_battery_temp_history[i] = 0;
+		bmark_battery_voltage_history[i] = 0;
+	}
 	osGetSystemVersionDataString(&os_ver, &os_ver, system_ver_char, 0x50);
 	bmark_system_ver = system_ver_char;
 	bmark_start_button.c2d = var_square_image[0];
@@ -820,7 +872,7 @@ void Bmark_main(void)
 			else if(bmark_sending_data)
 				Draw(bmark_msg[DEF_BMARK_SUBMITING_RESULT_MSG], 230, 180, 0.5, 0.5, DEF_DRAW_RED);
 
-			Draw(std::to_string(var_battery_voltage).substr(0, 5) + "v " + std::to_string(var_battery_level_raw) + "% " + std::to_string(var_battery_temp) + "゜C", 240, 210, 0.65, 0.65, DEF_DRAW_BLUE);
+			Draw(std::to_string(var_battery_voltage).substr(0, 5) + "V " + std::to_string(var_battery_level_raw) + "% " + std::to_string(var_battery_temp) + "゜C", 240, 210, 0.65, 0.65, DEF_DRAW_BLUE);
 
 			Draw("memcpy thread " + std::to_string(bmark_copied / 1024 / 1024) + "MB/s", 260, 20, 0.425, 0.425, color);
 			Draw("video thread " + std::to_string(bmark_fps) + "fps", 260, 30, 0.425, 0.425, color);
@@ -847,10 +899,35 @@ void Bmark_main(void)
 
 			Draw(DEF_BMARK_VER, 0, 0, 0.4, 0.4, DEF_DRAW_GREEN);
 
+			//Graph for battery level/temp/voltage
+			Draw_texture(var_square_image[0], DEF_DRAW_WEAK_AQUA, 20, 30, DEF_BMARK_NUM_OF_HISTORY, 130);
+			Draw("(V)", 0, 10, 0.45, 0.45, DEF_DRAW_YELLOW, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_TOP, 20, 20);
+			Draw("(%)", 275, 10, 0.45, 0.45, DEF_DRAW_RED);
+			Draw("(゜C)", 295, 10, 0.45, 0.45, 0xFF00A000);
+			for(int i = 0; i < 6; i++)
+			{
+				Draw_line(20, 130 - (i * 20), weak_color, 300, 130 - (i * 20), weak_color, 1);
+				Draw(std::to_string(i * 0.25 + 3).substr(0, 4), 0, 125 - (i * 20), 0.4, 0.4, color, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_TOP, 20, 20);
+				Draw(std::to_string(i * 20), 300, 125 - (i * 20), 0.45, 0.45, color);
+			}
+			for(int i = 0; i < DEF_BMARK_NUM_OF_HISTORY - 1; i++)
+			{
+				Draw_line(i + 20, 130 - bmark_battery_level_history[i], DEF_DRAW_RED, i + 21, 130 - bmark_battery_level_history[i + 1], DEF_DRAW_RED, 1);
+				Draw_line(i + 20, 130 - bmark_battery_temp_history[i], 0xFF00A000, i + 21, 130 - bmark_battery_temp_history[i + 1], 0xFF00A000, 1);
+				Draw_line(i + 20, 130 - (bmark_battery_voltage_history[i] == 0 ? 0 : (bmark_battery_voltage_history[i] - 3) * 80), DEF_DRAW_YELLOW,
+				i + 21, 130 - (bmark_battery_voltage_history[i + 1] == 0 ? 0 : (bmark_battery_voltage_history[i + 1] - 3) * 80), DEF_DRAW_YELLOW, 1);
+			}
+			Draw("Battery level : " + std::to_string(var_battery_level_raw) + "%", 20, 130, 0.5, 0.5, DEF_DRAW_RED,
+			DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
+			Draw("Battery temp : " + std::to_string(var_battery_temp) + "゜C", 160, 130, 0.5, 0.5, 0xFF00A000,
+			DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
+			Draw("Battery voltage : " + std::to_string(var_battery_voltage).substr(0, 5) + "V", 20, 145, 0.5, 0.5, DEF_DRAW_YELLOW,
+			DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 280, 15);
+
 			//start, stop and option button
-			Draw(bmark_msg[DEF_BMARK_START_MSG], 20, 180, 0.425, 0.425, bmark_start_mark_request ? weak_color : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 135, 15,
+			Draw(bmark_msg[DEF_BMARK_START_MSG], 20, 175, 0.425, 0.425, bmark_start_mark_request ? weak_color : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 135, 15,
 			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmark_start_button, bmark_start_button.selected ?  DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
-			Draw(bmark_msg[DEF_BMARK_STOP_MSG], 165, 180, 0.425, 0.425, bmark_start_mark_request ? color : weak_color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 135, 15,
+			Draw(bmark_msg[DEF_BMARK_STOP_MSG], 165, 175, 0.425, 0.425, bmark_start_mark_request ? color : weak_color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 135, 15,
 			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmark_stop_button, bmark_stop_button.selected ?  DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 			Draw(bmark_msg[DEF_BMARK_SEND_DATA_MSG] + bmark_msg[DEF_BMARK_OFF_MSG + bmark_send_data], 20, 200, 0.425, 0.425, bmark_start_mark_request ? weak_color : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER,
 			280, 15, DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmark_send_data_button, bmark_send_data_button.selected ?  DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
