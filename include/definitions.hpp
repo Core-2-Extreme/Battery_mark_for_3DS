@@ -80,6 +80,7 @@
 #define DEF_BMARK_ABORT_CONFIRMATION_MSG 26
 #define DEF_BMARK_YES_MSG 27
 #define DEF_BMARK_NO_MSG 28
+#define DEF_BMARK_BATTERY_TEMP_MSG 29
 
 //battery mark ranking
 #define DEF_BMR_NUM_OF_MSG 17
