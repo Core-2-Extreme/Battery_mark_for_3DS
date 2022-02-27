@@ -130,9 +130,8 @@ void Bmark_check_thread(void* arg)
 			time_data = time_cache;
 			file_name = time_data;
 			//csv format
-			save_data = DEF_BMARK_VER + "\n" + time_data + "\n" + std::to_string(bmark_initial_battery) 
-			+ "% -> " + std::to_string(bmark_final_battery) + "%\n" 
-			+ bmark_msg[DEF_BMARK_TIME_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_TIME_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_VOLTAGE_MSG] + "\n";
+			save_data = bmark_msg[DEF_BMARK_TIME_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_TIME_MSG]
+			+ "," + bmark_msg[DEF_BMARK_BATTERY_VOLTAGE_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_TEMP_MSG] + "\n";
 			result = Util_file_save_to_file(file_name + ".csv", DEF_MAIN_DIR + "result/", (u8*)save_data.c_str(), save_data.length(), true);
 			Util_log_save(DEF_BMARK_WATCH_THREAD_STR, "Util_file_save_to_file()..." + result.string, result.code);
 
@@ -226,7 +225,8 @@ void Bmark_check_thread(void* arg)
 						//csv format
 						memset(time_cache, 0, 64);
 						sprintf(time_cache, "%02d:%02d:%02d", var_hours, var_minutes, var_seconds);
-						save_data = (std::string)time_cache + "," + std::to_string(battery_level) + "," + std::to_string(time).substr(0, 5) + "," + std::to_string(var_battery_voltage).substr(0, 4) + "\n";
+						save_data = (std::string)time_cache + "," + std::to_string(battery_level) + "," + std::to_string(time).substr(0, 5) + ","
+						+ std::to_string(var_battery_voltage).substr(0, 4) + "," + std::to_string(var_battery_temp) + "\n";
 						result = Util_file_save_to_file(file_name + ".csv", DEF_MAIN_DIR + "result/", (u8*)save_data.c_str(), save_data.length(), false);
 						Util_log_save(DEF_BMARK_WATCH_THREAD_STR, "Util_file_save_to_file()..." + result.string, result.code);
 
@@ -235,8 +235,10 @@ void Bmark_check_thread(void* arg)
 							bmark_start_mark_request = false;
 							bmark_stop_mark_request = true;
 							//save result
-							save_data = bmark_msg[DEF_BMARK_TIME_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_TIME_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_VOLTAGE_MSG] + "\n";
-							save_data += bmark_msg[DEF_BMARK_BATTERY_TIME_MAX_MSG] + Util_convert_seconds_to_time(bmark_max_time) + "\n" 
+							save_data = bmark_msg[DEF_BMARK_TIME_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_TIME_MSG]
+							+ "," + bmark_msg[DEF_BMARK_BATTERY_VOLTAGE_MSG] + "\n"+ DEF_BMARK_VER + "\n" + time_data + 
+							"\n" + std::to_string(bmark_initial_battery) + "% -> " + std::to_string(bmark_final_battery) + "%\n"
+							+ bmark_msg[DEF_BMARK_BATTERY_TIME_MAX_MSG] + Util_convert_seconds_to_time(bmark_max_time) + "\n" 
 							+ bmark_msg[DEF_BMARK_BATTERY_TIME_AVG_MSG] + Util_convert_seconds_to_time(bmark_avg_time) + "\n"
 							+ bmark_msg[DEF_BMARK_BATTERY_TIME_MIN_MSG] + Util_convert_seconds_to_time(bmark_min_time) + "\n"
 							+ bmark_msg[DEF_BMARK_TOTAL_ELAPSED_TIME_MSG] + Util_convert_seconds_to_time(bmark_total_elapsed_time);
