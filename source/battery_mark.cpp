@@ -9,6 +9,7 @@ int bmark_cache_fps = 0;
 int bmark_remain_test = 0;
 int bmark_initial_battery = 0;
 int bmark_final_battery = 0;
+int bmark_graph_index = 0;
 double bmark_max_time = 0;
 double bmark_min_time = 0;
 double bmark_avg_time = 0;
@@ -103,15 +104,17 @@ void Bmark_check_thread(void* arg)
 			bmark_total_elapsed_time = 0;
 			bmark_remain_time = 1234567890;
 			test_amount = bmark_remain_test;
+			bmark_graph_index = 0;
 			for(int i = 0; i < DEF_BMARK_BMR_NUM_OF_HISTORY; i++)
 			{
 				bmark_battery_level_history[i] = 0;
 				bmark_battery_temp_history[i] = 0;
 				bmark_battery_voltage_history[i] = 0;
 			}
-			bmark_battery_level_history[DEF_BMARK_NUM_OF_HISTORY - 1] = var_battery_level_raw;
-			bmark_battery_temp_history[DEF_BMARK_NUM_OF_HISTORY - 1] = var_battery_temp;
-			bmark_battery_voltage_history[DEF_BMARK_NUM_OF_HISTORY - 1] = var_battery_voltage;
+			bmark_battery_level_history[bmark_graph_index] = var_battery_level_raw;
+			bmark_battery_temp_history[bmark_graph_index] = var_battery_temp;
+			bmark_battery_voltage_history[bmark_graph_index] = var_battery_voltage;
+			bmark_graph_index++;
 
 			eco_mode = var_eco_mode;
 			screen_brightness = var_lcd_brightness;
@@ -551,14 +554,26 @@ void Bmark_update_thread(void* arg)
 		if(current_ts > graph_update_ts + 60000)
 		{
 			graph_update_ts = current_ts;
-			bmark_battery_level_history[DEF_BMARK_NUM_OF_HISTORY - 1] = var_battery_level_raw;
-			bmark_battery_temp_history[DEF_BMARK_NUM_OF_HISTORY - 1] = var_battery_temp;
-			bmark_battery_voltage_history[DEF_BMARK_NUM_OF_HISTORY - 1] = var_battery_voltage;
-			for(int i = 1; i < DEF_BMARK_NUM_OF_HISTORY; i++)
+
+			//Shift graph content if graph is full
+			if(bmark_graph_index + 1 >= DEF_BMARK_BMR_NUM_OF_HISTORY)
 			{
-				bmark_battery_level_history[i - 1] = bmark_battery_level_history[i];
-				bmark_battery_temp_history[i - 1] = bmark_battery_temp_history[i];
-				bmark_battery_voltage_history[i - 1] = bmark_battery_voltage_history[i];
+				bmark_battery_level_history[bmark_graph_index] = var_battery_level_raw;
+				bmark_battery_temp_history[bmark_graph_index] = var_battery_temp;
+				bmark_battery_voltage_history[bmark_graph_index] = var_battery_voltage;
+				for(int i = 1; i < DEF_BMARK_BMR_NUM_OF_HISTORY; i++)
+				{
+					bmark_battery_level_history[i - 1] = bmark_battery_level_history[i];
+					bmark_battery_temp_history[i - 1] = bmark_battery_temp_history[i];
+					bmark_battery_voltage_history[i - 1] = bmark_battery_voltage_history[i];
+				}
+			}
+			else
+			{
+				bmark_battery_level_history[bmark_graph_index] = var_battery_level_raw;
+				bmark_battery_temp_history[bmark_graph_index] = var_battery_temp;
+				bmark_battery_voltage_history[bmark_graph_index] = var_battery_voltage;
+				bmark_graph_index++;
 			}
 		}
 	}
