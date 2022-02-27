@@ -79,6 +79,7 @@ void Bmark_check_thread(void* arg)
 	std::string time_data = "";
 	std::string post_data = "";
 	std::string cache = "";
+	std::string graph_csv_data = "";
 	Result_with_string result;
 	TickCounter stop_watch, elapsed_time_stop_watch;
 	osTickCounterStart(&stop_watch);
@@ -104,6 +105,7 @@ void Bmark_check_thread(void* arg)
 			bmark_total_elapsed_time = 0;
 			bmark_remain_time = 1234567890;
 			test_amount = bmark_remain_test;
+			graph_csv_data = "";
 			bmark_graph_index = 0;
 			for(int i = 0; i < DEF_BMARK_BMR_NUM_OF_HISTORY; i++)
 			{
@@ -294,6 +296,8 @@ void Bmark_check_thread(void* arg)
 							if(bmark_send_data)
 							{
 								bmark_sending_data = true;
+								for(int i = 0; i < DEF_BMARK_BMR_NUM_OF_HISTORY; i++)
+									graph_csv_data += std::to_string(bmark_battery_level_history[i]) + "," + std::to_string(bmark_battery_temp_history[i]) + "," + std::to_string(bmark_battery_voltage_history[i]).substr(0, 4) + ",";
 
 								//send data to the ranking server
 								post_data = "{ \"ver\" : \"" + DEF_BMARK_VER + "\","
@@ -303,7 +307,8 @@ void Bmark_check_thread(void* arg)
 									+ "\"max_time\" : \"" + std::to_string(bmark_max_time) + "\","
 									+ "\"avg_time\" : \"" + std::to_string(bmark_avg_time) + "\","
 									+ "\"min_time\" : \"" + std::to_string(bmark_min_time) + "\","
-									+ "\"total_time\" : \"" + std::to_string(bmark_total_elapsed_time) + "\""
+									+ "\"total_time\" : \"" + std::to_string(bmark_total_elapsed_time) + "\","
+									+ "\"graph_csv\" : \"" + graph_csv_data + "\""
 								+ "}";
 
 								result = Util_httpc_post_and_dl_data(DEF_BMARK_BMR_RANKING_SERVER_URL, (u8*)post_data.c_str(), post_data.length(), &data, 0x10000, &dled_size, true, 5);
