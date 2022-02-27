@@ -37,6 +37,9 @@
 
 //battery mark
 #define DEF_BMARK_NUM_OF_MSG 29
+#define DEF_BMARK_BMR_RANKING_SERVER_URL (std::string)"https://script.google.com/macros/s/AKfycbxo4iwCbxtI2ZuYQP7bKveRdHx6kPTH4rZ8Pg8nUguIq_7zcoooEUszJQ/exec"
+
+#define DEF_BMARK_NUM_OF_MSG 30
 //#define DEF_BMARK_ENABLE_ICON
 #define DEF_BMARK_ENABLE_NAME
 #define DEF_BMARK_ICON_PATH (std::string)"romfs:/"

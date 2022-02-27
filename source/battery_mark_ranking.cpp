@@ -59,7 +59,7 @@ void Bmr_thread(void* arg)
 			//download ranking data from the ranking server
 			cache = "";
 			log_num = Util_log_save(DEF_BMR_WORKER_THREAD_STR, "Util_httpc_dl_data()...");
-			result = Util_httpc_dl_data("https://script.google.com/macros/s/AKfycbxo4iwCbxtI2ZuYQP7bKveRdHx6kPTH4rZ8Pg8nUguIq_7zcoooEUszJQ/exec?mode=" + std::to_string(bmr_model_mode) + "&start_pos=1&logs=1000", &data, size, &dled_size, true, 5);
+			result = Util_httpc_dl_data(DEF_BMARK_BMR_RANKING_SERVER_URL + "?mode=" + std::to_string(bmr_model_mode) + "&start_pos=1&logs=1000&ver=" + std::to_string(DEF_CURRENT_APP_VER_INT), &data, size, &dled_size, true, 5);
 			Util_log_add(log_num, result.string, result.code);
 			string_data = (char*)data;
 			Util_safe_linear_free(data);

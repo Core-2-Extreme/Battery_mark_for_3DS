@@ -303,8 +303,7 @@ void Bmark_check_thread(void* arg)
 									+ "\"total_time\" : \"" + std::to_string(bmark_total_elapsed_time) + "\""
 								+ "}";
 
-								result = Util_httpc_post_and_dl_data("https://script.google.com/macros/s/AKfycbxo4iwCbxtI2ZuYQP7bKveRdHx6kPTH4rZ8Pg8nUguIq_7zcoooEUszJQ/exec",
-								(u8*)post_data.c_str(), post_data.length(), &data, 0x10000, &dled_size, true, 5);
+								result = Util_httpc_post_and_dl_data(DEF_BMARK_BMR_RANKING_SERVER_URL, (u8*)post_data.c_str(), post_data.length(), &data, 0x10000, &dled_size, true, 5);
 								Util_log_save(DEF_BMARK_WATCH_THREAD_STR, "Util_httpc_post_and_dl_data()..." + result.string, result.code);
 								if(result.code == 0)
 								{
