@@ -286,7 +286,7 @@ void Bmark_check_thread(void* arg)
 								if(result.code == 0)
 								{
 									Util_converter_rgb888be_to_rgb888le(graph_buffer, rotated_screen_width, rotated_screen_height);
-									result = Util_image_encoder_encode(DEF_MAIN_DIR + "result/" + file_name + "_graph.png", graph_buffer, rotated_screen_width, rotated_screen_height, DEF_ENCODER_IMAGE_CODEC_PNG, 0);
+									result = Util_image_encoder_encode(DEF_MAIN_DIR + "result/" + file_name + "_graph.jpg", graph_buffer, rotated_screen_width, rotated_screen_height, DEF_ENCODER_IMAGE_CODEC_JPG, 85);
 									Util_log_save(DEF_BMARK_WATCH_THREAD_STR, "Util_image_encoder_encode()...", result.code);
 								}
 								Util_safe_linear_free(graph_buffer);
