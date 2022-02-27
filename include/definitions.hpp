@@ -36,8 +36,8 @@
 #define DEF_SWKBD_MAX_DIC_WORDS 128
 
 //battery mark
-#define DEF_BMARK_NUM_OF_MSG 29
 #define DEF_BMARK_BMR_RANKING_SERVER_URL (std::string)"https://script.google.com/macros/s/AKfycbxo4iwCbxtI2ZuYQP7bKveRdHx6kPTH4rZ8Pg8nUguIq_7zcoooEUszJQ/exec"
+#define DEF_BMARK_BMR_NUM_OF_HISTORY 280
 
 #define DEF_BMARK_NUM_OF_MSG 30
 //#define DEF_BMARK_ENABLE_ICON
@@ -52,7 +52,6 @@
 #define DEF_BMARK_VIDEO_THREAD_STR (std::string)"Bmark/Video thread"
 #define DEF_BMARK_COPY_THREAD_STR (std::string)"Bmark/Copy thread"
 #define DEF_BMARK_UPDATE_THREAD_STR (std::string)"Bmark/Update thread"
-#define DEF_BMARK_NUM_OF_HISTORY 280
 
 #define DEF_BMARK_BATTERY_MSG 0
 #define DEF_BMARK_BATTERY_TIME_MSG 1

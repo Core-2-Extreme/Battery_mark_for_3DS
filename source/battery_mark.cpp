@@ -1,7 +1,7 @@
 #include "system/headers.hpp"
 
-u8 bmark_battery_level_history[DEF_BMARK_NUM_OF_HISTORY];
-u8 bmark_battery_temp_history[DEF_BMARK_NUM_OF_HISTORY];
+u8 bmark_battery_level_history[DEF_BMARK_BMR_NUM_OF_HISTORY];
+u8 bmark_battery_temp_history[DEF_BMARK_BMR_NUM_OF_HISTORY];
 int bmark_copied = 0;
 int bmark_cache_copied = 0;
 int bmark_fps = 0;
@@ -15,7 +15,7 @@ double bmark_avg_time = 0;
 double bmark_elapsed_time = 0;
 double bmark_total_elapsed_time = 0;
 double bmark_remain_time = 0;
-double bmark_battery_voltage_history[DEF_BMARK_NUM_OF_HISTORY];
+double bmark_battery_voltage_history[DEF_BMARK_BMR_NUM_OF_HISTORY];
 bool bmark_main_run = false;
 bool bmark_thread_run = false;
 bool bmark_already_init = false;
@@ -103,7 +103,7 @@ void Bmark_check_thread(void* arg)
 			bmark_total_elapsed_time = 0;
 			bmark_remain_time = 1234567890;
 			test_amount = bmark_remain_test;
-			for(int i = 0; i < DEF_BMARK_NUM_OF_HISTORY; i++)
+			for(int i = 0; i < DEF_BMARK_BMR_NUM_OF_HISTORY; i++)
 			{
 				bmark_battery_level_history[i] = 0;
 				bmark_battery_temp_history[i] = 0;
@@ -674,7 +674,8 @@ void Bmark_init_thread(void* arg)
 	bmark_update_thread = threadCreate(Bmark_update_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_REALTIME, 0, false);
 
 	bmark_status += "\nInitializing variables...";
-	for(int i = 0; i < DEF_BMARK_NUM_OF_HISTORY; i++)
+	bmark_graph_index = 0;
+	for(int i = 0; i < DEF_BMARK_BMR_NUM_OF_HISTORY; i++)
 	{
 		bmark_battery_level_history[i] = 0;
 		bmark_battery_temp_history[i] = 0;
@@ -901,7 +902,7 @@ void Bmark_main(void)
 			Draw(DEF_BMARK_VER, 0, 0, 0.4, 0.4, DEF_DRAW_GREEN);
 
 			//Graph for battery level/temp/voltage
-			Draw_texture(var_square_image[0], DEF_DRAW_WEAK_AQUA, 20, 30, DEF_BMARK_NUM_OF_HISTORY, 130);
+			Draw_texture(var_square_image[0], DEF_DRAW_WEAK_AQUA, 20, 30, DEF_BMARK_BMR_NUM_OF_HISTORY, 130);
 			Draw("(V)", 0, 10, 0.45, 0.45, DEF_DRAW_YELLOW, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_TOP, 20, 20);
 			Draw("(%)", 275, 10, 0.45, 0.45, DEF_DRAW_RED);
 			Draw("(゜C)", 295, 10, 0.45, 0.45, 0xFF00A000);
@@ -911,7 +912,7 @@ void Bmark_main(void)
 				Draw(std::to_string(i * 0.25 + 3).substr(0, 4), 0, 125 - (i * 20), 0.4, 0.4, color, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_TOP, 20, 20);
 				Draw(std::to_string(i * 20), 300, 125 - (i * 20), 0.45, 0.45, color);
 			}
-			for(int i = 0; i < DEF_BMARK_NUM_OF_HISTORY - 1; i++)
+			for(int i = 0; i < DEF_BMARK_BMR_NUM_OF_HISTORY - 1; i++)
 			{
 				Draw_line(i + 20, 130 - bmark_battery_level_history[i], DEF_DRAW_RED, i + 21, 130 - bmark_battery_level_history[i + 1], DEF_DRAW_RED, 1);
 				Draw_line(i + 20, 130 - bmark_battery_temp_history[i], 0xFF00A000, i + 21, 130 - bmark_battery_temp_history[i + 1], 0xFF00A000, 1);
