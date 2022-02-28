@@ -55,6 +55,7 @@ void Bmr_thread(void* arg)
 	Util_log_save(DEF_BMR_WORKER_THREAD_STR, "Thread started.");
 	int size = 0x100000;
 	int log_num = 0;
+	int string_offset = 0;
 	size_t cut_pos = 0;
 	u8* data = NULL;
 	u32 dled_size = 0;
@@ -69,6 +70,7 @@ void Bmr_thread(void* arg)
 		if(bmr_dl_log_request)
 		{
 			//download ranking data from the ranking server
+			string_offset = 0;
 			cache = "";
 			log_num = Util_log_save(DEF_BMR_WORKER_THREAD_STR, "Util_httpc_dl_data()...");
 			result = Util_httpc_dl_data(DEF_BMARK_BMR_RANKING_SERVER_URL + "?mode=" + std::to_string(bmr_model_mode) + "&start_pos=1&logs=1000&ver=" + std::to_string(DEF_CURRENT_APP_VER_INT), &data, size, &dled_size, true, 5);
@@ -77,11 +79,11 @@ void Bmr_thread(void* arg)
 			Util_safe_linear_free(data);
 			data = NULL;
 
-			cut_pos = string_data.find(",");
+			cut_pos = string_data.find(",", string_offset);
 			if(!(cut_pos == std::string::npos))
 			{
 				cache = string_data.substr(0, cut_pos);
-				string_data = string_data.substr(cut_pos + 1);
+				string_offset = cut_pos + 1;
 			}
 
 			if(cache == "Success")
@@ -102,105 +104,105 @@ void Bmr_thread(void* arg)
 				//parse data
 				for(int i = 0; i < DEF_BMR_NUM_OF_LOGS; i++)
 				{
-					cut_pos = string_data.find(",");
+					cut_pos = string_data.find(",", string_offset);
 					if(cut_pos == std::string::npos)
 						break;
 					
-					bmr_ranking[i] = atoi(string_data.substr(0, cut_pos).c_str());
-					string_data = string_data.substr(cut_pos + 1);
+					bmr_ranking[i] = atoi(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+					string_offset = cut_pos + 1;
 
-					cut_pos = string_data.find(",");
+					cut_pos = string_data.find(",", string_offset);
 					if(cut_pos == std::string::npos)
 						break;
 					
-					bmr_date[i] = string_data.substr(0, cut_pos);
-					string_data = string_data.substr(cut_pos + 1);
+					bmr_date[i] = string_data.substr(string_offset, cut_pos - string_offset);
+					string_offset = cut_pos + 1;
 
-					cut_pos = string_data.find(",");
+					cut_pos = string_data.find(",", string_offset);
 					if(cut_pos == std::string::npos)
 						break;
 					
-					bmr_app_ver[i] = string_data.substr(0, cut_pos);
-					string_data = string_data.substr(cut_pos + 1);
+					bmr_app_ver[i] = string_data.substr(string_offset, cut_pos - string_offset);
+					string_offset = cut_pos + 1;
 
-					cut_pos = string_data.find(",");
+					cut_pos = string_data.find(",", string_offset);
 					if(cut_pos == std::string::npos)
 						break;
 					
-					bmr_system_ver[i] = string_data.substr(0, cut_pos);
-					string_data = string_data.substr(cut_pos + 1);
+					bmr_system_ver[i] = string_data.substr(string_offset, cut_pos - string_offset);
+					string_offset = cut_pos + 1;
 
-					cut_pos = string_data.find(",");
+					cut_pos = string_data.find(",", string_offset);
 					if(cut_pos == std::string::npos)
 						break;
 					
-					bmr_model[i] = string_data.substr(0, cut_pos);
-					string_data = string_data.substr(cut_pos + 1);
+					bmr_model[i] = string_data.substr(string_offset, cut_pos - string_offset);
+					string_offset = cut_pos + 1;
 
-					cut_pos = string_data.find(",");
+					cut_pos = string_data.find(",", string_offset);
 					if(cut_pos == std::string::npos)
 						break;
 					
-					bmr_user_name[i] = string_data.substr(0, cut_pos);
-					string_data = string_data.substr(cut_pos + 1);
+					bmr_user_name[i] = string_data.substr(string_offset, cut_pos - string_offset);
+					string_offset = cut_pos + 1;
 
-					cut_pos = string_data.find(",");
+					cut_pos = string_data.find(",", string_offset);
 					if(cut_pos == std::string::npos)
 						break;
 					
-					bmr_max_time[i] = atof(string_data.substr(0, cut_pos).c_str());
-					string_data = string_data.substr(cut_pos + 1);
+					bmr_max_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+					string_offset = cut_pos + 1;
 
-					cut_pos = string_data.find(",");
+					cut_pos = string_data.find(",", string_offset);
 					if(cut_pos == std::string::npos)
 						break;
 					
-					bmr_avg_time[i] = atof(string_data.substr(0, cut_pos).c_str());
-					string_data = string_data.substr(cut_pos + 1);
+					bmr_avg_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+					string_offset = cut_pos + 1;
 
-					cut_pos = string_data.find(",");
+					cut_pos = string_data.find(",", string_offset);
 					if(cut_pos == std::string::npos)
 						break;
 
-					bmr_min_time[i] = atof(string_data.substr(0, cut_pos).c_str());
-					string_data = string_data.substr(cut_pos + 1);
+					bmr_min_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+					string_offset = cut_pos + 1;
 					
-					cut_pos = string_data.find(",");
+					cut_pos = string_data.find(",", string_offset);
 					if(cut_pos == std::string::npos)
 						break;
 					
-					bmr_total_time[i] = atof(string_data.substr(0, cut_pos).c_str());
-					string_data = string_data.substr(cut_pos + 1);
+					bmr_total_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+					string_offset = cut_pos + 1;
 
 					for(int k = 0; k < DEF_BMARK_BMR_NUM_OF_HISTORY; k++)
 					{
-						cut_pos = string_data.find(",");
+						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
 
-						bmr_graph_data[i].battery_level[k] = atoi(string_data.substr(0, cut_pos).c_str());
-						string_data = string_data.substr(cut_pos + 1);
+						bmr_graph_data[i].battery_level[k] = atoi(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+						string_offset = cut_pos + 1;
 
-						cut_pos = string_data.find(",");
+						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
 
-						bmr_graph_data[i].battery_temp[k] = atoi(string_data.substr(0, cut_pos).c_str());
-						string_data = string_data.substr(cut_pos + 1);
+						bmr_graph_data[i].battery_temp[k] = atoi(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+						string_offset = cut_pos + 1;
 
-						cut_pos = string_data.find(",");
+						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
 
-						bmr_graph_data[i].battery_voltage[k] = atof(string_data.substr(0, cut_pos).c_str());
-						string_data = string_data.substr(cut_pos + 1);
+						bmr_graph_data[i].battery_voltage[k] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+						string_offset = cut_pos + 1;
 					}
 
-					cut_pos = string_data.find("\n");
+					cut_pos = string_data.find("\n", string_offset);
 					if(cut_pos == std::string::npos)
 						break;
 					
-					string_data = string_data.substr(cut_pos + 1);
+					string_offset = cut_pos + 1;
 				}
 			}
 			else if(result.code != 0)
