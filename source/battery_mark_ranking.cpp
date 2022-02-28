@@ -1,12 +1,23 @@
 #include "system/headers.hpp"
 
+struct Graph_data
+{
+	u8 battery_level[DEF_BMARK_BMR_NUM_OF_HISTORY];
+	u8 battery_temp[DEF_BMARK_BMR_NUM_OF_HISTORY];
+	double battery_voltage[DEF_BMARK_BMR_NUM_OF_HISTORY];
+};
+
 bool bmr_main_run = false;
 bool bmr_thread_run = false;
 bool bmr_already_init = false;
 bool bmr_thread_suspend = true;
 bool bmr_dl_log_request = false;
+bool bmr_show_graph_request = false;
 int bmr_ranking[DEF_BMR_NUM_OF_LOGS];
 int bmr_model_mode = 0;
+int bmr_selected_ranking = 0;
+int bmr_selected_graph_pos = 0;
+int bmr_wait = 0;
 double bmr_y_offset = 0;
 double bmr_x_offset = 0;
 double bmr_max_time[DEF_BMR_NUM_OF_LOGS];
@@ -21,7 +32,8 @@ std::string bmr_user_name[DEF_BMR_NUM_OF_LOGS];
 std::string bmr_msg[DEF_BMR_NUM_OF_MSG];
 std::string bmr_status = "";
 Thread bmr_init_thread, bmr_exit_thread, bmr_worker_thread;
-Image_data bmr_model_selection_button[7], bmr_dl_ranking_button;
+Image_data bmr_model_selection_button[7], bmr_dl_ranking_button, bmr_close_graph_button, bmr_graph_area;
+Graph_data bmr_graph_data[DEF_BMR_NUM_OF_LOGS];
 
 bool Bmr_query_init_flag(void)
 {
@@ -94,8 +106,7 @@ void Bmr_thread(void* arg)
 					if(cut_pos == std::string::npos)
 						break;
 					
-					if(string_data.substr(0, cut_pos) != "")
-						bmr_ranking[i] = atoi(string_data.substr(0, cut_pos).c_str());
+					bmr_ranking[i] = atoi(string_data.substr(0, cut_pos).c_str());
 					string_data = string_data.substr(cut_pos + 1);
 
 					cut_pos = string_data.find(",");
@@ -137,32 +148,58 @@ void Bmr_thread(void* arg)
 					if(cut_pos == std::string::npos)
 						break;
 					
-					if(string_data.substr(0, cut_pos) != "")
-						bmr_max_time[i] = atof(string_data.substr(0, cut_pos).c_str());
+					bmr_max_time[i] = atof(string_data.substr(0, cut_pos).c_str());
 					string_data = string_data.substr(cut_pos + 1);
 
 					cut_pos = string_data.find(",");
 					if(cut_pos == std::string::npos)
 						break;
 					
-					if(string_data.substr(0, cut_pos) != "")
-						bmr_avg_time[i] = atof(string_data.substr(0, cut_pos).c_str());
+					bmr_avg_time[i] = atof(string_data.substr(0, cut_pos).c_str());
 					string_data = string_data.substr(cut_pos + 1);
 
 					cut_pos = string_data.find(",");
 					if(cut_pos == std::string::npos)
 						break;
 
-					if(string_data.substr(0, cut_pos) != "")
-						bmr_min_time[i] = atof(string_data.substr(0, cut_pos).c_str());
+					bmr_min_time[i] = atof(string_data.substr(0, cut_pos).c_str());
 					string_data = string_data.substr(cut_pos + 1);
+					
+					cut_pos = string_data.find(",");
+					if(cut_pos == std::string::npos)
+						break;
+					
+					bmr_total_time[i] = atof(string_data.substr(0, cut_pos).c_str());
+					string_data = string_data.substr(cut_pos + 1);
+
+					for(int k = 0; k < DEF_BMARK_BMR_NUM_OF_HISTORY; k++)
+					{
+						cut_pos = string_data.find(",");
+						if(cut_pos == std::string::npos)
+							break;
+
+						bmr_graph_data[i].battery_level[k] = atoi(string_data.substr(0, cut_pos).c_str());
+						string_data = string_data.substr(cut_pos + 1);
+
+						cut_pos = string_data.find(",");
+						if(cut_pos == std::string::npos)
+							break;
+
+						bmr_graph_data[i].battery_temp[k] = atoi(string_data.substr(0, cut_pos).c_str());
+						string_data = string_data.substr(cut_pos + 1);
+
+						cut_pos = string_data.find(",");
+						if(cut_pos == std::string::npos)
+							break;
+
+						bmr_graph_data[i].battery_voltage[k] = atof(string_data.substr(0, cut_pos).c_str());
+						string_data = string_data.substr(cut_pos + 1);
+					}
 
 					cut_pos = string_data.find("\n");
 					if(cut_pos == std::string::npos)
 						break;
 					
-					if(string_data.substr(0, cut_pos) != "")
-						bmr_total_time[i] = atof(string_data.substr(0, cut_pos).c_str());
 					string_data = string_data.substr(cut_pos + 1);
 				}
 			}
@@ -212,17 +249,33 @@ void Bmr_init_thread(void* arg)
 		bmr_system_ver[i] = "";
 		bmr_model[i] = "";
 		bmr_user_name[i] = "";
-	}
 
+		for(int k = 0; k < DEF_BMARK_BMR_NUM_OF_HISTORY; k++)
+		{
+			bmr_graph_data[i].battery_level[k] = 0;
+			bmr_graph_data[i].battery_temp[k] = 0;
+			bmr_graph_data[i].battery_voltage[k] = 0;
+		}
+	}
+	
+	bmr_selected_ranking = 0;
+	bmr_selected_graph_pos = 0;
 	bmr_dl_ranking_button.c2d = var_square_image[0];
+	bmr_close_graph_button.c2d = var_square_image[0];
+	bmr_graph_area.c2d = var_square_image[0];
 	for(int i = 0; i < 7; i++)
 		bmr_model_selection_button[i].c2d = var_square_image[0];
 
+	Util_add_watch(&bmr_selected_ranking);
+	Util_add_watch(&bmr_selected_graph_pos);
 	Util_add_watch(&bmr_x_offset);
 	Util_add_watch(&bmr_y_offset);
 	Util_add_watch(&bmr_model_mode);
 	Util_add_watch(&bmr_dl_log_request);
+	Util_add_watch(&bmr_show_graph_request);
 	Util_add_watch(&bmr_dl_ranking_button.selected);
+	Util_add_watch(&bmr_close_graph_button.selected);
+	Util_add_watch(&bmr_graph_area.selected);
 	for(int i = 0; i < 7; i++)
 		Util_add_watch(&bmr_model_selection_button[i].selected);
 
@@ -250,11 +303,16 @@ void Bmr_exit_thread(void* arg)
 	threadFree(bmr_init_thread);
 	threadFree(bmr_worker_thread);
 
+	Util_remove_watch(&bmr_selected_ranking);
+	Util_remove_watch(&bmr_selected_graph_pos);
 	Util_remove_watch(&bmr_x_offset);
 	Util_remove_watch(&bmr_y_offset);
 	Util_remove_watch(&bmr_model_mode);
 	Util_remove_watch(&bmr_dl_log_request);
+	Util_remove_watch(&bmr_show_graph_request);
 	Util_remove_watch(&bmr_dl_ranking_button.selected);
+	Util_remove_watch(&bmr_close_graph_button.selected);
+	Util_remove_watch(&bmr_graph_area.selected);
 	for(int i = 0; i < 7; i++)
 		Util_remove_watch(&bmr_model_selection_button[i].selected);
 
@@ -292,10 +350,16 @@ void Bmr_hid(Hid_info key)
 			Draw_get_bot_ui_button()->selected = true;
 		else if (key.p_start || (Util_hid_is_released(key, *Draw_get_bot_ui_button()) && Draw_get_bot_ui_button()->selected))
 			Bmr_suspend();
-		else if(Util_hid_is_pressed(key, bmr_dl_ranking_button) && !bmr_dl_log_request)
+		else if(Util_hid_is_pressed(key, bmr_dl_ranking_button) && !bmr_dl_log_request && !bmr_show_graph_request)
 			bmr_dl_ranking_button.selected = true;
-		else if((key.p_b || (Util_hid_is_released(key, bmr_dl_ranking_button) && bmr_dl_ranking_button.selected)) && !bmr_dl_log_request)
+		else if((key.p_b || (Util_hid_is_released(key, bmr_dl_ranking_button) && bmr_dl_ranking_button.selected)) && !bmr_dl_log_request && !bmr_show_graph_request)
 			bmr_dl_log_request = true;
+		else if(key.p_a)
+			bmr_show_graph_request = true;
+		else if(Util_hid_is_pressed(key, bmr_close_graph_button) && bmr_show_graph_request)
+			bmr_close_graph_button.selected = true;
+		else if((key.p_y || (Util_hid_is_released(key, bmr_close_graph_button) && bmr_close_graph_button.selected)) && bmr_show_graph_request)
+			bmr_show_graph_request = false;
 		else if(key.h_c_left)
 		{
 			if(bmr_x_offset + 2.5 > 0)
@@ -312,17 +376,47 @@ void Bmr_hid(Hid_info key)
 		}
 		else if(key.h_c_down)
 		{
-			if(bmr_y_offset + 0.5 > 978)
-				bmr_y_offset = 978;
+			if(bmr_wait - 1 < 0)
+			{
+				bmr_wait = 3;
+				if(bmr_selected_ranking + 1 <= 20)
+					bmr_selected_ranking++;
+				else if(bmr_y_offset + 1 > 978)
+					bmr_y_offset = 978;
+				else
+					bmr_y_offset += 1;
+			}
 			else
-				bmr_y_offset += 0.5;
+				bmr_wait--;
 		}
 		else if(key.h_c_up)
 		{
-			if(bmr_y_offset - 0.5 < 0)
-				bmr_y_offset = 0;
+			if(bmr_wait - 1 < 0)
+			{
+				bmr_wait = 3;
+				if(bmr_selected_ranking - 1 >= 0)
+					bmr_selected_ranking--;
+				else if(bmr_y_offset - 1 < 0)
+					bmr_y_offset = 0;
+				else
+					bmr_y_offset -= 1;
+			}
 			else
-				bmr_y_offset -= 0.5;
+				bmr_wait--;
+		}
+		else if(bmr_show_graph_request)
+		{
+			if(Util_hid_is_pressed(key, bmr_graph_area))
+				bmr_graph_area.selected = true;
+			if(bmr_graph_area.selected && key.h_touch)
+			{
+				if(key.touch_x < 20)
+					bmr_selected_graph_pos = 0;
+				else if(key.touch_x > 20 + DEF_BMARK_BMR_NUM_OF_HISTORY - 1)
+					bmr_selected_graph_pos = DEF_BMARK_BMR_NUM_OF_HISTORY - 1;
+				else
+					bmr_selected_graph_pos = key.touch_x - 20;
+			}
 		}
 		else
 		{
@@ -340,6 +434,8 @@ void Bmr_hid(Hid_info key)
 	{
 		Draw_get_bot_ui_button()->selected = false;
 		bmr_dl_ranking_button.selected = false;
+		bmr_close_graph_button.selected = false;
+		bmr_graph_area.selected = false;
 		for(int i = 0; i < 7; i++)
 			bmr_model_selection_button[i].selected = false;
 	}
@@ -477,8 +573,11 @@ void Bmr_main(void)
 			Draw(bmr_msg[DEF_BMR_APP_VER_MSG], 375 + bmr_x_offset, 17.5, 0.425, 0.425, color);
 			Draw(bmr_msg[DEF_BMR_SYS_VER_MSG], 425 + bmr_x_offset, 17.5, 0.425, 0.425, color);
 			Draw(bmr_msg[DEF_BMR_DATE_MSG], 495 + bmr_x_offset, 17.5, 0.425, 0.425, color);
-			for(int i = 0; i < 22; i++)
+			for(int i = 0; i < 21; i++)
 			{
+				if(i == bmr_selected_ranking)
+					Draw_texture(var_square_image[0], DEF_DRAW_WEAK_GREEN, 0, 30 + (i * 10), 400, 10);
+
 				Draw_line(0, 30 + (i * 10), line_color, 400, 30 + (i * 10), line_color, 2);
 				Draw(std::to_string(bmr_ranking[i + (int)bmr_y_offset]), 0 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
 				Draw(bmr_model[i + (int)bmr_y_offset], 25 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
@@ -533,6 +632,41 @@ void Bmr_main(void)
 			//download ranking
 			Draw(bmr_msg[DEF_BMR_DL_RANKING_MSG], 100, 190, 0.45, 0.45, bmr_dl_log_request ? DEF_DRAW_WEAK_BLACK : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 120, 20,
 			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmr_dl_ranking_button, bmr_dl_ranking_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+
+			//Graph for battery level/temp/voltage
+			if(bmr_show_graph_request)
+			{
+				Draw_texture(&bmr_graph_area, DEF_DRAW_AQUA, 20, 40, DEF_BMARK_BMR_NUM_OF_HISTORY, 100);
+				Draw_texture(var_square_image[0], DEF_DRAW_AQUA, 20, 140, DEF_BMARK_BMR_NUM_OF_HISTORY, 50);
+				Draw("(V)", 0, 20, 0.45, 0.45, DEF_DRAW_YELLOW, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_TOP, 20, 20);
+				Draw("(%)", 275, 20, 0.45, 0.45, DEF_DRAW_RED);
+				Draw("(゜C)", 295, 20, 0.45, 0.45, 0xFF00A000);
+				for(int i = 0; i < 6; i++)
+				{
+					Draw_line(20, 140 - (i * 20), line_color, 300, 140 - (i * 20), line_color, 1);
+					Draw(std::to_string(i * 0.25 + 3).substr(0, 4), 0, 135 - (i * 20), 0.4, 0.4, color, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_TOP, 20, 20);
+					Draw(std::to_string(i * 20), 300, 135 - (i * 20), 0.45, 0.45, color);
+				}
+				Draw_line(bmr_selected_graph_pos + 20, 140, DEF_DRAW_BLACK, bmr_selected_graph_pos + 20, 40, DEF_DRAW_BLACK, 1);
+				for(int i = 0; i < DEF_BMARK_BMR_NUM_OF_HISTORY - 1; i++)
+				{
+					Draw_line(i + 20, 140 - bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_level[i], DEF_DRAW_RED, i + 21, 140 - bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_level[i + 1], DEF_DRAW_RED, 1);
+					Draw_line(i + 20, 140 - bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_temp[i], 0xFF00A000, i + 21, 140 - bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_temp[i + 1], 0xFF00A000, 1);
+					Draw_line(i + 20, 140 - (bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_voltage[i] == 0 ? 0 : (bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_voltage[i] - 3) * 80), DEF_DRAW_YELLOW,
+					i + 21, 140 - (bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_voltage[i + 1] == 0 ? 0 : (bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_voltage[i + 1] - 3) * 80), DEF_DRAW_YELLOW, 1);
+				}
+
+				Draw("Battery level : " + std::to_string(bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_level[bmr_selected_graph_pos]) + "%",
+				20, 140, 0.5, 0.5, DEF_DRAW_RED, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
+				Draw("Battery temp : " + std::to_string(bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_temp[bmr_selected_graph_pos]) + "゜C",
+				160, 140, 0.5, 0.5, 0xFF00A000, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
+				Draw("Battery voltage : " + std::to_string(bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_voltage[bmr_selected_graph_pos]).substr(0, 5) + "V",
+				20, 155, 0.5, 0.5, DEF_DRAW_YELLOW, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 280, 15);
+				Draw("Close(Y)", 20, 170, 0.45, 0.45, DEF_DRAW_BLACK, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, DEF_BMARK_BMR_NUM_OF_HISTORY, 20,
+				DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmr_close_graph_button, bmr_close_graph_button.selected ? DEF_DRAW_GREEN : DEF_DRAW_WEAK_GREEN);
+			}
+
+
 
 			Draw_bot_ui();
 		}
