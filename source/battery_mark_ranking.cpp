@@ -18,6 +18,7 @@ int bmr_model_mode = 0;
 int bmr_selected_ranking = 0;
 int bmr_selected_graph_pos = 0;
 int bmr_wait = 0;
+int bmr_page_num = 0;
 double bmr_y_offset = 0;
 double bmr_x_offset = 0;
 double bmr_max_time[DEF_BMR_NUM_OF_LOGS];
@@ -72,149 +73,156 @@ void Bmr_thread(void* arg)
 			//download ranking data from the ranking server
 			string_offset = 0;
 			cache = "";
-			log_num = Util_log_save(DEF_BMR_WORKER_THREAD_STR, "Util_httpc_dl_data()...");
-			result = Util_httpc_dl_data(DEF_BMARK_BMR_RANKING_SERVER_URL + "?mode=" + std::to_string(bmr_model_mode) + "&start_pos=1&logs=200&ver=" + std::to_string(DEF_CURRENT_APP_VER_INT), &data, size, &dled_size, true, 5);
-			Util_log_add(log_num, result.string, result.code);
-			string_data = (char*)data;
-			Util_safe_linear_free(data);
-			data = NULL;
-
-			cut_pos = string_data.find(",", string_offset);
-			if(!(cut_pos == std::string::npos))
+			for(int i = 0; i < DEF_BMR_NUM_OF_LOGS; i++)
 			{
-				cache = string_data.substr(0, cut_pos);
-				string_offset = cut_pos + 1;
+				bmr_ranking[i] = 0;
+				bmr_max_time[i] = 0;
+				bmr_avg_time[i] = 0;
+				bmr_min_time[i] = 0;
+				bmr_total_time[i] = 0;
+				bmr_date[i] = "";
+				bmr_app_ver[i] = "";
+				bmr_system_ver[i] = "";
+				bmr_model[i] = "";
+				bmr_user_name[i] = "";
 			}
+			var_need_reflesh = true;
 
-			if(cache == "Success")
+			log_num = Util_log_save(DEF_BMR_WORKER_THREAD_STR, "Util_httpc_dl_data()...");
+			result = Util_httpc_dl_data(DEF_BMARK_BMR_RANKING_SERVER_URL + "?mode=" + std::to_string(bmr_model_mode) + "&start_pos=" + std::to_string(bmr_page_num * 200 + 1) + "&logs=200&ver=" + std::to_string(DEF_CURRENT_APP_VER_INT), &data, size, &dled_size, true, 5);
+			Util_log_add(log_num, result.string, result.code);
+			if(result.code == 0)
 			{
-				for(int i = 0; i < DEF_BMR_NUM_OF_LOGS; i++)
+				string_data = (char*)data;
+				Util_safe_linear_free(data);
+				data = NULL;
+				
+				cut_pos = string_data.find(",", string_offset);
+				if(!(cut_pos == std::string::npos))
 				{
-					bmr_ranking[i] = 0;
-					bmr_max_time[i] = 0;
-					bmr_avg_time[i] = 0;
-					bmr_min_time[i] = 0;
-					bmr_total_time[i] = 0;
-					bmr_date[i] = "";
-					bmr_app_ver[i] = "";
-					bmr_system_ver[i] = "";
-					bmr_model[i] = "";
-					bmr_user_name[i] = "";
+					cache = string_data.substr(0, cut_pos);
+					string_offset = cut_pos + 1;
 				}
-				//parse data
-				for(int i = 0; i < DEF_BMR_NUM_OF_LOGS; i++)
+
+				if(cache == "Success")
 				{
-					cut_pos = string_data.find(",", string_offset);
-					if(cut_pos == std::string::npos)
-						break;
-					
-					bmr_ranking[i] = atoi(string_data.substr(string_offset, cut_pos - string_offset).c_str());
-					string_offset = cut_pos + 1;
-
-					cut_pos = string_data.find(",", string_offset);
-					if(cut_pos == std::string::npos)
-						break;
-					
-					bmr_date[i] = string_data.substr(string_offset, cut_pos - string_offset);
-					string_offset = cut_pos + 1;
-
-					cut_pos = string_data.find(",", string_offset);
-					if(cut_pos == std::string::npos)
-						break;
-					
-					bmr_app_ver[i] = string_data.substr(string_offset, cut_pos - string_offset);
-					string_offset = cut_pos + 1;
-
-					cut_pos = string_data.find(",", string_offset);
-					if(cut_pos == std::string::npos)
-						break;
-					
-					bmr_system_ver[i] = string_data.substr(string_offset, cut_pos - string_offset);
-					string_offset = cut_pos + 1;
-
-					cut_pos = string_data.find(",", string_offset);
-					if(cut_pos == std::string::npos)
-						break;
-					
-					bmr_model[i] = string_data.substr(string_offset, cut_pos - string_offset);
-					string_offset = cut_pos + 1;
-
-					cut_pos = string_data.find(",", string_offset);
-					if(cut_pos == std::string::npos)
-						break;
-					
-					bmr_user_name[i] = string_data.substr(string_offset, cut_pos - string_offset);
-					string_offset = cut_pos + 1;
-
-					cut_pos = string_data.find(",", string_offset);
-					if(cut_pos == std::string::npos)
-						break;
-					
-					bmr_max_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
-					string_offset = cut_pos + 1;
-
-					cut_pos = string_data.find(",", string_offset);
-					if(cut_pos == std::string::npos)
-						break;
-					
-					bmr_avg_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
-					string_offset = cut_pos + 1;
-
-					cut_pos = string_data.find(",", string_offset);
-					if(cut_pos == std::string::npos)
-						break;
-
-					bmr_min_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
-					string_offset = cut_pos + 1;
-					
-					cut_pos = string_data.find(",", string_offset);
-					if(cut_pos == std::string::npos)
-						break;
-					
-					bmr_total_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
-					string_offset = cut_pos + 1;
-
-					for(int k = 0; k < DEF_BMARK_BMR_NUM_OF_HISTORY; k++)
+					//parse data
+					for(int i = 0; i < DEF_BMR_NUM_OF_LOGS; i++)
 					{
 						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
+						
+						bmr_ranking[i] = atoi(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+						string_offset = cut_pos + 1;
 
-						bmr_graph_data[i].battery_level[k] = atoi(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+						cut_pos = string_data.find(",", string_offset);
+						if(cut_pos == std::string::npos)
+							break;
+						
+						bmr_date[i] = string_data.substr(string_offset, cut_pos - string_offset);
+						string_offset = cut_pos + 1;
+
+						cut_pos = string_data.find(",", string_offset);
+						if(cut_pos == std::string::npos)
+							break;
+						
+						bmr_app_ver[i] = string_data.substr(string_offset, cut_pos - string_offset);
+						string_offset = cut_pos + 1;
+
+						cut_pos = string_data.find(",", string_offset);
+						if(cut_pos == std::string::npos)
+							break;
+						
+						bmr_system_ver[i] = string_data.substr(string_offset, cut_pos - string_offset);
+						string_offset = cut_pos + 1;
+
+						cut_pos = string_data.find(",", string_offset);
+						if(cut_pos == std::string::npos)
+							break;
+						
+						bmr_model[i] = string_data.substr(string_offset, cut_pos - string_offset);
+						string_offset = cut_pos + 1;
+
+						cut_pos = string_data.find(",", string_offset);
+						if(cut_pos == std::string::npos)
+							break;
+						
+						bmr_user_name[i] = string_data.substr(string_offset, cut_pos - string_offset);
+						string_offset = cut_pos + 1;
+
+						cut_pos = string_data.find(",", string_offset);
+						if(cut_pos == std::string::npos)
+							break;
+						
+						bmr_max_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+						string_offset = cut_pos + 1;
+
+						cut_pos = string_data.find(",", string_offset);
+						if(cut_pos == std::string::npos)
+							break;
+						
+						bmr_avg_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
 						string_offset = cut_pos + 1;
 
 						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
 
-						bmr_graph_data[i].battery_temp[k] = atoi(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+						bmr_min_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
 						string_offset = cut_pos + 1;
-
+						
 						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
+						
+						bmr_total_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+						string_offset = cut_pos + 1;
 
-						bmr_graph_data[i].battery_voltage[k] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+						for(int k = 0; k < DEF_BMARK_BMR_NUM_OF_HISTORY; k++)
+						{
+							cut_pos = string_data.find(",", string_offset);
+							if(cut_pos == std::string::npos)
+								break;
+
+							bmr_graph_data[i].battery_level[k] = atoi(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+							string_offset = cut_pos + 1;
+
+							cut_pos = string_data.find(",", string_offset);
+							if(cut_pos == std::string::npos)
+								break;
+
+							bmr_graph_data[i].battery_temp[k] = atoi(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+							string_offset = cut_pos + 1;
+
+							cut_pos = string_data.find(",", string_offset);
+							if(cut_pos == std::string::npos)
+								break;
+
+							bmr_graph_data[i].battery_voltage[k] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
+							string_offset = cut_pos + 1;
+						}
+
+						cut_pos = string_data.find("\n", string_offset);
+						if(cut_pos == std::string::npos)
+							break;
+						
 						string_offset = cut_pos + 1;
 					}
-
-					cut_pos = string_data.find("\n", string_offset);
-					if(cut_pos == std::string::npos)
-						break;
-					
-					string_offset = cut_pos + 1;
+				}
+				else
+				{
+					Util_err_set_error_message(DEF_ERR_GAS_RETURNED_NOT_SUCCESS_STR, string_data, DEF_BMR_WORKER_THREAD_STR, DEF_ERR_GAS_RETURNED_NOT_SUCCESS);
+					Util_err_set_error_show_flag(true);
 				}
 			}
-			else if(result.code != 0)
+			else
 			{
 				Util_err_set_error_message(result.string, result.error_description, DEF_BMR_WORKER_THREAD_STR, result.code);
 				Util_err_set_error_show_flag(true);
 			}
-			else
-			{
-				Util_err_set_error_message(DEF_ERR_GAS_RETURNED_NOT_SUCCESS_STR, string_data, DEF_BMR_WORKER_THREAD_STR, DEF_ERR_GAS_RETURNED_NOT_SUCCESS);
-				Util_err_set_error_show_flag(true);
-			}
+			Util_safe_linear_free(data);
+			data = NULL;
 
 			bmr_dl_log_request = false;
 		}
@@ -260,6 +268,7 @@ void Bmr_init_thread(void* arg)
 		}
 	}
 	
+	bmr_page_num = 0;
 	bmr_selected_ranking = 0;
 	bmr_selected_graph_pos = 0;
 	bmr_dl_ranking_button.c2d = var_square_image[0];
@@ -362,6 +371,26 @@ void Bmr_hid(Hid_info key)
 			bmr_close_graph_button.selected = true;
 		else if((key.p_y || (Util_hid_is_released(key, bmr_close_graph_button) && bmr_close_graph_button.selected)) && bmr_show_graph_request)
 			bmr_show_graph_request = false;
+		else if(key.p_l && !bmr_dl_log_request)
+		{
+			if(bmr_page_num - 1 >= 0)
+			{
+				bmr_page_num--;
+				bmr_dl_log_request = true;
+			}
+			else
+				bmr_page_num = 0;
+		}
+		else if(key.p_r && !bmr_dl_log_request)
+		{
+			if(bmr_page_num + 1 <= 49)
+			{
+				bmr_page_num++;
+				bmr_dl_log_request = true;
+			}
+			else
+				bmr_page_num = 49;
+		}
 		else if(key.h_c_left)
 		{
 			if(bmr_x_offset + 2.5 > 0)
@@ -389,10 +418,10 @@ void Bmr_hid(Hid_info key)
 				else
 					bmr_wait = 3;
 
-				if(bmr_selected_ranking + 1 <= 20)
+				if(bmr_selected_ranking + 1 <= 18)
 					bmr_selected_ranking++;
-				else if(bmr_y_offset + 1 > 178)
-					bmr_y_offset = 178;
+				else if(bmr_y_offset + 1 > 181)
+					bmr_y_offset = 181;
 				else
 					bmr_y_offset += 1;
 			}
