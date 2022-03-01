@@ -602,15 +602,15 @@ void Bmr_main(void)
 		{
 			Draw_screen_ready(0, back_color);
 
-			Draw_line(23 + bmr_x_offset, 15, line_color, 23 + bmr_x_offset, 240, line_color, 2);
-			Draw_line(93 + bmr_x_offset, 15, line_color, 93 + bmr_x_offset, 240, line_color, 2);
-			Draw_line(138 + bmr_x_offset, 15, line_color, 138 + bmr_x_offset, 240, line_color, 2);
-			Draw_line(178 + bmr_x_offset, 15, line_color, 178 + bmr_x_offset, 240, line_color, 2);
-			Draw_line(218 + bmr_x_offset, 15, line_color, 218 + bmr_x_offset, 240, line_color, 2);
-			Draw_line(258 + bmr_x_offset, 15, line_color, 258 + bmr_x_offset, 240, line_color, 2);
-			Draw_line(373 + bmr_x_offset, 15, line_color, 373 + bmr_x_offset, 240, line_color, 2);
-			Draw_line(423 + bmr_x_offset, 15, line_color, 423 + bmr_x_offset, 240, line_color, 2);
-			Draw_line(493 + bmr_x_offset, 15, line_color, 493 + bmr_x_offset, 240, line_color, 2);
+			Draw_line(23 + bmr_x_offset, 15, line_color, 23 + bmr_x_offset, 220, line_color, 2);
+			Draw_line(93 + bmr_x_offset, 15, line_color, 93 + bmr_x_offset, 220, line_color, 2);
+			Draw_line(138 + bmr_x_offset, 15, line_color, 138 + bmr_x_offset, 220, line_color, 2);
+			Draw_line(178 + bmr_x_offset, 15, line_color, 178 + bmr_x_offset, 220, line_color, 2);
+			Draw_line(218 + bmr_x_offset, 15, line_color, 218 + bmr_x_offset, 220, line_color, 2);
+			Draw_line(258 + bmr_x_offset, 15, line_color, 258 + bmr_x_offset, 220, line_color, 2);
+			Draw_line(373 + bmr_x_offset, 15, line_color, 373 + bmr_x_offset, 220, line_color, 2);
+			Draw_line(423 + bmr_x_offset, 15, line_color, 423 + bmr_x_offset, 220, line_color, 2);
+			Draw_line(493 + bmr_x_offset, 15, line_color, 493 + bmr_x_offset, 220, line_color, 2);
 			Draw(bmr_msg[DEF_BMR_MODEL_MSG], 25 + bmr_x_offset, 17.5, 0.425, 0.425, color);
 			Draw(bmr_msg[DEF_BMR_TOTAL_MSG], 95 + bmr_x_offset, 17.5, 0.425, 0.425, color);
 			Draw(bmr_msg[DEF_BMR_AVG_MSG], 140 + bmr_x_offset, 17.5, 0.425, 0.425, color);
@@ -620,7 +620,7 @@ void Bmr_main(void)
 			Draw(bmr_msg[DEF_BMR_APP_VER_MSG], 375 + bmr_x_offset, 17.5, 0.425, 0.425, color);
 			Draw(bmr_msg[DEF_BMR_SYS_VER_MSG], 425 + bmr_x_offset, 17.5, 0.425, 0.425, color);
 			Draw(bmr_msg[DEF_BMR_DATE_MSG], 495 + bmr_x_offset, 17.5, 0.425, 0.425, color);
-			for(int i = 0; i < 21; i++)
+			for(int i = 0; i < 19; i++)
 			{
 				if(i == bmr_selected_ranking)
 					Draw_texture(var_square_image[0], DEF_DRAW_WEAK_GREEN, 0, 30 + (i * 10), 400, 10);
@@ -636,6 +636,14 @@ void Bmr_main(void)
 				Draw(bmr_app_ver[i + (int)bmr_y_offset], 375 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
 				Draw(bmr_system_ver[i + (int)bmr_y_offset], 425 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
 				Draw(bmr_date[i + (int)bmr_y_offset], 495 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
+			}
+			Draw("Change page(LR), Show graph(A), Select data(↑←↓→)", 0, 220, 0.45, 0.45, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 400, 20);
+			Draw("Page : " + std::to_string(bmr_page_num + 1), 0, 220, 0.45, 0.45, color, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_CENTER, 400, 20);
+
+			if(bmr_dl_log_request)
+			{
+				Draw("Downloading...", 0, 220, 0.45, 0.45, DEF_DRAW_WHITE, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 400, 20,
+				DEF_DRAW_BACKGROUND_UNDER_TEXT, var_square_image[0], DEF_DRAW_BLACK);
 			}
 
 			if(Util_log_query_log_show_flag())
