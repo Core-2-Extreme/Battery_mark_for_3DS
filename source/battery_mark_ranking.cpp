@@ -19,7 +19,7 @@ int bmr_selected_ranking = 0;
 int bmr_selected_graph_pos = 0;
 int bmr_wait = 0;
 int bmr_page_num = 0;
-double bmr_y_offset = 0;
+int bmr_y_offset = 0;
 double bmr_x_offset = 0;
 double bmr_max_time[DEF_BMR_NUM_OF_LOGS];
 double bmr_avg_time[DEF_BMR_NUM_OF_LOGS];
@@ -626,16 +626,16 @@ void Bmr_main(void)
 					Draw_texture(var_square_image[0], DEF_DRAW_WEAK_GREEN, 0, 30 + (i * 10), 400, 10);
 
 				Draw_line(0, 30 + (i * 10), line_color, 400, 30 + (i * 10), line_color, 2);
-				Draw(std::to_string(bmr_ranking[i + (int)bmr_y_offset]), 0 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
-				Draw(bmr_model[i + (int)bmr_y_offset], 25 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
-				Draw(Util_convert_seconds_to_time(bmr_total_time[i + (int)bmr_y_offset]).substr(0, Util_convert_seconds_to_time(bmr_total_time[i + (int)bmr_y_offset]).length() - 2), 95 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
-				Draw(Util_convert_seconds_to_time(bmr_avg_time[i + (int)bmr_y_offset]).substr(0, Util_convert_seconds_to_time(bmr_avg_time[i + (int)bmr_y_offset]).length() - 2), 140 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
-				Draw(Util_convert_seconds_to_time(bmr_max_time[i + (int)bmr_y_offset]).substr(0, Util_convert_seconds_to_time(bmr_max_time[i + (int)bmr_y_offset]).length() - 2), 180 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
-				Draw(Util_convert_seconds_to_time(bmr_min_time[i + (int)bmr_y_offset]).substr(0, Util_convert_seconds_to_time(bmr_min_time[i + (int)bmr_y_offset]).length() - 2), 220 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
-				Draw(bmr_user_name[i + (int)bmr_y_offset], 260 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
-				Draw(bmr_app_ver[i + (int)bmr_y_offset], 375 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
-				Draw(bmr_system_ver[i + (int)bmr_y_offset], 425 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
-				Draw(bmr_date[i + (int)bmr_y_offset], 495 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
+				Draw(std::to_string(bmr_ranking[i + bmr_y_offset]), 0 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
+				Draw(bmr_model[i + bmr_y_offset], 25 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
+				Draw(Util_convert_seconds_to_time(bmr_total_time[i + bmr_y_offset]).substr(0, Util_convert_seconds_to_time(bmr_total_time[i + bmr_y_offset]).length() - 2), 95 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
+				Draw(Util_convert_seconds_to_time(bmr_avg_time[i + bmr_y_offset]).substr(0, Util_convert_seconds_to_time(bmr_avg_time[i + bmr_y_offset]).length() - 2), 140 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
+				Draw(Util_convert_seconds_to_time(bmr_max_time[i + bmr_y_offset]).substr(0, Util_convert_seconds_to_time(bmr_max_time[i + bmr_y_offset]).length() - 2), 180 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
+				Draw(Util_convert_seconds_to_time(bmr_min_time[i + bmr_y_offset]).substr(0, Util_convert_seconds_to_time(bmr_min_time[i + bmr_y_offset]).length() - 2), 220 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
+				Draw(bmr_user_name[i + bmr_y_offset], 260 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
+				Draw(bmr_app_ver[i + bmr_y_offset], 375 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
+				Draw(bmr_system_ver[i + bmr_y_offset], 425 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
+				Draw(bmr_date[i + bmr_y_offset], 495 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
 			}
 			Draw("Change page(LR), Show graph(A), Select data(↑←↓→)", 0, 220, 0.45, 0.45, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 400, 20);
 			Draw("Page : " + std::to_string(bmr_page_num + 1), 0, 220, 0.45, 0.45, color, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_CENTER, 400, 20);
@@ -702,17 +702,17 @@ void Bmr_main(void)
 				Draw_line(bmr_selected_graph_pos + 20, 140, DEF_DRAW_BLACK, bmr_selected_graph_pos + 20, 40, DEF_DRAW_BLACK, 1);
 				for(int i = 0; i < DEF_BMARK_BMR_NUM_OF_HISTORY - 1; i++)
 				{
-					Draw_line(i + 20, 140 - bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_level[i], DEF_DRAW_RED, i + 21, 140 - bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_level[i + 1], DEF_DRAW_RED, 1);
-					Draw_line(i + 20, 140 - bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_temp[i], 0xFF00A000, i + 21, 140 - bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_temp[i + 1], 0xFF00A000, 1);
-					Draw_line(i + 20, 140 - (bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_voltage[i] == 0 ? 0 : (bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_voltage[i] - 3) * 80), 0xFF00A0FF,
-					i + 21, 140 - (bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_voltage[i + 1] == 0 ? 0 : (bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_voltage[i + 1] - 3) * 80), 0xFF00A0FF, 1);
+					Draw_line(i + 20, 140 - bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_level[i], DEF_DRAW_RED, i + 21, 140 - bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_level[i + 1], DEF_DRAW_RED, 1);
+					Draw_line(i + 20, 140 - bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_temp[i], 0xFF00A000, i + 21, 140 - bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_temp[i + 1], 0xFF00A000, 1);
+					Draw_line(i + 20, 140 - (bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_voltage[i] == 0 ? 0 : (bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_voltage[i] - 3) * 80), 0xFF00A0FF,
+					i + 21, 140 - (bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_voltage[i + 1] == 0 ? 0 : (bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_voltage[i + 1] - 3) * 80), 0xFF00A0FF, 1);
 				}
 
-				Draw("Battery level : " + std::to_string(bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_level[bmr_selected_graph_pos]) + "%",
+				Draw("Battery level : " + std::to_string(bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_level[bmr_selected_graph_pos]) + "%",
 				20, 140, 0.5, 0.5, DEF_DRAW_RED, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
-				Draw("Battery temp : " + std::to_string(bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_temp[bmr_selected_graph_pos]) + "゜C",
+				Draw("Battery temp : " + std::to_string(bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_temp[bmr_selected_graph_pos]) + "゜C",
 				160, 140, 0.5, 0.5, 0xFF00A000, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
-				Draw("Battery voltage : " + std::to_string(bmr_graph_data[bmr_selected_ranking + (int)bmr_y_offset].battery_voltage[bmr_selected_graph_pos]).substr(0, 5) + "V",
+				Draw("Battery voltage : " + std::to_string(bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_voltage[bmr_selected_graph_pos]).substr(0, 5) + "V",
 				20, 160, 0.5, 0.5, 0xFF00A0FF, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 280, 15);
 				Draw("Close(Y)", 20, 180, 0.45, 0.45, DEF_DRAW_BLACK, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, DEF_BMARK_BMR_NUM_OF_HISTORY, 20,
 				DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmr_close_graph_button, bmr_close_graph_button.selected ? DEF_DRAW_GREEN : DEF_DRAW_WEAK_GREEN);
