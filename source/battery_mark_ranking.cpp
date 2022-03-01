@@ -660,9 +660,6 @@ void Bmr_main(void)
 
 			Draw(DEF_BMR_VER, 0.0, 0.0, 0.4, 0.4, DEF_DRAW_GREEN);
 
-			if(Util_err_query_error_show_flag())
-				Util_err_draw();
-
 			//Model selection
 			for(int i = 0; i < 7; i++)
 			{
@@ -713,7 +710,8 @@ void Bmr_main(void)
 				DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmr_close_graph_button, bmr_close_graph_button.selected ? DEF_DRAW_GREEN : DEF_DRAW_WEAK_GREEN);
 			}
 
-
+			if(Util_err_query_error_show_flag())
+				Util_err_draw();
 
 			Draw_bot_ui();
 		}
