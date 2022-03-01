@@ -380,7 +380,15 @@ void Bmr_hid(Hid_info key)
 		{
 			if(bmr_wait - 1 < 0)
 			{
-				bmr_wait = 3;
+				if(key.held_time > 240)
+					bmr_wait = 0;
+				else if(key.held_time > 120)
+					bmr_wait = 1;
+				else if(key.held_time > 60)
+					bmr_wait = 2;
+				else
+					bmr_wait = 3;
+
 				if(bmr_selected_ranking + 1 <= 20)
 					bmr_selected_ranking++;
 				else if(bmr_y_offset + 1 > 978)
@@ -395,7 +403,15 @@ void Bmr_hid(Hid_info key)
 		{
 			if(bmr_wait - 1 < 0)
 			{
-				bmr_wait = 3;
+				if(key.held_time > 240)
+					bmr_wait = 0;
+				else if(key.held_time > 120)
+					bmr_wait = 1;
+				else if(key.held_time > 60)
+					bmr_wait = 2;
+				else
+					bmr_wait = 3;
+
 				if(bmr_selected_ranking - 1 >= 0)
 					bmr_selected_ranking--;
 				else if(bmr_y_offset - 1 < 0)
