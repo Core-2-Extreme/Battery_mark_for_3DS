@@ -89,6 +89,7 @@ void Menu_check_core_thread(void* arg)
 void Menu_init(void)
 {
 	u8* data = NULL;
+	u8 dummy = 0;
 	u8 region = 0;
 	u8 model = 0;
 	u32 read_size = 0;
@@ -117,8 +118,8 @@ void Menu_init(void)
 	Util_log_save(DEF_MENU_INIT_STR, "Util_safe_linear_alloc_init()...", result.code);
 
 	//create directory
-	Util_file_save_to_file(".", DEF_MAIN_DIR, NULL, 0, false);
-	Util_file_save_to_file(".", DEF_MAIN_DIR + "screen_recording/", NULL, 0, false);
+	Util_file_save_to_file(".", DEF_MAIN_DIR, &dummy, 1, true);
+	Util_file_save_to_file(".", DEF_MAIN_DIR + "screen_recording/", &dummy, 1, true);
 
 	if(Util_file_load_from_file("fake_model.txt", DEF_MAIN_DIR, &data, 1, &read_size).code == 0 && *data <= 5)
 	{
