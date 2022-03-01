@@ -923,7 +923,7 @@ void Bmark_main(void)
 
 			//Graph for battery level/temp/voltage
 			Draw_texture(var_square_image[0], DEF_DRAW_WEAK_AQUA, 20, 30, DEF_BMARK_BMR_NUM_OF_HISTORY, 130);
-			Draw("(V)", 0, 10, 0.45, 0.45, DEF_DRAW_YELLOW, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_TOP, 20, 20);
+			Draw("(V)", 0, 10, 0.45, 0.45, 0xFF00A0FF, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_TOP, 20, 20);
 			Draw("(%)", 275, 10, 0.45, 0.45, DEF_DRAW_RED);
 			Draw("(゜C)", 295, 10, 0.45, 0.45, 0xFF00A000);
 			for(int i = 0; i < 6; i++)
@@ -936,14 +936,14 @@ void Bmark_main(void)
 			{
 				Draw_line(i + 20, 130 - bmark_battery_level_history[i], DEF_DRAW_RED, i + 21, 130 - bmark_battery_level_history[i + 1], DEF_DRAW_RED, 1);
 				Draw_line(i + 20, 130 - bmark_battery_temp_history[i], 0xFF00A000, i + 21, 130 - bmark_battery_temp_history[i + 1], 0xFF00A000, 1);
-				Draw_line(i + 20, 130 - (bmark_battery_voltage_history[i] == 0 ? 0 : (bmark_battery_voltage_history[i] - 3) * 80), DEF_DRAW_YELLOW,
-				i + 21, 130 - (bmark_battery_voltage_history[i + 1] == 0 ? 0 : (bmark_battery_voltage_history[i + 1] - 3) * 80), DEF_DRAW_YELLOW, 1);
+				Draw_line(i + 20, 130 - (bmark_battery_voltage_history[i] == 0 ? 0 : (bmark_battery_voltage_history[i] - 3) * 80), 0xFF00A0FF,
+				i + 21, 130 - (bmark_battery_voltage_history[i + 1] == 0 ? 0 : (bmark_battery_voltage_history[i + 1] - 3) * 80), 0xFF00A0FF, 1);
 			}
 			Draw("Battery level : " + std::to_string(var_battery_level_raw) + "%", 20, 130, 0.5, 0.5, DEF_DRAW_RED,
 			DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
 			Draw("Battery temp : " + std::to_string(var_battery_temp) + "゜C", 160, 130, 0.5, 0.5, 0xFF00A000,
 			DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
-			Draw("Battery voltage : " + std::to_string(var_battery_voltage).substr(0, 5) + "V", 20, 145, 0.5, 0.5, DEF_DRAW_YELLOW,
+			Draw("Battery voltage : " + std::to_string(var_battery_voltage).substr(0, 5) + "V", 20, 145, 0.5, 0.5, 0xFF00A0FF,
 			DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 280, 15);
 
 			//start, stop and option button
