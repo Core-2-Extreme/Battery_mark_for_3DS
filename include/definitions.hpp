@@ -86,7 +86,7 @@
 
 //battery mark ranking
 #define DEF_BMR_NUM_OF_MSG 17
-#define DEF_BMR_NUM_OF_LOGS 1000
+#define DEF_BMR_NUM_OF_LOGS 200
 //#define DEF_BMR_ENABLE_ICON
 #define DEF_BMR_ENABLE_NAME
 #define DEF_BMR_ICON_PATH (std::string)"romfs:/"

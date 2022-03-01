@@ -73,7 +73,7 @@ void Bmr_thread(void* arg)
 			string_offset = 0;
 			cache = "";
 			log_num = Util_log_save(DEF_BMR_WORKER_THREAD_STR, "Util_httpc_dl_data()...");
-			result = Util_httpc_dl_data(DEF_BMARK_BMR_RANKING_SERVER_URL + "?mode=" + std::to_string(bmr_model_mode) + "&start_pos=1&logs=1000&ver=" + std::to_string(DEF_CURRENT_APP_VER_INT), &data, size, &dled_size, true, 5);
+			result = Util_httpc_dl_data(DEF_BMARK_BMR_RANKING_SERVER_URL + "?mode=" + std::to_string(bmr_model_mode) + "&start_pos=1&logs=200&ver=" + std::to_string(DEF_CURRENT_APP_VER_INT), &data, size, &dled_size, true, 5);
 			Util_log_add(log_num, result.string, result.code);
 			string_data = (char*)data;
 			Util_safe_linear_free(data);
@@ -391,8 +391,8 @@ void Bmr_hid(Hid_info key)
 
 				if(bmr_selected_ranking + 1 <= 20)
 					bmr_selected_ranking++;
-				else if(bmr_y_offset + 1 > 978)
-					bmr_y_offset = 978;
+				else if(bmr_y_offset + 1 > 178)
+					bmr_y_offset = 178;
 				else
 					bmr_y_offset += 1;
 			}
