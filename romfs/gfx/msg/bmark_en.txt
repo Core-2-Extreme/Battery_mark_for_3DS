@@ -30,3 +30,6 @@ please charge battery and try again.</17>
 <27>Yes(A)</27>
 <28>No(B)</28>
 <29>Battery temp(゜C) </29>
+<30>Battery level : </30>
+<31>Battery temp : </31>
+<32>Battery voltage : </32>

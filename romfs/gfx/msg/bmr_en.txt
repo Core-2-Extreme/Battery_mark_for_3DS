@@ -15,3 +15,10 @@
 <14>Only NEW 2DS XL</14>
 <15>All models</15>
 <16>Download ranking(B)</16>
+<17>Change page(LR), Show graph(A), Select data(↑←↓→)</17>
+<18>Page : </18>
+<19>Downloading...</19>
+<20>Battery level : </20>
+<21>Battery temp : </21>
+<22>Battery voltage : </22>
+<23>Close(Y)</23>

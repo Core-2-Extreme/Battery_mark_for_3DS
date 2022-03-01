@@ -637,12 +637,12 @@ void Bmr_main(void)
 				Draw(bmr_system_ver[i + bmr_y_offset], 425 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
 				Draw(bmr_date[i + bmr_y_offset], 495 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
 			}
-			Draw("Change page(LR), Show graph(A), Select data(↑←↓→)", 0, 220, 0.45, 0.45, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 400, 20);
-			Draw("Page : " + std::to_string(bmr_page_num + 1), 0, 220, 0.45, 0.45, color, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_CENTER, 400, 20);
+			Draw(bmr_msg[DEF_BMR_CONTROLS_MSG], 0, 220, 0.45, 0.45, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 400, 20);
+			Draw(bmr_msg[DEF_BMR_PAGE_MSG] + std::to_string(bmr_page_num + 1), 0, 220, 0.45, 0.45, color, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_CENTER, 400, 20);
 
 			if(bmr_dl_log_request)
 			{
-				Draw("Downloading...", 0, 220, 0.45, 0.45, DEF_DRAW_WHITE, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 400, 20,
+				Draw(bmr_msg[DEF_BMR_DL_MSG], 0, 220, 0.45, 0.45, DEF_DRAW_WHITE, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 400, 20,
 				DEF_DRAW_BACKGROUND_UNDER_TEXT, var_square_image[0], DEF_DRAW_BLACK);
 			}
 
@@ -708,13 +708,13 @@ void Bmr_main(void)
 					i + 21, 140 - (bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_voltage[i + 1] == 0 ? 0 : (bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_voltage[i + 1] - 3) * 80), 0xFF00A0FF, 1);
 				}
 
-				Draw("Battery level : " + std::to_string(bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_level[bmr_selected_graph_pos]) + "%",
+				Draw(bmr_msg[DEF_BMR_BATTERY_LEVEL_MSG] + std::to_string(bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_level[bmr_selected_graph_pos]) + "%",
 				20, 140, 0.5, 0.5, DEF_DRAW_RED, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
-				Draw("Battery temp : " + std::to_string(bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_temp[bmr_selected_graph_pos]) + "゜C",
+				Draw(bmr_msg[DEF_BMR_BATTERY_TEMP_MSG] + std::to_string(bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_temp[bmr_selected_graph_pos]) + "゜C",
 				160, 140, 0.5, 0.5, 0xFF00A000, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
-				Draw("Battery voltage : " + std::to_string(bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_voltage[bmr_selected_graph_pos]).substr(0, 5) + "V",
+				Draw(bmr_msg[DEF_BMR_BATTERY_VOLTAGE_MSG] + std::to_string(bmr_graph_data[bmr_selected_ranking + bmr_y_offset].battery_voltage[bmr_selected_graph_pos]).substr(0, 5) + "V",
 				20, 160, 0.5, 0.5, 0xFF00A0FF, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 280, 15);
-				Draw("Close(Y)", 20, 180, 0.45, 0.45, DEF_DRAW_BLACK, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, DEF_BMARK_BMR_NUM_OF_HISTORY, 20,
+				Draw(bmr_msg[DEF_BMR_CLOSE_MSG], 20, 180, 0.45, 0.45, DEF_DRAW_BLACK, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, DEF_BMARK_BMR_NUM_OF_HISTORY, 20,
 				DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmr_close_graph_button, bmr_close_graph_button.selected ? DEF_DRAW_GREEN : DEF_DRAW_WEAK_GREEN);
 			}
 
