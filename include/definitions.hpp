@@ -7,7 +7,7 @@
 #define DEF_CHECK_INTERNET_URL (std::string)"https://connectivitycheck.gstatic.com/generate_204"
 #define DEF_SEND_APP_INFO_URL (std::string)"https://script.google.com/macros/s/AKfycbyn_blFyKWXCgJr6NIF8x6ETs7CHRN5FXKYEAAIrzV6jPYcCkI/exec"
 #define DEF_CHECK_UPDATE_URL (std::string)"https://script.google.com/macros/s/AKfycbz8Nsobjwc9IslWkIEB_2gyc76bTyJFwod2SZJbeVuhu_HbfQiszty8/exec"
-#define DEF_HTTP_USER_AGENT (std::string)"battery mark for 3ds v2.1.0-d"
+#define DEF_HTTP_USER_AGENT (std::string)"battery mark for 3ds " + DEF_CURRENT_APP_VER
 #define DEF_CURRENT_APP_VER (std::string)"v2.1.0-d"
 #define DEF_CURRENT_APP_VER_INT 2064
 #define DEF_ENABLE_BMARK
