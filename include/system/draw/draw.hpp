@@ -48,8 +48,6 @@ double Draw_query_frametime(void);
 */
 double Draw_query_fps(void);
 
-int Draw_convert_to_pos(int height, int width, int img_height, int img_width, int pixel_size);
-
 /**
  * @brief Initialize a texture.
  * @param image (out) Pointer for texture.

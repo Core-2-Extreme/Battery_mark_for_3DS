@@ -1,5 +1,11 @@
 #pragma once
 
+extern "C" void* __real_malloc(size_t size);
+extern "C" void* __real_realloc(void* ptr, size_t size);
+extern "C" void __real_free(void* ptr);
+extern "C" void __real__free_r(struct _reent *r, void* ptr);
+extern "C" void* __real_memalign(size_t alignment, size_t size);
+
 /**
  * @brief Initialize util API.
  * @return On success DEF_SUCCESS, 
@@ -175,6 +181,16 @@ void Util_safe_linear_alloc_exit(void);
 void* Util_safe_linear_alloc(size_t size);
 
 /**
+ * @brief Linear align.
+ * Always return NULL if safe linear alloc api is not initialized.
+ * @param alignment (in) Alignment.
+ * @param size (in) Memory size (in byte).
+ * @return On success pointer, on failure NULL.
+ * @note Thread safe
+*/
+void* Util_safe_linear_align(size_t alignment, size_t size);
+
+/**
  * @brief Linear realloc.
  * Always return NULL if safe linear alloc api is not initialized.
  * @param pointer (in) Old pointer.
@@ -205,7 +221,3 @@ u32 Util_check_free_linear_space(void);
  * @warning Thread dangerous (untested)
 */
 u32 Util_check_free_ram(void);
-
-void* stbi_malloc(size_t size);
-void* stbi_realloc(void *ptr, size_t size);
-void stbi_free(void *ptr);
