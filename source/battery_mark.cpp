@@ -277,7 +277,7 @@ void Bmark_check_thread(void* arg)
 								Util_err_set_error_show_flag(true);
 							}
 
-							//save bottom screen (graph) as png
+							//save bottom screen (graph) as jpg
 							frame_buffer = gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, &screen_width, &screen_height);
 							if(frame_buffer)
 							{
