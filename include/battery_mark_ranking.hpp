@@ -13,8 +13,8 @@ void Bmr_suspend(void);
 
 void Bmr_hid(Hid_info key);
 
-void Bmr_init(void);
+void Bmr_init(bool draw);
 
-void Bmr_exit(void);
+void Bmr_exit(bool draw);
 
 void Bmr_main(void);

@@ -13,8 +13,8 @@ void Bmark_suspend(void);
 
 void Bmark_hid(Hid_info key);
 
-void Bmark_init(void);
+void Bmark_init(bool draw);
 
-void Bmark_exit(void);
+void Bmark_exit(bool draw);
 
 void Bmark_main(void);

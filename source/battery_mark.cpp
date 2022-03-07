@@ -786,7 +786,7 @@ void Bmark_exit_thread(void* arg)
 	threadExit(0);
 }
 
-void Bmark_init(void)
+void Bmark_init(bool draw)
 {
 	Util_log_save(DEF_BMARK_INIT_STR, "Initializing...");
 	int color = DEF_DRAW_BLACK;
@@ -803,7 +803,7 @@ void Bmark_init(void)
 		bmark_init_thread = threadCreate(Bmark_init_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_NORMAL, 1, false);
 	}
 
-	while(!bmark_already_init)
+	while(!bmark_already_init && draw)
 	{
 		if (var_night_mode)
 		{
@@ -833,7 +833,7 @@ void Bmark_init(void)
 	Util_log_save(DEF_BMARK_INIT_STR, "Initialized.");
 }
 
-void Bmark_exit(void)
+void Bmark_exit(bool draw)
 {
 	Util_log_save(DEF_BMARK_EXIT_STR, "Exiting...");
 
@@ -844,7 +844,7 @@ void Bmark_exit(void)
 
 	bmark_exit_thread = threadCreate(Bmark_exit_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_NORMAL, 1, false);
 
-	while(bmark_already_init)
+	while(bmark_already_init && draw)
 	{
 		if (var_night_mode)
 		{

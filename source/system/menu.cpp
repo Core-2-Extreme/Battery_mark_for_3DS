@@ -316,11 +316,11 @@ void Menu_exit(void)
 
 	#ifdef DEF_ENABLE_BMARK
 	if (Bmark_query_init_flag())
-		Bmark_exit();
+		Bmark_exit(false);
 	#endif
 	#ifdef DEF_ENABLE_BMR
 	if (Bmr_query_init_flag())
-		Bmr_exit();
+		Bmr_exit(false);
 	#endif
 	#ifdef DEF_ENABLE_SUB_APP2
 	if (Sapp2_query_init_flag())
@@ -595,24 +595,24 @@ void Menu_main(void)
 		#ifdef DEF_ENABLE_BMARK
 		if(menu_init_request[0])
 		{
-			Bmark_init();
+			Bmark_init(true);
 			menu_init_request[0] = false;
 		}
 		else if(menu_exit_request[0])
 		{
-			Bmark_exit();
+			Bmark_exit(true);
 			menu_exit_request[0] = false;
 		}
 		#endif
 		#ifdef DEF_ENABLE_BMR
 		if(menu_init_request[1])
 		{
-			Bmr_init();
+			Bmr_init(true);
 			menu_init_request[1] = false;
 		}
 		else if(menu_exit_request[1])
 		{
-			Bmr_exit();
+			Bmr_exit(true);
 			menu_exit_request[1] = false;
 		}
 		#endif

@@ -496,7 +496,7 @@ void Bmr_hid(Hid_info key)
 		Util_log_main(key);
 }
 
-void Bmr_init(void)
+void Bmr_init(bool draw)
 {
 	Util_log_save(DEF_BMR_INIT_STR, "Initializing...");
 	int color = DEF_DRAW_BLACK;
@@ -513,7 +513,7 @@ void Bmr_init(void)
 		bmr_init_thread = threadCreate(Bmr_init_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_NORMAL, 1, false);
 	}
 
-	while(!bmr_already_init)
+	while(!bmr_already_init && draw)
 	{
 		if (var_night_mode)
 		{
@@ -543,7 +543,7 @@ void Bmr_init(void)
 	Util_log_save(DEF_BMR_INIT_STR, "Initialized.");
 }
 
-void Bmr_exit(void)
+void Bmr_exit(bool draw)
 {
 	Util_log_save(DEF_BMR_EXIT_STR, "Exiting...");
 
@@ -554,7 +554,7 @@ void Bmr_exit(void)
 
 	bmr_exit_thread = threadCreate(Bmr_exit_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_NORMAL, 1, false);
 
-	while(bmr_already_init)
+	while(bmr_already_init && draw)
 	{
 		if (var_night_mode)
 		{
