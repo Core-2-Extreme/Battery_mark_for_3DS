@@ -10,6 +10,7 @@ int bmark_remain_test = 0;
 int bmark_initial_battery = 0;
 int bmark_final_battery = 0;
 int bmark_graph_index = 0;
+int bmark_selected_graph_pos = 0;
 double bmark_max_time = 0;
 double bmark_min_time = 0;
 double bmark_avg_time = 0;
@@ -32,7 +33,7 @@ std::string bmark_system_ver = "unknown";
 std::string bmark_msg[DEF_BMARK_NUM_OF_MSG];
 std::string bmark_status = "";
 Thread bmark_video_thread, bmark_check_thread, bmark_update_thread, bmark_copy_thread, bmark_init_thread, bmark_exit_thread;
-Image_data bmark_image, bmark_start_button, bmark_stop_button, bmark_send_data_button, bmark_yes_button, bmark_no_button;
+Image_data bmark_image, bmark_start_button, bmark_stop_button, bmark_send_data_button, bmark_yes_button, bmark_no_button, bmark_graph_area;
 
 extern "C" void memcpy_asm(u8*, u8*, int);
 
@@ -631,7 +632,18 @@ void Bmark_hid(Hid_info key)
 		}
 		else
 		{
-			if(Util_hid_is_pressed(key, bmark_start_button) && !bmark_start_mark_request)
+			if(Util_hid_is_pressed(key, bmark_graph_area))
+				bmark_graph_area.selected = true;
+			else if(bmark_graph_area.selected && key.h_touch)
+			{
+				if(key.touch_x < 20)
+					bmark_selected_graph_pos = 0;
+				else if(key.touch_x > 20 + DEF_BMARK_BMR_NUM_OF_HISTORY - 1)
+					bmark_selected_graph_pos = DEF_BMARK_BMR_NUM_OF_HISTORY - 1;
+				else
+					bmark_selected_graph_pos = key.touch_x - 20;
+			}
+			else if(Util_hid_is_pressed(key, bmark_start_button) && !bmark_start_mark_request)
 				bmark_start_button.selected = true;
 			else if((key.p_a || (Util_hid_is_released(key, bmark_start_button) && bmark_start_button.selected)) && !bmark_start_mark_request)
 			{
@@ -659,6 +671,7 @@ void Bmark_hid(Hid_info key)
 	if(!key.p_touch && !key.h_touch)
 	{
 		Draw_get_bot_ui_button()->selected = false;
+		bmark_graph_area.selected = false;
 		bmark_start_button.selected = false;
 		bmark_stop_button.selected = false;
 		bmark_send_data_button.selected = false;
@@ -695,6 +708,7 @@ void Bmark_init_thread(void* arg)
 
 	bmark_status += "\nInitializing variables...";
 	bmark_graph_index = 0;
+	bmark_selected_graph_pos = 0;
 	for(int i = 0; i < DEF_BMARK_BMR_NUM_OF_HISTORY; i++)
 	{
 		bmark_battery_level_history[i] = 0;
@@ -703,6 +717,7 @@ void Bmark_init_thread(void* arg)
 	}
 	osGetSystemVersionDataString(&os_ver, &os_ver, system_ver_char, 0x50);
 	bmark_system_ver = system_ver_char;
+	bmark_graph_area.c2d = var_square_image[0];
 	bmark_start_button.c2d = var_square_image[0];
 	bmark_stop_button.c2d = var_square_image[0];
 	bmark_send_data_button.c2d = var_square_image[0];
@@ -710,6 +725,8 @@ void Bmark_init_thread(void* arg)
 	bmark_no_button.c2d = var_square_image[0];
 	Draw_texture_init(&bmark_image, 256, 256, DEF_DRAW_FORMAT_RGB565);
 	Draw_set_texture_filter(&bmark_image, false);
+	Util_add_watch(&bmark_selected_graph_pos);
+	Util_add_watch(&bmark_graph_area.selected);
 	Util_add_watch(&bmark_start_button.selected);
 	Util_add_watch(&bmark_stop_button.selected);
 	Util_add_watch(&bmark_send_data_button.selected);
@@ -749,6 +766,8 @@ void Bmark_exit_thread(void* arg)
 
 	bmark_status += "\nCleaning up...";	
 	Draw_texture_free(&bmark_image);
+	Util_remove_watch(&bmark_selected_graph_pos);
+	Util_remove_watch(&bmark_graph_area.selected);
 	Util_remove_watch(&bmark_start_button.selected);
 	Util_remove_watch(&bmark_stop_button.selected);
 	Util_remove_watch(&bmark_send_data_button.selected);
@@ -922,7 +941,8 @@ void Bmark_main(void)
 			Draw(DEF_BMARK_VER, 0, 0, 0.4, 0.4, DEF_DRAW_GREEN);
 
 			//Graph for battery level/temp/voltage
-			Draw_texture(var_square_image[0], DEF_DRAW_WEAK_AQUA, 20, 30, DEF_BMARK_BMR_NUM_OF_HISTORY, 130);
+			Draw_texture(&bmark_graph_area, DEF_DRAW_WEAK_AQUA, 20, 30, DEF_BMARK_BMR_NUM_OF_HISTORY, 100);
+			Draw_texture(var_square_image[0], DEF_DRAW_WEAK_AQUA, 20, 130, DEF_BMARK_BMR_NUM_OF_HISTORY, 30);
 			Draw("(V)", 0, 10, 0.45, 0.45, 0xFF00A0FF, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_TOP, 20, 20);
 			Draw("(%)", 275, 10, 0.45, 0.45, DEF_DRAW_RED);
 			Draw("(゜C)", 295, 10, 0.45, 0.45, 0xFF00A000);
@@ -932,6 +952,7 @@ void Bmark_main(void)
 				Draw(std::to_string(i * 0.25 + 3).substr(0, 4), 0, 125 - (i * 20), 0.4, 0.4, color, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_TOP, 20, 20);
 				Draw(std::to_string(i * 20), 300, 125 - (i * 20), 0.45, 0.45, color);
 			}
+			Draw_line(bmark_selected_graph_pos + 20, 130, DEF_DRAW_BLACK, bmark_selected_graph_pos + 20, 30, DEF_DRAW_BLACK, 1);
 			for(int i = 0; i < DEF_BMARK_BMR_NUM_OF_HISTORY - 1; i++)
 			{
 				Draw_line(i + 20, 130 - bmark_battery_level_history[i], DEF_DRAW_RED, i + 21, 130 - bmark_battery_level_history[i + 1], DEF_DRAW_RED, 1);
@@ -939,12 +960,12 @@ void Bmark_main(void)
 				Draw_line(i + 20, 130 - (bmark_battery_voltage_history[i] == 0 ? 0 : (bmark_battery_voltage_history[i] - 3) * 80), 0xFF00A0FF,
 				i + 21, 130 - (bmark_battery_voltage_history[i + 1] == 0 ? 0 : (bmark_battery_voltage_history[i + 1] - 3) * 80), 0xFF00A0FF, 1);
 			}
-			Draw(bmark_msg[DEF_BMARK_GRAPH_BATTERY_LEVEL_MSG] + std::to_string(var_battery_level_raw) + "%", 20, 130, 0.5, 0.5, DEF_DRAW_RED,
-			DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
-			Draw(bmark_msg[DEF_BMARK_GRAPH_BATTERY_TEMP_MSG] + std::to_string(var_battery_temp) + "゜C", 160, 130, 0.5, 0.5, 0xFF00A000,
-			DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
-			Draw(bmark_msg[DEF_BMARK_GRAPH_BATTERY_VOLTAGE_MSG] + std::to_string(var_battery_voltage).substr(0, 5) + "V", 20, 145, 0.5, 0.5, 0xFF00A0FF,
-			DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 280, 15);
+			Draw(bmark_msg[DEF_BMARK_GRAPH_BATTERY_LEVEL_MSG] + std::to_string(bmark_battery_level_history[bmark_selected_graph_pos]) + "%",
+			20, 130, 0.5, 0.5, DEF_DRAW_RED, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
+			Draw(bmark_msg[DEF_BMARK_GRAPH_BATTERY_TEMP_MSG] + std::to_string(bmark_battery_temp_history[bmark_selected_graph_pos]) + "゜C",
+			160, 130, 0.5, 0.5, 0xFF00A000, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
+			Draw(bmark_msg[DEF_BMARK_GRAPH_BATTERY_VOLTAGE_MSG] + std::to_string(bmark_battery_voltage_history[bmark_selected_graph_pos]).substr(0, 5) + "V",
+			20, 145, 0.5, 0.5, 0xFF00A0FF, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 280, 15);
 
 			//start, stop and option button
 			Draw(bmark_msg[DEF_BMARK_START_MSG], 20, 175, 0.425, 0.425, bmark_start_mark_request ? weak_color : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 135, 15,
