@@ -86,6 +86,8 @@ void Bmr_thread(void* arg)
 				bmr_model[i] = "";
 				bmr_user_name[i] = "";
 			}
+			bmr_y_offset = 0;
+			bmr_selected_ranking = 0;
 			var_need_reflesh = true;
 
 			log_num = Util_log_save(DEF_BMR_WORKER_THREAD_STR, "Util_httpc_dl_data()...");
@@ -270,7 +272,10 @@ void Bmr_init_thread(void* arg)
 	
 	bmr_page_num = 0;
 	bmr_selected_ranking = 0;
+	bmr_y_offset = 0;
 	bmr_selected_graph_pos = 0;
+	bmr_model_mode = 6;
+	bmr_dl_log_request = true;
 	bmr_dl_ranking_button.c2d = var_square_image[0];
 	bmr_close_graph_button.c2d = var_square_image[0];
 	bmr_graph_area.c2d = var_square_image[0];
