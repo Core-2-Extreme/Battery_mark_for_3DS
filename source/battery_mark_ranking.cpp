@@ -607,15 +607,15 @@ void Bmr_main(void)
 		{
 			Draw_screen_ready(0, back_color);
 
-			Draw_line(23 + bmr_x_offset, 15, line_color, 23 + bmr_x_offset, 220, line_color, 2);
-			Draw_line(93 + bmr_x_offset, 15, line_color, 93 + bmr_x_offset, 220, line_color, 2);
-			Draw_line(138 + bmr_x_offset, 15, line_color, 138 + bmr_x_offset, 220, line_color, 2);
-			Draw_line(178 + bmr_x_offset, 15, line_color, 178 + bmr_x_offset, 220, line_color, 2);
-			Draw_line(218 + bmr_x_offset, 15, line_color, 218 + bmr_x_offset, 220, line_color, 2);
-			Draw_line(258 + bmr_x_offset, 15, line_color, 258 + bmr_x_offset, 220, line_color, 2);
-			Draw_line(373 + bmr_x_offset, 15, line_color, 373 + bmr_x_offset, 220, line_color, 2);
-			Draw_line(423 + bmr_x_offset, 15, line_color, 423 + bmr_x_offset, 220, line_color, 2);
-			Draw_line(493 + bmr_x_offset, 15, line_color, 493 + bmr_x_offset, 220, line_color, 2);
+			Draw_texture(var_square_image[0], color, 23 + bmr_x_offset, 15, 1, 205);
+			Draw_texture(var_square_image[0], color, 93 + bmr_x_offset, 15, 1, 205);
+			Draw_texture(var_square_image[0], color, 138 + bmr_x_offset, 15, 1, 205);
+			Draw_texture(var_square_image[0], color, 178 + bmr_x_offset, 15, 1, 205);
+			Draw_texture(var_square_image[0], color, 218 + bmr_x_offset, 15, 1, 205);
+			Draw_texture(var_square_image[0], color, 258 + bmr_x_offset, 15, 1, 205);
+			Draw_texture(var_square_image[0], color, 373 + bmr_x_offset, 15, 1, 205);
+			Draw_texture(var_square_image[0], color, 423 + bmr_x_offset, 15, 1, 205);
+			Draw_texture(var_square_image[0], color, 493 + bmr_x_offset, 15, 1, 205);
 			Draw(bmr_msg[DEF_BMR_MODEL_MSG], 25 + bmr_x_offset, 17.5, 0.425, 0.425, color);
 			Draw(bmr_msg[DEF_BMR_TOTAL_MSG], 95 + bmr_x_offset, 17.5, 0.425, 0.425, color);
 			Draw(bmr_msg[DEF_BMR_AVG_MSG], 140 + bmr_x_offset, 17.5, 0.425, 0.425, color);
@@ -630,7 +630,7 @@ void Bmr_main(void)
 				if(i == bmr_selected_ranking)
 					Draw_texture(var_square_image[0], DEF_DRAW_WEAK_GREEN, 0, 30 + (i * 10), 400, 10);
 
-				Draw_line(0, 30 + (i * 10), line_color, 400, 30 + (i * 10), line_color, 2);
+				Draw_texture(var_square_image[0], color, 0, 30 + (i * 10), 400, 1);
 				Draw(std::to_string(bmr_ranking[i + bmr_y_offset]), 0 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
 				Draw(bmr_model[i + bmr_y_offset], 25 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
 				Draw(Util_convert_seconds_to_time(bmr_total_time[i + bmr_y_offset]).substr(0, Util_convert_seconds_to_time(bmr_total_time[i + bmr_y_offset]).length() - 2), 95 + bmr_x_offset, 30 + (i * 10), 0.375, 0.375, color);
