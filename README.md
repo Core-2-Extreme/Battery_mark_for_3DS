@@ -14,8 +14,8 @@
 * Changed battery mark test(test result is not compatible with older version)
 
 ## Summary
-![ranking](https://user-images.githubusercontent.com/45873899/106357964-b7f6c800-634c-11eb-8be3-a036a1d995c9.png)
-![battery_mark](https://user-images.githubusercontent.com/45873899/106357972-c3e28a00-634c-11eb-8603-774ff2d02473.png)
+![Battery_mark_ranking](https://user-images.githubusercontent.com/45873899/157168071-f21d8af2-51ed-4793-98ec-4c3943988a70.png)
+![battery_mark](https://user-images.githubusercontent.com/45873899/157168078-01f94697-6226-42f3-974f-bff92cd78b45.png)
 
 ## Supported languages
 * English
