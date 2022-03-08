@@ -2,7 +2,7 @@
 
 ## Patch note
 ### ver2.1.0
-* Battery level/temp/voltage graph has beed added to battery mark and battery mark ranking(*0)
+* Battery level/temp/voltage graph has been added to battery mark and battery mark ranking(*0)
 * Test result (graph) will be saved to sdmc:/Battery_mark/result/{date}.jpg
 * Many adjustment have been made
 
