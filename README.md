@@ -1,5 +1,8 @@
 # Battery mark for 3DS
 
+[Discord channel](https://discord.gg/66qCrQNqrw)
+[GBAtemp thread](https://gbatemp.net/threads/release-battery-mark-v2.581951/)
+
 ## Patch note
 ### ver2.1.0
 * Battery level/temp/voltage graph has been added to battery mark and battery mark ranking(*0)
