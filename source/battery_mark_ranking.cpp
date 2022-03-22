@@ -98,7 +98,7 @@ void Bmr_thread(void* arg)
 				string_data = (char*)data;
 				Util_safe_linear_free(data);
 				data = NULL;
-				
+
 				cut_pos = string_data.find(",", string_offset);
 				if(!(cut_pos == std::string::npos))
 				{
@@ -114,56 +114,56 @@ void Bmr_thread(void* arg)
 						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
-						
+
 						bmr_ranking[i] = atoi(string_data.substr(string_offset, cut_pos - string_offset).c_str());
 						string_offset = cut_pos + 1;
 
 						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
-						
+
 						bmr_date[i] = string_data.substr(string_offset, cut_pos - string_offset);
 						string_offset = cut_pos + 1;
 
 						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
-						
+
 						bmr_app_ver[i] = string_data.substr(string_offset, cut_pos - string_offset);
 						string_offset = cut_pos + 1;
 
 						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
-						
+
 						bmr_system_ver[i] = string_data.substr(string_offset, cut_pos - string_offset);
 						string_offset = cut_pos + 1;
 
 						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
-						
+
 						bmr_model[i] = string_data.substr(string_offset, cut_pos - string_offset);
 						string_offset = cut_pos + 1;
 
 						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
-						
+
 						bmr_user_name[i] = string_data.substr(string_offset, cut_pos - string_offset);
 						string_offset = cut_pos + 1;
 
 						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
-						
+
 						bmr_max_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
 						string_offset = cut_pos + 1;
 
 						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
-						
+
 						bmr_avg_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
 						string_offset = cut_pos + 1;
 
@@ -173,11 +173,11 @@ void Bmr_thread(void* arg)
 
 						bmr_min_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
 						string_offset = cut_pos + 1;
-						
+
 						cut_pos = string_data.find(",", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
-						
+
 						bmr_total_time[i] = atof(string_data.substr(string_offset, cut_pos - string_offset).c_str());
 						string_offset = cut_pos + 1;
 
@@ -208,7 +208,7 @@ void Bmr_thread(void* arg)
 						cut_pos = string_data.find("\n", string_offset);
 						if(cut_pos == std::string::npos)
 							break;
-						
+
 						string_offset = cut_pos + 1;
 					}
 				}
@@ -243,7 +243,7 @@ void Bmr_init_thread(void* arg)
 {
 	Util_log_save(DEF_BMR_INIT_STR, "Thread started.");
 	Result_with_string result;
-	
+
 	bmr_status = "Starting threads...";
 	bmr_thread_run = true;
 	bmr_worker_thread = threadCreate(Bmr_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_NORMAL, 0, false);
@@ -269,7 +269,7 @@ void Bmr_init_thread(void* arg)
 			bmr_graph_data[i].battery_voltage[k] = 0;
 		}
 	}
-	
+
 	bmr_page_num = 0;
 	bmr_selected_ranking = 0;
 	bmr_y_offset = 0;
@@ -309,7 +309,7 @@ void Bmr_exit_thread(void* arg)
 	bmr_thread_run = false;
 
 	bmr_status = "Exiting threads...";
-	Util_log_save(DEF_BMR_EXIT_STR, "threadJoin()...", threadJoin(bmr_init_thread, DEF_THREAD_WAIT_TIME));	
+	Util_log_save(DEF_BMR_EXIT_STR, "threadJoin()...", threadJoin(bmr_init_thread, DEF_THREAD_WAIT_TIME));
 
 	bmr_status += ".";
 	Util_log_save(DEF_BMR_EXIT_STR, "threadJoin()...", threadJoin(bmr_worker_thread, DEF_THREAD_WAIT_TIME));
@@ -586,7 +586,7 @@ void Bmr_exit(bool draw)
 			usleep(20000);
 	}
 
-	Util_log_save(DEF_BMR_EXIT_STR, "threadJoin()...", threadJoin(bmr_exit_thread, DEF_THREAD_WAIT_TIME));	
+	Util_log_save(DEF_BMR_EXIT_STR, "threadJoin()...", threadJoin(bmr_exit_thread, DEF_THREAD_WAIT_TIME));
 	threadFree(bmr_exit_thread);
 	Util_remove_watch(&bmr_status);
 	var_need_reflesh = true;
@@ -676,7 +676,7 @@ void Bmr_main(void)
 				Draw_top_ui();
 			}
 		}
-		
+
 		if(var_turn_on_bottom_lcd)
 		{
 			Draw_screen_ready(1, back_color);
