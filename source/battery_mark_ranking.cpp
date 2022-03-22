@@ -513,26 +513,31 @@ void Bmr_init(bool draw)
 		bmr_init_thread = threadCreate(Bmr_init_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_NORMAL, 1, false);
 	}
 
-	while(!bmr_already_init && draw)
+	while(!bmr_already_init)
 	{
-		if (var_night_mode)
+		if(draw)
 		{
-			color = DEF_DRAW_WHITE;
-			back_color = DEF_DRAW_BLACK;
-		}
+			if (var_night_mode)
+			{
+				color = DEF_DRAW_WHITE;
+				back_color = DEF_DRAW_BLACK;
+			}
 
-		if(Util_is_watch_changed() || var_need_reflesh || !var_eco_mode)
-		{
-			var_need_reflesh = false;
-			Draw_frame_ready();
-			Draw_screen_ready(0, back_color);
-			Draw_top_ui();
-			Draw(bmr_status, 0, 20, 0.65, 0.65, color);
+			if(Util_is_watch_changed() || var_need_reflesh || !var_eco_mode)
+			{
+				var_need_reflesh = false;
+				Draw_frame_ready();
+				Draw_screen_ready(0, back_color);
+				Draw_top_ui();
+				Draw(bmr_status, 0, 20, 0.65, 0.65, color);
 
-			Draw_apply_draw();
+				Draw_apply_draw();
+			}
+			else
+				gspWaitForVBlank();
 		}
 		else
-			gspWaitForVBlank();
+			usleep(20000);
 	}
 
 	if(!(var_model == CFG_MODEL_N2DSXL || var_model == CFG_MODEL_N3DSXL || var_model == CFG_MODEL_3DSXL) || !var_core_2_available)
@@ -554,26 +559,31 @@ void Bmr_exit(bool draw)
 
 	bmr_exit_thread = threadCreate(Bmr_exit_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_NORMAL, 1, false);
 
-	while(bmr_already_init && draw)
+	while(bmr_already_init)
 	{
-		if (var_night_mode)
+		if(draw)
 		{
-			color = DEF_DRAW_WHITE;
-			back_color = DEF_DRAW_BLACK;
-		}
+			if (var_night_mode)
+			{
+				color = DEF_DRAW_WHITE;
+				back_color = DEF_DRAW_BLACK;
+			}
 
-		if(Util_is_watch_changed() || var_need_reflesh || !var_eco_mode)
-		{
-			var_need_reflesh = false;
-			Draw_frame_ready();
-			Draw_screen_ready(0, back_color);
-			Draw_top_ui();
-			Draw(bmr_status, 0, 20, 0.65, 0.65, color);
+			if(Util_is_watch_changed() || var_need_reflesh || !var_eco_mode)
+			{
+				var_need_reflesh = false;
+				Draw_frame_ready();
+				Draw_screen_ready(0, back_color);
+				Draw_top_ui();
+				Draw(bmr_status, 0, 20, 0.65, 0.65, color);
 
-			Draw_apply_draw();
+				Draw_apply_draw();
+			}
+			else
+				gspWaitForVBlank();
 		}
 		else
-			gspWaitForVBlank();
+			usleep(20000);
 	}
 
 	Util_log_save(DEF_BMR_EXIT_STR, "threadJoin()...", threadJoin(bmr_exit_thread, DEF_THREAD_WAIT_TIME));	
