@@ -770,13 +770,21 @@ void Menu_hid_thread(void* arg)
 							else if (Util_hid_is_pressed(key, menu_sapp_close_button[0]) && Bmark_query_init_flag())
 								menu_sapp_close_button[0].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_close_button[0]) && Bmark_query_init_flag() && menu_sapp_close_button[0].selected)
+							{
 								menu_exit_request[0] = true;
+								while(menu_exit_request[0])
+									usleep(20000);
+							}
 							else if (Util_hid_is_pressed(key, menu_sapp_button[0]))
 								menu_sapp_button[0].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_button[0]) && menu_sapp_button[0].selected)
 							{
 								if (!Bmark_query_init_flag())
+								{
 									menu_init_request[0] = true;
+									while(menu_init_request[0])
+										usleep(20000);
+								}
 								else
 									Bmark_resume();
 							}
@@ -785,13 +793,21 @@ void Menu_hid_thread(void* arg)
 							else if (Util_hid_is_pressed(key, menu_sapp_close_button[1]) && Bmr_query_init_flag())
 								menu_sapp_close_button[1].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_close_button[1]) && Bmr_query_init_flag() && menu_sapp_close_button[1].selected)
+							{
 								menu_exit_request[1] = true;
+								while(menu_exit_request[1])
+									usleep(20000);
+							}
 							else if (Util_hid_is_pressed(key, menu_sapp_button[1]))
 								menu_sapp_button[1].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_button[1]) && menu_sapp_button[1].selected)
 							{
 								if (!Bmr_query_init_flag())
+								{
 									menu_init_request[1] = true;
+									while(menu_init_request[1])
+										usleep(20000);
+								}
 								else
 									Bmr_resume();
 							}
@@ -800,13 +816,21 @@ void Menu_hid_thread(void* arg)
 							else if (Util_hid_is_pressed(key, menu_sapp_close_button[2]) && Sapp2_query_init_flag())
 								menu_sapp_close_button[2].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_close_button[2]) && Sapp2_query_init_flag() && menu_sapp_close_button[2].selected)
+							{
 								menu_exit_request[2] = true;
+								while(menu_exit_request[2])
+									usleep(20000);
+							}
 							else if (Util_hid_is_pressed(key, menu_sapp_button[2]))
 								menu_sapp_button[2].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_button[2]) && menu_sapp_button[2].selected)
 							{
 								if (!Sapp2_query_init_flag())
+								{
 									menu_init_request[2] = true;
+									while(menu_init_request[2])
+										usleep(20000);
+								}
 								else
 									Sapp2_resume();
 							}
@@ -815,13 +839,21 @@ void Menu_hid_thread(void* arg)
 							else if (Util_hid_is_pressed(key, menu_sapp_close_button[3]) && Sapp3_query_init_flag())
 								menu_sapp_close_button[3].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_close_button[3]) && Sapp3_query_init_flag() && menu_sapp_close_button[3].selected)
+							{
 								menu_exit_request[3] = true;
+								while(menu_exit_request[3])
+									usleep(20000);
+							}
 							else if (Util_hid_is_pressed(key, menu_sapp_button[3]))
 								menu_sapp_button[3].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_button[3]) && menu_sapp_button[3].selected)
 							{
 								if (!Sapp3_query_init_flag())
+								{
 									menu_init_request[3] = true;
+									while(menu_init_request[3])
+										usleep(20000);
+								}
 								else
 									Sapp3_resume();
 							}
@@ -830,13 +862,21 @@ void Menu_hid_thread(void* arg)
 							else if (Util_hid_is_pressed(key, menu_sapp_close_button[4]) && Sapp4_query_init_flag())
 								menu_sapp_close_button[4].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_close_button[4]) && Sapp4_query_init_flag() && menu_sapp_close_button[4].selected)
+							{
 								menu_exit_request[4] = true;
+								while(menu_exit_request[4])
+									usleep(20000);
+							}
 							else if (Util_hid_is_pressed(key, menu_sapp_button[4]))
 								menu_sapp_button[4].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_button[4]) && menu_sapp_button[4].selected)
 							{
 								if (!Sapp4_query_init_flag())
+								{
 									menu_init_request[4] = true;
+									while(menu_init_request[4])
+										usleep(20000);
+								}
 								else
 									Sapp4_resume();
 							}
@@ -845,13 +885,21 @@ void Menu_hid_thread(void* arg)
 							else if (Util_hid_is_pressed(key, menu_sapp_close_button[5]) && Sapp5_query_init_flag())
 								menu_sapp_close_button[5].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_close_button[5]) && Sapp5_query_init_flag() && menu_sapp_close_button[5].selected)
+							{
 								menu_exit_request[5] = true;
+								while(menu_exit_request[5])
+									usleep(20000);
+							}
 							else if (Util_hid_is_pressed(key, menu_sapp_button[5]))
 								menu_sapp_button[5].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_button[5]) && menu_sapp_button[5].selected)
 							{
 								if (!Sapp5_query_init_flag())
+								{
 									menu_init_request[5] = true;
+									while(menu_init_request[5])
+										usleep(20000);
+								}
 								else
 									Sapp5_resume();
 							}
@@ -860,13 +908,21 @@ void Menu_hid_thread(void* arg)
 							else if (Util_hid_is_pressed(key, menu_sapp_close_button[6]) && Sapp6_query_init_flag())
 								menu_sapp_close_button[6].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_close_button[6]) && Sapp6_query_init_flag() && menu_sapp_close_button[6].selected)
+							{
 								menu_exit_request[6] = true;
+								while(menu_exit_request[6])
+									usleep(20000);
+							}
 							else if (Util_hid_is_pressed(key, menu_sapp_button[6]))
 								menu_sapp_button[6].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_button[6]) && menu_sapp_button[6].selected)
 							{
 								if (!Sapp6_query_init_flag())
+								{
 									menu_init_request[6] = true;
+									while(menu_init_request[6])
+										usleep(20000);
+								}
 								else
 									Sapp6_resume();
 							}
@@ -875,13 +931,21 @@ void Menu_hid_thread(void* arg)
 							else if (Util_hid_is_pressed(key, menu_sapp_close_button[7]) && Sapp7_query_init_flag())
 								menu_sapp_close_button[7].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_close_button[7]) && Sapp7_query_init_flag() && menu_sapp_close_button[7].selected)
+							{
 								menu_exit_request[7] = true;
+								while(menu_exit_request[7])
+									usleep(20000);
+							}
 							else if (Util_hid_is_pressed(key, menu_sapp_button[7]))
 								menu_sapp_button[7].selected = true;
 							else if (Util_hid_is_released(key, menu_sapp_button[7]) && menu_sapp_button[7].selected)
 							{
 								if (!Sapp7_query_init_flag())
+								{
 									menu_init_request[7] = true;
+									while(menu_init_request[7])
+										usleep(20000);
+								}
 								else
 									Sapp7_resume();
 							}
@@ -891,7 +955,11 @@ void Menu_hid_thread(void* arg)
 							else if (Util_hid_is_released(key, menu_sem_button) && menu_sem_button.selected)
 							{
 								if (!Sem_query_init_flag())
+								{
 									menu_init_request[8] = true;
+									while(menu_init_request[8])
+										usleep(20000);
+								}
 								else
 									Sem_resume();
 							}
