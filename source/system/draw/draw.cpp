@@ -1262,6 +1262,14 @@ void Draw_texture(C2D_Image image, float x, float y, float x_size, float y_size)
 
 void Draw_texture(C2D_Image image, int abgr8888, float x, float y, float x_size, float y_size)
 {
+	Draw_texture(image, abgr8888, x, y, x_size, y_size, 0, 0, 0);
+}
+
+void Draw_texture(C2D_Image image, int abgr8888, float x, float y, float x_size, float y_size, float angle, float center_x, float center_y)
+{
+	if(!image.tex || !image.subtex || x_size <= 0 || y_size <= 0)
+		return;
+
 	C2D_ImageTint tint;
 	C2D_DrawParams c2d_parameter =
 	{
@@ -1272,11 +1280,11 @@ void Draw_texture(C2D_Image image, int abgr8888, float x, float y, float x_size,
 			y_size
 		},
 		{
-			0,
-			0
+			center_x,
+			center_y
 		},
 		0.0f,
-		0.0f
+		angle
 	};
 	if(!util_draw_init)
 		return;
@@ -1300,6 +1308,11 @@ void Draw_texture(Image_data* image, float x, float y, float x_size, float y_siz
 
 void Draw_texture(Image_data* image, int abgr8888, float x, float y, float x_size, float y_size)
 {
+	Draw_texture(image, abgr8888, x, y, x_size, y_size, 0, 0, 0);
+}
+
+void Draw_texture(Image_data* image, int abgr8888, float x, float y, float x_size, float y_size, float angle, float center_x, float center_y)
+{
 	if(!util_draw_init)
 		return;
 
@@ -1310,7 +1323,7 @@ void Draw_texture(Image_data* image, int abgr8888, float x, float y, float x_siz
 	image->y = y;
 	image->x_size = x_size;
 	image->y_size = y_size;
-	Draw_texture(image->c2d, abgr8888, x, y, x_size, y_size);
+	Draw_texture(image->c2d, abgr8888, x, y, x_size, y_size, angle, center_x, center_y);
 }
 
 void Draw_line(float x_0, float y_0, int abgr8888_0, float x_1, float y_1, int abgr8888_1, float width)
