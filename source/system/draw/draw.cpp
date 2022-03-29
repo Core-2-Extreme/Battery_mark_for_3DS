@@ -227,10 +227,12 @@ Result_with_string Draw_texture_init(Image_data* image, int tex_size_x, int tex_
 		goto not_inited;
 
 	if(!image || tex_size_x <= 0 || tex_size_y <= 0
-	|| (color_format != DEF_DRAW_FORMAT_RGB888 && color_format != DEF_DRAW_FORMAT_RGB565))
+	|| (color_format != DEF_DRAW_FORMAT_RGBA8888 && color_format != DEF_DRAW_FORMAT_RGB888 && color_format != DEF_DRAW_FORMAT_RGB565))
 		goto invalid_arg;
 
-	if(color_format == DEF_DRAW_FORMAT_RGB888)
+	if(color_format == DEF_DRAW_FORMAT_RGBA8888)
+		color = GPU_RGBA8;
+	else if(color_format == DEF_DRAW_FORMAT_RGB888)
 		color = GPU_RGB8;
 	else if(color_format == DEF_DRAW_FORMAT_RGB565)
 		color = GPU_RGB565;
@@ -303,10 +305,12 @@ int tex_size_x, int tex_size_y, int color_format)
 
 	if(!image || !image->subtex || !image->c2d.tex || !buf || pic_width > 1024 || pic_width <= 0 
 	|| pic_height > 1024 || pic_height <= 0 || pic_width > tex_size_x || pic_height > tex_size_y
-	|| (color_format != DEF_DRAW_FORMAT_RGB888 && color_format != DEF_DRAW_FORMAT_RGB565))
+	|| (color_format != DEF_DRAW_FORMAT_RGBA8888 && color_format != DEF_DRAW_FORMAT_RGB888 && color_format != DEF_DRAW_FORMAT_RGB565))
 		goto invalid_arg;
 	
-	if(color_format == DEF_DRAW_FORMAT_RGB888)
+	if(color_format == DEF_DRAW_FORMAT_RGBA8888)
+		pixel_size = 4;
+	else if(color_format == DEF_DRAW_FORMAT_RGB888)
 		pixel_size = 3;
 	else if(color_format == DEF_DRAW_FORMAT_RGB565)
 		pixel_size = 2;
@@ -365,10 +369,12 @@ int width_offset, int height_offset, int tex_size_x, int tex_size_y, int color_f
 
 	if(!image || !image->subtex || !image->c2d.tex || !buf || pic_width <= 0 || pic_height <= 0
 	|| width_offset > pic_width || height_offset > pic_height || tex_size_x <= 0 || tex_size_y <= 0
-	|| (color_format != DEF_DRAW_FORMAT_RGB888 && color_format != DEF_DRAW_FORMAT_RGB565))
+	|| (color_format != DEF_DRAW_FORMAT_RGBA8888 && color_format != DEF_DRAW_FORMAT_RGB888 && color_format != DEF_DRAW_FORMAT_RGB565))
 		goto invalid_arg;
 
-	if(color_format == DEF_DRAW_FORMAT_RGB888)
+	if(color_format == DEF_DRAW_FORMAT_RGBA8888)
+		pixel_size = 4;
+	else if(color_format == DEF_DRAW_FORMAT_RGB888)
 		pixel_size = 3;
 	else if(color_format == DEF_DRAW_FORMAT_RGB565)
 		pixel_size = 2;
@@ -431,6 +437,23 @@ int width_offset, int height_offset, int tex_size_x, int tex_size_y, int color_f
 			{
 				memcpy_asm_4b(&(((u8*)image->c2d.tex->data)[c3d_pos + c3d_offset]), &(((u8*)buf)[Draw_convert_to_pos(k + height_offset, i + width_offset, pic_height, pic_width, pixel_size)]));
 				memcpy(&(((u8*)image->c2d.tex->data)[c3d_pos + c3d_offset + 4]), &(((u8*)buf)[Draw_convert_to_pos(k + height_offset, i + width_offset, pic_height, pic_width, pixel_size) + 4]), 2);
+				c3d_pos += increase_list_x[count[0]];
+				count[0]++;
+			}
+			count[0] = 0;
+			c3d_pos = 0;
+			c3d_offset += increase_list_y[count[1]];
+			count[1]++;
+		}
+	}
+	else if(pixel_size == 4)
+	{
+		for(int k = 0; k < y_max; k++)
+		{
+			for(int i = 0; i < x_max; i += 2)
+			{
+				memcpy_asm_4b(&(((u8*)image->c2d.tex->data)[c3d_pos + c3d_offset]), &(((u8*)buf)[Draw_convert_to_pos(k + height_offset, i + width_offset, pic_height, pic_width, pixel_size)]));
+				memcpy_asm_4b(&(((u8*)image->c2d.tex->data)[c3d_pos + c3d_offset + 4]), &(((u8*)buf)[Draw_convert_to_pos(k + height_offset, i + width_offset, pic_height, pic_width, pixel_size) + 4]));
 				c3d_pos += increase_list_x[count[0]];
 				count[0]++;
 			}

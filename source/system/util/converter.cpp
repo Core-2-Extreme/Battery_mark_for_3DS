@@ -286,6 +286,38 @@ Result_with_string Util_converter_yuv420p_to_rgb888le_asm(u8* yuv420p, u8** rgb8
 	return result;
 }
 
+Result_with_string Util_converter_rgba8888be_to_rgba8888le(u8* rgba8888, int width, int height)
+{
+	int offset = 0;
+	Result_with_string result;
+
+	if(!rgba8888 || width <= 0 || height <= 0)
+		goto invalid_arg;
+
+	for (int x = 0; x < width; x++) 
+	{
+		for (int y = 0; y < height; y++) 
+		{
+			u8 r = *(u8*)(rgba8888 + offset);
+			u8 g = *(u8*)(rgba8888 + offset + 1);
+			u8 b = *(u8*)(rgba8888 + offset + 2);
+			u8 a = *(u8*)(rgba8888 + offset + 3);
+
+			*(rgba8888 + offset) = a;
+			*(rgba8888 + offset + 1) = b;
+			*(rgba8888 + offset + 2) = g;
+			*(rgba8888 + offset + 3) = r;
+			offset += 4;
+		}
+	}
+	return result;
+
+	invalid_arg:
+	result.code = DEF_ERR_INVALID_ARG;
+	result.string = DEF_ERR_INVALID_ARG_STR;
+	return result;
+}
+
 Result_with_string Util_converter_rgb888be_to_rgb888le(u8* rgb888, int width, int height)
 {
 	int offset = 0;

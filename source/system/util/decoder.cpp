@@ -2500,17 +2500,54 @@ void Util_decoder_close_file(int session)
 	svcCloseHandle(util_decoder_cache_packet_mutex[session]);
 }
 
-Result_with_string Util_image_decoder_decode(std::string file_name, u8** raw_data, int* width, int* height)
+Result_with_string Util_image_decoder_decode(std::string file_name, u8** raw_data, int* width, int* height, bool alpha)
 {
 	Result_with_string result;
 	int image_ch = 0;
-	*raw_data = stbi_load(file_name.c_str(), width, height, &image_ch, STBI_rgb);
+
+	if(!raw_data || !width || !height)
+		goto invalid_arg;
+
+	*raw_data = stbi_load(file_name.c_str(), width, height, &image_ch, alpha ? STBI_rgb_alpha : STBI_rgb);
 	if(!*raw_data)
 	{
 		result.error_description = (std::string)"[Error] " + stbi_failure_reason();
 		goto stbi_api_failed;
 	}
 
+	return result;
+
+	invalid_arg:
+	result.code = DEF_ERR_INVALID_ARG;
+	result.string = DEF_ERR_INVALID_ARG_STR;
+	return result;
+
+	stbi_api_failed:
+	result.code = DEF_ERR_STB_IMG_RETURNED_NOT_SUCCESS;
+	result.string = DEF_ERR_STB_IMG_RETURNED_NOT_SUCCESS_STR;
+	return result;
+}
+
+Result_with_string Util_image_decoder_decode(u8* compressed_data, int compressed_buffer_size, u8** raw_data, int* width, int* height, bool alpha)
+{
+	Result_with_string result;
+	int image_ch = 0;
+
+	if(!compressed_data || !raw_data || !width || !height || compressed_buffer_size <= 0)
+		goto invalid_arg;
+
+	*raw_data = stbi_load_from_memory(compressed_data, compressed_buffer_size, width, height, &image_ch, alpha ? STBI_rgb_alpha : STBI_rgb);
+	if(!*raw_data)
+	{
+		result.error_description = (std::string)"[Error] " + stbi_failure_reason();
+		goto stbi_api_failed;
+	}
+
+	return result;
+
+	invalid_arg:
+	result.code = DEF_ERR_INVALID_ARG;
+	result.string = DEF_ERR_INVALID_ARG_STR;
 	return result;
 
 	stbi_api_failed:
