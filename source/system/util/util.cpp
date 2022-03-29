@@ -1,4 +1,5 @@
 #include "system/headers.hpp"
+#include "base64/base64.h"
 
 bool util_safe_linear_alloc_init = false, util_init = false;
 int util_draw_num_of_watch_bool = 0, util_draw_num_of_watch_int = 0, util_draw_num_of_watch_double = 0, util_draw_num_of_watch_string = 0;
@@ -636,6 +637,16 @@ Result_with_string Util_load_msg(std::string file_name, std::string out_msg[], i
 	Util_safe_linear_free(fs_buffer);
 	fs_buffer = NULL;
 	return result;
+}
+
+std::string Util_encode_to_base64(char* source, int size)
+{
+	return base64_encode((const unsigned char*)source, size);
+}
+
+std::string Util_decode_from_base64(std::string source)
+{
+	return base64_decode(source);
 }
 
 Result_with_string Util_safe_linear_alloc_init(void)
