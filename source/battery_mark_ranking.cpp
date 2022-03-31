@@ -309,14 +309,11 @@ void Bmr_exit_thread(void* arg)
 	bmr_thread_run = false;
 
 	bmr_status = "Exiting threads...";
-	Util_log_save(DEF_BMR_EXIT_STR, "threadJoin()...", threadJoin(bmr_init_thread, DEF_THREAD_WAIT_TIME));
 
-	bmr_status += ".";
 	Util_log_save(DEF_BMR_EXIT_STR, "threadJoin()...", threadJoin(bmr_worker_thread, DEF_THREAD_WAIT_TIME));
 
 	bmr_status += "\nCleaning up...";
 
-	threadFree(bmr_init_thread);
 	threadFree(bmr_worker_thread);
 
 	Util_remove_watch(&bmr_selected_ranking);
@@ -543,6 +540,8 @@ void Bmr_init(bool draw)
 	if(!(var_model == CFG_MODEL_N2DSXL || var_model == CFG_MODEL_N3DSXL || var_model == CFG_MODEL_N3DS) || !var_core_2_available)
 		APT_SetAppCpuTimeLimit(10);
 
+	Util_log_save(DEF_BMR_EXIT_STR, "threadJoin()...", threadJoin(bmr_init_thread, DEF_THREAD_WAIT_TIME));
+	threadFree(bmr_init_thread);
 	Bmr_resume();
 
 	Util_log_save(DEF_BMR_INIT_STR, "Initialized.");

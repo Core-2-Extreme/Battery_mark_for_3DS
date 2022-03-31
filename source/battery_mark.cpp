@@ -761,9 +761,6 @@ void Bmark_exit_thread(void* arg)
 	bmark_status += ".";
 	Util_log_save(DEF_BMARK_EXIT_STR, "threadJoin()...", threadJoin(bmark_update_thread, DEF_THREAD_WAIT_TIME));
 
-	bmark_status += ".";
-	Util_log_save(DEF_BMARK_EXIT_STR, "threadJoin()...", threadJoin(bmark_init_thread, DEF_THREAD_WAIT_TIME));
-
 	bmark_status += "\nCleaning up...";	
 	Draw_texture_free(&bmark_image);
 	Util_remove_watch(&bmark_selected_graph_pos);
@@ -779,7 +776,6 @@ void Bmark_exit_thread(void* arg)
 	threadFree(bmark_check_thread);
 	threadFree(bmark_copy_thread);
 	threadFree(bmark_update_thread);
-	threadFree(bmark_init_thread);
 
 	bmark_already_init = false;
 	Util_log_save(DEF_BMARK_EXIT_STR, "Thread exit.");
@@ -833,6 +829,8 @@ void Bmark_init(bool draw)
 	if(!(var_model == CFG_MODEL_N2DSXL || var_model == CFG_MODEL_N3DSXL || var_model == CFG_MODEL_N3DS) || !var_core_2_available)
 		APT_SetAppCpuTimeLimit(10);
 
+	Util_log_save(DEF_BMARK_EXIT_STR, "threadJoin()...", threadJoin(bmark_init_thread, DEF_THREAD_WAIT_TIME));
+	threadFree(bmark_init_thread);
 	Bmark_resume();
 
 	Util_log_save(DEF_BMARK_INIT_STR, "Initialized.");

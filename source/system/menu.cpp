@@ -196,7 +196,7 @@ void Menu_init(void)
 	menu_thread_run = true;
 	menu_worker_thread = threadCreate(Menu_worker_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_REALTIME, 1, false);
 	menu_check_connectivity_thread = threadCreate(Menu_check_connectivity_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_NORMAL, 1, false);
-	menu_update_thread = threadCreate(Menu_update_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_REALTIME, 1, false);
+	menu_update_thread = threadCreate(Menu_update_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_REALTIME, 1, true);
 	menu_hid_thread = threadCreate(Menu_hid_thread, (void*)(""), 1024 * 4, DEF_THREAD_PRIORITY_REALTIME, 0, false);
 
 	if(var_model == CFG_MODEL_N2DSXL || var_model == CFG_MODEL_N3DSXL || var_model == CFG_MODEL_N3DS)
@@ -310,41 +310,42 @@ void Menu_init(void)
 void Menu_exit(void)
 {
 	Util_log_save(DEF_MENU_EXIT_STR, "Exiting...");
+	bool draw = !aptShouldClose();
 	Result_with_string result;
 
 	menu_thread_run = false;
 
 	#ifdef DEF_ENABLE_BMARK
 	if (Bmark_query_init_flag())
-		Bmark_exit(false);
+		Bmark_exit(draw);
 	#endif
 	#ifdef DEF_ENABLE_BMR
 	if (Bmr_query_init_flag())
-		Bmr_exit(false);
+		Bmr_exit(draw);
 	#endif
 	#ifdef DEF_ENABLE_SUB_APP2
 	if (Sapp2_query_init_flag())
-		Sapp2_exit(false);
+		Sapp2_exit(draw);
 	#endif
 	#ifdef DEF_ENABLE_SUB_APP3
 	if (Sapp3_query_init_flag())
-		Sapp3_exit(false);
+		Sapp3_exit(draw);
 	#endif
 	#ifdef DEF_ENABLE_SUB_APP4
 	if (Sapp4_query_init_flag())
-		Sapp4_exit(false);
+		Sapp4_exit(draw);
 	#endif
 	#ifdef DEF_ENABLE_SUB_APP5
 	if (Sapp5_query_init_flag())
-		Sapp5_exit(false);
+		Sapp5_exit(draw);
 	#endif
 	#ifdef DEF_ENABLE_SUB_APP6
 	if (Sapp6_query_init_flag())
-		Sapp6_exit(false);
+		Sapp6_exit(draw);
 	#endif
 	#ifdef DEF_ENABLE_SUB_APP7
 	if (Sapp7_query_init_flag())
-		Sapp7_exit(false);
+		Sapp7_exit(draw);
 	#endif
 	if (Sem_query_init_flag())
 		Sem_exit();
@@ -365,8 +366,6 @@ void Menu_exit(void)
 	Util_log_save(DEF_MENU_EXIT_STR, "threadJoin()...", threadJoin(menu_hid_thread, DEF_THREAD_WAIT_TIME));
 	threadFree(menu_worker_thread);
 	threadFree(menu_check_connectivity_thread);
-	threadFree(menu_send_app_info_thread);
-	threadFree(menu_update_thread);
 	threadFree(menu_hid_thread);
 
 	Util_remove_watch(&menu_must_exit);
