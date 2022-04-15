@@ -505,7 +505,7 @@ void Bmr_init(bool draw)
 	Util_add_watch(&bmr_status);
 	bmr_status = "";
 
-	if((var_model == CFG_MODEL_N2DSXL || var_model == CFG_MODEL_N3DSXL || var_model == CFG_MODEL_3DSXL) && var_core_2_available)
+	if((var_model == CFG_MODEL_N2DSXL || var_model == CFG_MODEL_N3DSXL || var_model == CFG_MODEL_N3DS) && var_core_2_available)
 		bmr_init_thread = threadCreate(Bmr_init_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_NORMAL, 2, false);
 	else
 	{
@@ -540,7 +540,7 @@ void Bmr_init(bool draw)
 			usleep(20000);
 	}
 
-	if(!(var_model == CFG_MODEL_N2DSXL || var_model == CFG_MODEL_N3DSXL || var_model == CFG_MODEL_3DSXL) || !var_core_2_available)
+	if(!(var_model == CFG_MODEL_N2DSXL || var_model == CFG_MODEL_N3DSXL || var_model == CFG_MODEL_N3DS) || !var_core_2_available)
 		APT_SetAppCpuTimeLimit(10);
 
 	Bmr_resume();
