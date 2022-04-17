@@ -41,6 +41,7 @@ void Util_httpc_exit()
 	if(!util_httpc_init)
 		return;
 
+	util_httpc_init = false;
 	httpcExit();
 }
 

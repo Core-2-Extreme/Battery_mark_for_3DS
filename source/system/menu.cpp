@@ -172,6 +172,9 @@ void Menu_init(void)
 	result = Util_httpc_init(DEF_HTTP_POST_BUFFER_SIZE);
 	Util_log_save(DEF_MENU_INIT_STR, "Util_httpc_init()...", result.code);
 
+	result = Util_curl_init(DEF_SOCKET_BUFFER_SIZE);
+	Util_log_save(DEF_MENU_INIT_STR, "Util_curl_init()...", result.code);
+
 	result = Util_hid_init();
 	Util_log_save(DEF_MENU_INIT_STR, "Util_hid_init()...", result.code);
 
@@ -384,6 +387,7 @@ void Menu_exit(void)
 
 	Util_log_exit();
 	Util_httpc_exit();
+	Util_curl_exit();
 
 	Util_safe_linear_alloc_exit();
 	fsExit();

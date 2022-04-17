@@ -253,6 +253,7 @@
 #define DEF_ERR_TRY_AGAIN 0xFFFFFFF7
 #define DEF_ERR_ALREADY_INITIALIZED 0xFFFFFFF6
 #define DEF_ERR_NOT_INITIALIZED 0xFFFFFFF5
+#define DEF_ERR_CURL_RETURNED_NOT_SUCCESS 0xFFFFFFF4
 
 #define DEF_ERR_OTHER_STR (std::string)"[Error] Something went wrong. "
 #define DEF_ERR_OUT_OF_MEMORY_STR (std::string)"[Error] Out of memory. "
@@ -266,6 +267,7 @@
 #define DEF_ERR_ALREADY_INITIALIZED_STR (std::string)"[Error] Already initialized. "
 #define DEF_ERR_NOT_INITIALIZED_STR (std::string)"[Error] Not initialized. "
 #define DEF_ERR_NINTENDO_RETURNED_NOT_SUCCESS_STR (std::string)"[Error] Nintendo api returned NOT success. "
+#define DEF_ERR_CURL_RETURNED_NOT_SUCCESS_STR (std::string)"[Error] curl returned NOT success. "
 
 //error
 #define DEF_ERR_INIT_STR (std::string)"Err/Init"
