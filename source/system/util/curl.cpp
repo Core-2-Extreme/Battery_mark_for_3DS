@@ -864,10 +864,10 @@ int buffer_size, int* downloaded_size, int* uploaded_size, bool follow_redirect,
 }
 
 Result_with_string Util_curl_post_and_save_data(std::string url, u8* post_data, int (*read_callback)(void* buffer, int max_size, void* user_data), void* user_data,
-int* downloaded_size, int* uploaded_size, bool follow_redirect, int max_redirect, std::string* last_url, std::string dir_path, std::string file_name)
+int buffer_size, int* downloaded_size, int* uploaded_size, bool follow_redirect, int max_redirect, std::string* last_url, std::string dir_path, std::string file_name)
 {
 	int status_code = 0;
-	return Util_curl_post_and_save_data(url, post_data, NULL, 0, downloaded_size, uploaded_size,
+	return Util_curl_post_and_save_data(url, NULL, 0, buffer_size, downloaded_size, uploaded_size,
 	&status_code, follow_redirect, max_redirect, last_url, dir_path, file_name, read_callback, user_data);
 }
 
