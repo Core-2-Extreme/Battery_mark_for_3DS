@@ -35,6 +35,8 @@
 #define DEF_MUXER_MAX_SESSIONS 2
 #define DEF_SPEAKER_MAX_BUFFERS 192
 #define DEF_SWKBD_MAX_DIC_WORDS 128
+#define DEF_DECODER_USE_DMA
+#define DEF_DRAW_USE_DMA
 
 //battery mark
 #define DEF_BMARK_BMR_RANKING_SERVER_URL (std::string)"https://script.google.com/macros/s/AKfycbxo4iwCbxtI2ZuYQP7bKveRdHx6kPTH4rZ8Pg8nUguIq_7zcoooEUszJQ/exec"
