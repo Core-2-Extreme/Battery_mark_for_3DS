@@ -1,4 +1,7 @@
 #include "system/headers.hpp"
+
+#if DEF_ENABLE_CURL_API
+
 #include "curl/curl.h"
 
 bool util_curl_init = false;
@@ -976,3 +979,5 @@ int (*read_callback)(void* buffer, int max_size, void* user_data), void* user_da
 	api_failed:
 	return result;
 }
+
+#endif

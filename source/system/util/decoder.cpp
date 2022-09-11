@@ -1,5 +1,7 @@
 #include "system/headers.hpp"
 
+#if DEF_ENABLE_VIDEO_AUDIO_DECODER_API
+
 extern "C" 
 {
 #include "libavcodec/avcodec.h"
@@ -7,7 +9,15 @@ extern "C"
 #include "libswresample/swresample.h"
 }
 
+#endif
+
+#if DEF_ENABLE_IMAGE_DECODER_API
+
 #include "stb_image/stb_image.h"
+
+#endif
+
+#if DEF_ENABLE_VIDEO_AUDIO_DECODER_API
 
 extern "C" void memcpy_asm(u8*, u8*, int);
 
@@ -2173,7 +2183,7 @@ Result_with_string Util_video_decoder_get_image(u8** raw_data, double* current_p
 	double current_frame = 0;
 	double timebase = 0;
 	Result_with_string result;
-#ifdef DEF_DECODER_USE_DMA
+#if DEF_DECODER_USE_DMA
 	int dma_result[3] = { 0, 0, 0, };
 	Handle dma_handle[3] = { 0, 0, 0, };
 	DmaConfig dma_config;
@@ -2220,7 +2230,7 @@ Result_with_string Util_video_decoder_get_image(u8** raw_data, double* current_p
 	else if(framerate != 0.0)
 		*current_pos = current_frame * (1000 / framerate);//calc frame pos
 
-#ifdef DEF_DECODER_USE_DMA
+#if DEF_DECODER_USE_DMA
 	dmaConfigInitDefault(&dma_config);
 
 	dma_result[0] = svcStartInterProcessDma(&dma_handle[0], CUR_PROCESS_HANDLE, (u32)*raw_data, CUR_PROCESS_HANDLE, (u32)util_video_decoder_raw_image[session][packet_index][buffer_num]->data[0], cpy_size[0], &dma_config);
@@ -2285,7 +2295,7 @@ Result_with_string Util_mvd_video_decoder_get_image(u8** raw_data, double* curre
 	double current_frame = 0;
 	double timebase = 0;
 	Result_with_string result;
-#ifdef DEF_DECODER_USE_DMA
+#if DEF_DECODER_USE_DMA
 	int dma_result = 0;
 	Handle dma_handle = 0;
 	DmaConfig dma_config;
@@ -2638,6 +2648,10 @@ void Util_decoder_close_file(int session)
 	svcCloseHandle(util_decoder_cache_packet_mutex[session]);
 }
 
+#endif
+
+#if DEF_ENABLE_IMAGE_DECODER_API
+
 Result_with_string Util_image_decoder_decode(std::string file_name, u8** raw_data, int* width, int* height, bool alpha)
 {
 	Result_with_string result;
@@ -2693,3 +2707,5 @@ Result_with_string Util_image_decoder_decode(u8* compressed_data, int compressed
 	result.string = DEF_ERR_STB_IMG_RETURNED_NOT_SUCCESS_STR;
 	return result;
 }
+
+#endif

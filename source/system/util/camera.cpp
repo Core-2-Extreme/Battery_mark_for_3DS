@@ -1,5 +1,7 @@
 #include "system/headers.hpp"
 
+#if DEF_ENABLE_CAM_API
+
 bool util_cam_init = false;
 u32 util_cam_buffer_size = 0;
 int util_cam_width = 640;
@@ -605,3 +607,5 @@ void Util_cam_exit(void)
 	camExit();
 	util_cam_init = false;
 }
+
+#endif

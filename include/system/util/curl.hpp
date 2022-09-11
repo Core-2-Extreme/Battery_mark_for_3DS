@@ -1,5 +1,7 @@
 #pragma once
 
+#if DEF_ENABLE_CURL_API
+
 /**
  * @brief Initialize curl api.
  * @param buffer_size Internal buffer size used by post request.
@@ -435,3 +437,14 @@ int buffer_size, int* downloaded_size, int* uploaded_size, int* status_code, boo
 Result_with_string Util_curl_post_and_save_data(std::string url, u8* post_data, int post_size, int buffer_size, int* downloaded_size,
 int* uploaded_size, int* status_code, bool follow_redirect, int max_redirect, std::string* last_url, std::string dir_path, std::string file_name,
 int (*read_callback)(void* buffer, int max_size, void* user_data), void* user_data);
+
+#else
+
+#define Util_curl_init(...) Util_return_result_with_string(var_disabled_result)
+#define Util_curl_exit(...)
+#define Util_curl_dl_data(...) Util_return_result_with_string(var_disabled_result)
+#define Util_curl_save_data(...) Util_return_result_with_string(var_disabled_result)
+#define Util_curl_post_and_dl_data(...) Util_return_result_with_string(var_disabled_result)
+#define Util_curl_post_and_save_data(...) Util_return_result_with_string(var_disabled_result)
+
+#endif
