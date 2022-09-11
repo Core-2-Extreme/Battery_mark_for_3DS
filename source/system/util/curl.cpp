@@ -353,7 +353,7 @@ void Util_curl_get_response(CURL* curl_handle, int* status_code, std::string* ne
 	*new_url = "";
 	*status_code = 0;
 
-	result.code = curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &status_code);
+	result.code = curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, status_code);
 	if(result.code != CURLE_OK)
 		*status_code = 0;
 
