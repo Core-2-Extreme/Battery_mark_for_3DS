@@ -6,7 +6,7 @@ extern "C"
 {
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
-#include "libswresample/swresample.h"
+#include "libavutil/imgutils.h"
 }
 
 #endif
@@ -30,7 +30,6 @@ AVPacket* util_audio_decoder_cache_packet[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_
 AVFrame* util_audio_decoder_raw_data[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_AUDIO_TRACKS];
 AVCodecContext* util_audio_decoder_context[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_AUDIO_TRACKS];
 const AVCodec* util_audio_decoder_codec[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_AUDIO_TRACKS];
-SwrContext* util_audio_decoder_swr_context[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_AUDIO_TRACKS];
 
 bool util_video_decoder_init[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
 bool util_video_decoder_frame_cores[4] = { true, true, false, false, };
@@ -45,7 +44,7 @@ int util_video_decoder_raw_image_ready_index[DEF_DECODER_MAX_SESSIONS][DEF_DECOD
 int util_video_decoder_raw_image_current_index[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
 int util_video_decoder_stream_num[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
 int util_video_decoder_max_raw_image[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
-Handle util_video_decoder_raw_image_mutex[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
+LightLock util_video_decoder_raw_image_mutex[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
 AVPacket* util_video_decoder_packet[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
 AVPacket* util_video_decoder_cache_packet[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
 AVFrame* util_video_decoder_raw_image[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS][DEF_DECODER_MAX_RAW_IMAGE];
@@ -65,7 +64,7 @@ u8* util_mvd_video_decoder_packet = NULL;
 u8 util_mvd_video_decoder_current_cached_pts_index = 0;
 u8 util_mvd_video_decoder_next_cached_pts_index = 0;
 s64 util_mvd_video_decoder_cached_pts[32];
-Handle util_mvd_video_decoder_raw_image_mutex[DEF_DECODER_MAX_SESSIONS];
+LightLock util_mvd_video_decoder_raw_image_mutex[DEF_DECODER_MAX_SESSIONS];
 AVFrame* util_mvd_video_decoder_raw_image[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_RAW_IMAGE];
 
 bool util_subtitle_decoder_init[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_SUBTITLE_TRACKS];
@@ -84,20 +83,268 @@ bool util_decoder_init = false;
 int util_decoder_available_cache_packet[DEF_DECODER_MAX_SESSIONS];
 int util_decoder_cache_packet_ready_index[DEF_DECODER_MAX_SESSIONS];
 int util_decoder_cache_packet_current_index[DEF_DECODER_MAX_SESSIONS];
-Handle util_decoder_cache_packet_mutex[DEF_DECODER_MAX_SESSIONS];
+LightLock util_decoder_cache_packet_mutex[DEF_DECODER_MAX_SESSIONS];
 MVDSTD_Config util_decoder_mvd_config;
 AVPacket* util_decoder_cache_packet[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_CACHE_PACKETS];
 AVFormatContext* util_decoder_format_context[DEF_DECODER_MAX_SESSIONS];
+
+//Pixel format translation table AV_PIX_FMT_* -> DEF_CONVERTER_PIXEL_FORMAT_*.
+int util_video_decoder_pixel_format_table[] = 
+{
+	DEF_CONVERTER_PIXEL_FORMAT_YUV420P,
+	DEF_CONVERTER_PIXEL_FORMAT_YUYV422,
+	DEF_CONVERTER_PIXEL_FORMAT_RGB888,
+	DEF_CONVERTER_PIXEL_FORMAT_BGR888,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV422P,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV444P,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV410P,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV411P,
+	DEF_CONVERTER_PIXEL_FORMAT_GRAY8,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVJ420P,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVJ422P,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVJ444P,
+	DEF_CONVERTER_PIXEL_FORMAT_UYVY422,
+	DEF_CONVERTER_PIXEL_FORMAT_UYYVYY411,
+	DEF_CONVERTER_PIXEL_FORMAT_BGR332,
+	DEF_CONVERTER_PIXEL_FORMAT_BGR121,
+	DEF_CONVERTER_PIXEL_FORMAT_BGR121_BYTE,
+	DEF_CONVERTER_PIXEL_FORMAT_RGB332,
+	DEF_CONVERTER_PIXEL_FORMAT_RGB121,
+	DEF_CONVERTER_PIXEL_FORMAT_RGB121_BYTE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_ARGB8888,
+	DEF_CONVERTER_PIXEL_FORMAT_RGBA8888,
+	DEF_CONVERTER_PIXEL_FORMAT_ABGR8888,
+	DEF_CONVERTER_PIXEL_FORMAT_BGRA8888,
+	DEF_CONVERTER_PIXEL_FORMAT_GRAY16BE,
+	DEF_CONVERTER_PIXEL_FORMAT_GRAY16LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV440P,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVJ440P,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA420P,
+	DEF_CONVERTER_PIXEL_FORMAT_RGB161616BE,
+	DEF_CONVERTER_PIXEL_FORMAT_RGB161616LE,
+	DEF_CONVERTER_PIXEL_FORMAT_RGB565BE,
+	DEF_CONVERTER_PIXEL_FORMAT_RGB565LE,
+	DEF_CONVERTER_PIXEL_FORMAT_RGB555BE,
+	DEF_CONVERTER_PIXEL_FORMAT_RGB555LE,
+	DEF_CONVERTER_PIXEL_FORMAT_BGR565BE,
+	DEF_CONVERTER_PIXEL_FORMAT_BGR565LE,
+	DEF_CONVERTER_PIXEL_FORMAT_BGR555BE,
+	DEF_CONVERTER_PIXEL_FORMAT_BGR555LE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV420P16LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV420P16BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV422P16LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV422P16BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV444P16LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV444P16BE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_RGB444LE,
+	DEF_CONVERTER_PIXEL_FORMAT_RGB444BE,
+	DEF_CONVERTER_PIXEL_FORMAT_BGR444LE,
+	DEF_CONVERTER_PIXEL_FORMAT_BGR444BE,
+	DEF_CONVERTER_PIXEL_FORMAT_GRAYALPHA88,
+	DEF_CONVERTER_PIXEL_FORMAT_BGR161616BE,
+	DEF_CONVERTER_PIXEL_FORMAT_BGR161616LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV420P9BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV420P9LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV420P10BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV420P10LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV422P10BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV422P10LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV444P9BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV444P9LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV444P10BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV444P10LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV422P9BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV422P9LE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBR888P,
+	DEF_CONVERTER_PIXEL_FORMAT_GBR999PBE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBR999PLE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBR101010PBE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBR101010PLE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBR161616PBE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBR161616PLE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA422P,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA444P,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA420P9BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA420P9LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA422P9BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA422P9LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA444P9BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA444P9LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA420P10BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA420P10LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA422P10BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA422P10LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA444P10BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA444P10LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA420P16BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA420P16LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA422P16BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA422P16LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA444P16BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVA444P16LE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_RGBA16161616BE,
+	DEF_CONVERTER_PIXEL_FORMAT_RGBA16161616LE,
+	DEF_CONVERTER_PIXEL_FORMAT_BGRA16161616BE,
+	DEF_CONVERTER_PIXEL_FORMAT_BGRA16161616LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YVYU422,
+	DEF_CONVERTER_PIXEL_FORMAT_GRAYALPHA1616BE,
+	DEF_CONVERTER_PIXEL_FORMAT_GRAYALPHA1616LE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBRA8888P,
+	DEF_CONVERTER_PIXEL_FORMAT_GBRA16161616PBE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBRA16161616PLE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV420P12BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV420P12LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV420P14BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV420P14LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV422P12BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV422P12LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV422P14BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV422P14LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV444P12BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV444P12LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV444P14BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV444P14LE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBR121212PBE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBR121212PLE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBR141414PBE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBR141414PLE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUVJ411P,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV440P10LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV440P10BE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV440P12LE,
+	DEF_CONVERTER_PIXEL_FORMAT_YUV440P12BE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBRA12121212PBE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBRA12121212PLE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBRA10101010PBE,
+	DEF_CONVERTER_PIXEL_FORMAT_GBRA10101010PLE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_GRAY12BE,
+	DEF_CONVERTER_PIXEL_FORMAT_GRAY12LE,
+	DEF_CONVERTER_PIXEL_FORMAT_GRAY10BE,
+	DEF_CONVERTER_PIXEL_FORMAT_GRAY10LE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+	DEF_CONVERTER_PIXEL_FORMAT_NONE,
+};
+
+//Sample format translation table AV_SAMPLE_FMT_* -> DEF_CONVERTER_SAMPLE_FORMAT_*.
+int util_audio_decoder_sample_format_table[] = 
+{
+	DEF_CONVERTER_SAMPLE_FORMAT_U8,
+	DEF_CONVERTER_SAMPLE_FORMAT_S16,
+	DEF_CONVERTER_SAMPLE_FORMAT_S32,
+	DEF_CONVERTER_SAMPLE_FORMAT_FLOAT32,
+	DEF_CONVERTER_SAMPLE_FORMAT_DOUBLE64,
+	DEF_CONVERTER_SAMPLE_FORMAT_U8P,
+	DEF_CONVERTER_SAMPLE_FORMAT_S16P,
+	DEF_CONVERTER_SAMPLE_FORMAT_S32P,
+	DEF_CONVERTER_SAMPLE_FORMAT_FLOAT32P,
+	DEF_CONVERTER_SAMPLE_FORMAT_DOUBLE64P,
+	DEF_CONVERTER_SAMPLE_FORMAT_S64,
+	DEF_CONVERTER_SAMPLE_FORMAT_S64P,
+};
+
+u8 util_audio_decoder_sample_format_size_table[] = 
+{
+    sizeof(u8),
+    sizeof(s16),
+    sizeof(s32),
+    sizeof(float),
+    sizeof(double),
+    sizeof(u8),
+    sizeof(s16),
+    sizeof(s32),
+    sizeof(float),
+    sizeof(double),
+    sizeof(s64),
+    sizeof(s64),
+};
 
 void Util_video_decoder_free(void *opaque, uint8_t *data)
 {
 	Util_safe_linear_free(data);
 }
 
-int Util_video_decoder_allocate_yuv420p_buffer(AVCodecContext *avctx, AVFrame *frame, int flags)
+int Util_video_decoder_allocate_buffer(AVCodecContext *avctx, AVFrame *frame, int flags)
 {
 	int width = 0;
 	int height = 0;
+	int buffer_size = 0;
+	u8* buffer = NULL;
+
 	if(avctx->codec_type == AVMEDIA_TYPE_VIDEO)
 	{
 		for (int i = 0; i < AV_NUM_DATA_POINTERS; i++) 
@@ -124,17 +371,38 @@ int Util_video_decoder_allocate_yuv420p_buffer(AVCodecContext *avctx, AVFrame *f
 				height += 16 - height % 16;
 		}
 
-		frame->linesize[0] = width;
-		frame->linesize[1] = width / 2;
-		frame->linesize[2] = width / 2;
-		
-        frame->data[0] = (u8*)Util_safe_linear_alloc(width * height);
-        frame->data[1] = (u8*)Util_safe_linear_alloc(width * height / 4);
-        frame->data[2] = (u8*)Util_safe_linear_alloc(width * height / 4);
+		buffer_size = av_image_get_buffer_size(avctx->pix_fmt, width, height, 1);
+		if(buffer_size <= 0)
+			return -1;
 
-        frame->buf[0] = av_buffer_create(frame->data[0], frame->linesize[0] * frame->height, Util_video_decoder_free, NULL, 0);
-        frame->buf[1] = av_buffer_create(frame->data[1], frame->linesize[1] * frame->height / 4, Util_video_decoder_free, NULL, 0);
-        frame->buf[2] = av_buffer_create(frame->data[2], frame->linesize[2] * frame->height / 4, Util_video_decoder_free, NULL, 0);
+		buffer = (u8*)Util_safe_linear_alloc(buffer_size);
+		if(!buffer)
+			return -1;
+
+		if(av_image_fill_arrays(frame->data, frame->linesize, buffer, avctx->pix_fmt, width, height, 1) <= 0)
+		{
+			Util_safe_linear_free(buffer);
+			buffer = NULL;
+			return -1;
+		}
+
+		for(int i = 0; i < AV_NUM_DATA_POINTERS; i++)
+		{
+			if(frame->data[i])
+			{
+				frame->buf[i] = av_buffer_create(frame->data[i], 0, Util_video_decoder_free, NULL, 0);
+				if(!frame->buf[i])
+				{
+					for(int k = 0; k < AV_NUM_DATA_POINTERS; k++)
+						frame->buf[k] = NULL;
+
+					Util_safe_linear_free(buffer);
+					buffer = NULL;
+					return -1;
+				}
+			}
+		}
+
 		return 0;
 	}
 	else
@@ -170,7 +438,6 @@ void Util_decoder_init_variables(void)
 			util_audio_decoder_raw_data[i][k] = NULL;
 			util_audio_decoder_context[i][k] = NULL;
 			util_audio_decoder_codec[i][k] = NULL;
-			util_audio_decoder_swr_context[i][k] = NULL;
 		}
 
 		for(int k = 0; k < DEF_DECODER_MAX_VIDEO_TRACKS; k++)
@@ -179,8 +446,6 @@ void Util_decoder_init_variables(void)
 			util_video_decoder_changeable_buffer_size[i][k] = false;
 			util_video_decoder_cache_packet_ready[i][k] = false;
 			util_video_decoder_packet_ready[i][k] = false;
-			//util_video_decoder_previous_pts[i][k] = 0;
-			//util_video_decoder_increase_per_pts[i][k] = 0;
 			util_video_decoder_available_raw_image[i][k] = 0;
 			util_video_decoder_raw_image_ready_index[i][k] = 0;
 			util_video_decoder_raw_image_current_index[i][k] = 0;
@@ -279,12 +544,7 @@ Result_with_string Util_decoder_open_file(std::string file_path, int* num_of_aud
 		goto ffmpeg_api_failed;
 	}
 
-	result.code = svcCreateMutex(&util_decoder_cache_packet_mutex[session], false);
-	if(result.code != 0)
-	{
-		result.error_description = "[Error] svcCreateMutex() failed. ";
-		goto nintendo_api_failed;
-	}
+	LightLock_Init(&util_decoder_cache_packet_mutex[session]);
 
 	for(int i = 0; i < (int)util_decoder_format_context[session]->nb_streams; i++)
 	{
@@ -334,14 +594,7 @@ Result_with_string Util_decoder_open_file(std::string file_path, int* num_of_aud
 	result.string = DEF_ERR_FFMPEG_RETURNED_NOT_SUCCESS_STR;
 	return result;
 
-	nintendo_api_failed:
-	svcCloseHandle(util_decoder_cache_packet_mutex[session]);
-	avformat_free_context(util_decoder_format_context[session]);
-	result.string = DEF_ERR_NINTENDO_RETURNED_NOT_SUCCESS_STR;
-	return result;
-
 	other:
-	svcCloseHandle(util_decoder_cache_packet_mutex[session]);
 	avformat_free_context(util_decoder_format_context[session]);
 	result.code = DEF_ERR_OTHER;
 	result.string = DEF_ERR_OTHER_STR;
@@ -398,21 +651,6 @@ Result_with_string Util_audio_decoder_init(int num_of_audio_tracks, int session)
 			goto ffmpeg_api_failed;
 		}
 
-		util_audio_decoder_swr_context[session][i] = swr_alloc_set_opts(NULL, av_get_default_channel_layout(util_audio_decoder_context[session][i]->channels), AV_SAMPLE_FMT_S16, util_audio_decoder_context[session][i]->sample_rate,
-			av_get_default_channel_layout(util_audio_decoder_context[session][i]->channels), util_audio_decoder_context[session][i]->sample_fmt, util_audio_decoder_context[session][i]->sample_rate, 0, NULL);
-		if(!util_audio_decoder_swr_context[session][i])
-		{
-			result.error_description = "[Error] swr_alloc_set_opts() failed. " + std::to_string(ffmpeg_result) + " ";
-			goto ffmpeg_api_failed;
-		}
-
-		ffmpeg_result = swr_init(util_audio_decoder_swr_context[session][i]);
-		if(ffmpeg_result != 0)
-		{
-			result.error_description = "[Error] swr_init() failed. " + std::to_string(ffmpeg_result) + " ";
-			goto ffmpeg_api_failed;
-		}
-
 		util_audio_decoder_init[session][i] = true;
 	}
 
@@ -438,7 +676,6 @@ Result_with_string Util_audio_decoder_init(int num_of_audio_tracks, int session)
 	{
 		util_audio_decoder_init[session][i] = false;
 		avcodec_free_context(&util_audio_decoder_context[session][i]);
-		swr_free(&util_audio_decoder_swr_context[session][i]);
 	}
 	result.code = DEF_ERR_FFMPEG_RETURNED_NOT_SUCCESS;
 	result.string = DEF_ERR_FFMPEG_RETURNED_NOT_SUCCESS_STR;
@@ -522,11 +759,7 @@ Result_with_string Util_video_decoder_init(int low_resolution, int num_of_video_
 			else if(util_video_decoder_codec[session][i]->capabilities & AV_CODEC_CAP_SLICE_THREADS)
 				util_video_decoder_context[session][i]->thread_type = FF_THREAD_SLICE;
 			else
-			{
 				util_video_decoder_context[session][i]->thread_type = FF_THREAD_FRAME;
-				//util_video_decoder_context[session][i]->thread_type = 0;
-				//util_video_decoder_context[session][i]->thread_count = 1;
-			}
 		}
 		else if(thread_type == DEF_DECODER_THREAD_TYPE_SLICE && util_video_decoder_codec[session][i]->capabilities & AV_CODEC_CAP_SLICE_THREADS)
 			util_video_decoder_context[session][i]->thread_type = FF_THREAD_SLICE;
@@ -544,13 +777,7 @@ Result_with_string Util_video_decoder_init(int low_resolution, int num_of_video_
 			Util_fake_pthread_set_enabled_core(util_video_decoder_slice_cores);
 
 		util_video_decoder_context[session][i]->thread_safe_callbacks = 1;
-		util_video_decoder_context[session][i]->get_buffer2 = Util_video_decoder_allocate_yuv420p_buffer;
-
-		if(util_video_decoder_context[session][i]->pix_fmt != AV_PIX_FMT_YUV420P && util_video_decoder_context[session][i]->pix_fmt != AV_PIX_FMT_YUVJ420P)
-		{
-			result.error_description = "[Error] Unsupported pixel format. ";
-			goto other;
-		}
+		util_video_decoder_context[session][i]->get_buffer2 = Util_video_decoder_allocate_buffer;
 
 		ffmpeg_result = avcodec_open2(util_video_decoder_context[session][i], util_video_decoder_codec[session][i], NULL);
 		if(ffmpeg_result != 0)
@@ -559,18 +786,11 @@ Result_with_string Util_video_decoder_init(int low_resolution, int num_of_video_
 			goto ffmpeg_api_failed;
 		}
 
-		result.code = svcCreateMutex(&util_video_decoder_raw_image_mutex[session][i], false);
-		if(result.code != 0)
-		{
-			result.error_description = "[Error] svcCreateMutex() failed. ";
-			goto nintendo_api_failed;
-		}
+		LightLock_Init(&util_video_decoder_raw_image_mutex[session][i]);
 
 		util_video_decoder_max_raw_image[session][i] = DEF_DECODER_MAX_RAW_IMAGE;
 		util_video_decoder_changeable_buffer_size[session][i] = true;
 		util_video_decoder_init[session][i] = true;
-		//util_video_decoder_previous_pts[session][i] = 0;
-		//util_video_decoder_increase_per_pts[session][i] = 0;
 	}
 
 	return result;
@@ -592,31 +812,10 @@ Result_with_string Util_video_decoder_init(int low_resolution, int num_of_video_
 
 	ffmpeg_api_failed:
 	for(int i = 0; i < DEF_DECODER_MAX_VIDEO_TRACKS; i++)
-	{
 		avcodec_free_context(&util_video_decoder_context[session][i]);
-		svcCloseHandle(util_video_decoder_raw_image_mutex[session][i]);
-	}
+
 	result.code = DEF_ERR_FFMPEG_RETURNED_NOT_SUCCESS;
 	result.string = DEF_ERR_FFMPEG_RETURNED_NOT_SUCCESS_STR;
-	return result;
-
-	nintendo_api_failed:
-	for(int i = 0; i < DEF_DECODER_MAX_VIDEO_TRACKS; i++)
-	{
-		avcodec_free_context(&util_video_decoder_context[session][i]);
-		svcCloseHandle(util_video_decoder_raw_image_mutex[session][i]);
-	}
-	result.string = DEF_ERR_NINTENDO_RETURNED_NOT_SUCCESS_STR;
-	return result;
-
-	other:
-	for(int i = 0; i < DEF_DECODER_MAX_VIDEO_TRACKS; i++)
-	{
-		avcodec_free_context(&util_video_decoder_context[session][i]);
-		svcCloseHandle(util_video_decoder_raw_image_mutex[session][i]);
-	}
-	result.code = DEF_ERR_OTHER;
-	result.string = DEF_ERR_OTHER_STR;
 	return result;
 }
 
@@ -656,25 +855,21 @@ Result_with_string Util_mvd_video_decoder_init(int session)
 	if(!util_mvd_video_decoder_packet)
 		goto out_of_linear_memory;
 
-	result.code = mvdstdInit(MVDMODE_VIDEOPROCESSING, MVD_INPUT_H264, MVD_OUTPUT_BGR565, MVD_DEFAULT_WORKBUF_SIZE * 1.5, NULL);
-	//result.code = mvdstdInit(MVDMODE_VIDEOPROCESSING, (MVDSTD_InputFormat)0x00180001, MVD_OUTPUT_BGR565, width * height * 9, NULL);
+	if(width % 16 != 0)
+		width += 16 - width % 16;
+	if(height % 16 != 0)
+		height += 16 - height % 16;
+
+	//NEW3DS Internet browser uses MVD_DEFAULT_WORKBUF_SIZE(9438920 Bytes) and supports up to 854*480.(864*480)
+	//864*480*23 = (9538560 Bytes) > MVD_DEFAULT_WORKBUF_SIZE(9438920 Bytes).
+	result.code = mvdstdInit(MVDMODE_VIDEOPROCESSING, MVD_INPUT_H264, MVD_OUTPUT_BGR565, width * height * 23, NULL);
 	if(result.code != 0)
 	{
 		result.error_description = "[Error] mvdstdInit() failed. ";
 		goto nintendo_api_failed;
 	}
 
-	if(width % 16 != 0)
-		width += 16 - width % 16;
-	if(height % 16 != 0)
-		height += 16 - height % 16;
-
-	result.code = svcCreateMutex(&util_mvd_video_decoder_raw_image_mutex[session], false);
-	if(result.code != 0)
-	{
-		result.error_description = "[Error] svcCreateMutex() failed. ";
-		goto nintendo_api_failed;
-	}
+	LightLock_Init(&util_mvd_video_decoder_raw_image_mutex[session]);
 
 	util_mvd_video_decoder_max_raw_image[session] = DEF_DECODER_MAX_RAW_IMAGE;
 	util_mvd_video_decoder_first = true;
@@ -704,7 +899,6 @@ Result_with_string Util_mvd_video_decoder_init(int session)
 
 	nintendo_api_failed:
 	mvdstdExit();
-	svcCloseHandle(util_mvd_video_decoder_raw_image_mutex[session]);
 	result.string = DEF_ERR_NINTENDO_RETURNED_NOT_SUCCESS_STR;
 	return result;
 }
@@ -809,12 +1003,17 @@ void Util_audio_decoder_get_info(Audio_info* audio_info, int audio_index, int se
 		if(data)
 			audio_info->track_lang = (std::string)data->key + ":" + data->value;
 	}
-		
+
 	audio_info->bitrate = util_audio_decoder_context[session][audio_index]->bit_rate;
 	audio_info->sample_rate = util_audio_decoder_context[session][audio_index]->sample_rate;
-	audio_info->ch = util_audio_decoder_context[session][audio_index]->channels;
+	audio_info->ch = util_audio_decoder_context[session][audio_index]->ch_layout.nb_channels;
 	audio_info->format_name = util_audio_decoder_codec[session][audio_index]->long_name;
 	audio_info->duration = (double)util_decoder_format_context[session]->duration / AV_TIME_BASE;
+
+	if(util_audio_decoder_context[session][audio_index]->sample_fmt < 0 || util_audio_decoder_context[session][audio_index]->sample_fmt >= AV_SAMPLE_FMT_NB)
+		audio_info->sample_format = DEF_CONVERTER_SAMPLE_FORMAT_NONE;
+	else
+		audio_info->sample_format = util_audio_decoder_sample_format_table[util_audio_decoder_context[session][audio_index]->sample_fmt];
 }
 
 void Util_video_decoder_get_info(Video_info* video_info, int video_index, int session)
@@ -829,9 +1028,7 @@ void Util_video_decoder_get_info(Video_info* video_info, int video_index, int se
 	if(!util_decoder_opened_file[session] || !util_video_decoder_init[session][video_index])
 		return;
 
-	//Util_log_save("debug", std::to_string(util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][video_index]]->sample_aspect_ratio.num) + ":" + std::to_string(util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][video_index]]->sample_aspect_ratio.den));
 	sar = av_guess_sample_aspect_ratio(util_decoder_format_context[session], util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][video_index]], NULL);
-	//Util_log_save("debug", std::to_string(sar.num) + ":" + std::to_string(sar.den));
 	if(sar.num == 0 && sar.den == 1)
 	{
 		video_info->sar_width = 1;
@@ -858,6 +1055,11 @@ void Util_video_decoder_get_info(Video_info* video_info, int video_index, int se
 		video_info->thread_type = DEF_DECODER_THREAD_TYPE_SLICE;
 	else
 		video_info->thread_type = DEF_DECODER_THREAD_TYPE_NONE;
+
+	if(util_video_decoder_context[session][video_index]->pix_fmt < 0 || util_video_decoder_context[session][video_index]->pix_fmt >= AV_PIX_FMT_NB)
+		video_info->pixel_format = DEF_CONVERTER_PIXEL_FORMAT_NONE;
+	else
+		video_info->pixel_format = util_video_decoder_pixel_format_table[util_video_decoder_context[session][video_index]->pix_fmt];
 }
 
 void Util_subtitle_decoder_get_info(Subtitle_info* subtitle_info, int subtitle_index, int session)
@@ -930,13 +1132,13 @@ Result_with_string Util_decoder_read_packet(int session)
 	if(!util_decoder_opened_file[session])
 		goto not_inited;
 
-	svcWaitSynchronization(util_decoder_cache_packet_mutex[session], U64_MAX);
+	LightLock_Lock(&util_decoder_cache_packet_mutex[session]);
 	if(util_decoder_available_cache_packet[session] + 1 >= DEF_DECODER_MAX_CACHE_PACKETS)
 	{
 		result.error_description = "[Error] Queues are full. ";
 		goto try_again;
 	}
-	svcReleaseMutex(util_decoder_cache_packet_mutex[session]);
+	LightLock_Unlock(&util_decoder_cache_packet_mutex[session]);
 
 	util_decoder_cache_packet[session][util_decoder_cache_packet_ready_index[session]] = av_packet_alloc();
 	if(!util_decoder_cache_packet[session][util_decoder_cache_packet_ready_index[session]])
@@ -957,9 +1159,9 @@ Result_with_string Util_decoder_read_packet(int session)
 	else
 		util_decoder_cache_packet_ready_index[session] = 0;
 
-	svcWaitSynchronization(util_decoder_cache_packet_mutex[session], U64_MAX);
+	LightLock_Lock(&util_decoder_cache_packet_mutex[session]);
 	util_decoder_available_cache_packet[session]++;
-	svcReleaseMutex(util_decoder_cache_packet_mutex[session]);
+	LightLock_Unlock(&util_decoder_cache_packet_mutex[session]);
 
 	return result;
 
@@ -974,7 +1176,7 @@ Result_with_string Util_decoder_read_packet(int session)
 	return result;
 
 	try_again:
-	svcReleaseMutex(util_decoder_cache_packet_mutex[session]);
+	LightLock_Unlock(&util_decoder_cache_packet_mutex[session]);
 	result.code = DEF_ERR_TRY_AGAIN;
 	result.string = DEF_ERR_TRY_AGAIN_STR;
 	return result;
@@ -1003,13 +1205,13 @@ Result_with_string Util_decoder_parse_packet(int* type, int* packet_index, bool*
 	*packet_index = -1;
 	*type = DEF_DECODER_PACKET_TYPE_UNKNOWN;
 
-	svcWaitSynchronization(util_decoder_cache_packet_mutex[session], U64_MAX);
+	LightLock_Lock(&util_decoder_cache_packet_mutex[session]);
 	if(util_decoder_available_cache_packet[session] <= 0)
 	{
 		result.error_description = "[Error] No packet available. ";
 		goto try_again;
 	}
-	svcReleaseMutex(util_decoder_cache_packet_mutex[session]);
+	LightLock_Unlock(&util_decoder_cache_packet_mutex[session]);
 
 	for(int i = 0; i < DEF_DECODER_MAX_AUDIO_TRACKS; i++)
 	{
@@ -1102,9 +1304,9 @@ Result_with_string Util_decoder_parse_packet(int* type, int* packet_index, bool*
 	else
 		util_decoder_cache_packet_current_index[session] = 0;
 	
-	svcWaitSynchronization(util_decoder_cache_packet_mutex[session], U64_MAX);
+	LightLock_Lock(&util_decoder_cache_packet_mutex[session]);
 	util_decoder_available_cache_packet[session]--;
-	svcReleaseMutex(util_decoder_cache_packet_mutex[session]);
+	LightLock_Unlock(&util_decoder_cache_packet_mutex[session]);
 	return result;
 
 	invalid_arg:
@@ -1118,7 +1320,7 @@ Result_with_string Util_decoder_parse_packet(int* type, int* packet_index, bool*
 	return result;
 
 	try_again:
-	svcReleaseMutex(util_decoder_cache_packet_mutex[session]);
+	LightLock_Unlock(&util_decoder_cache_packet_mutex[session]);
 	result.code = DEF_ERR_TRY_AGAIN;
 	result.string = DEF_ERR_TRY_AGAIN_STR;
 	return result;
@@ -1446,10 +1648,10 @@ int Util_mvd_video_decoder_get_raw_image_buffer_size(int session)
 	return util_mvd_video_decoder_max_raw_image[session];
 }
 
-Result_with_string Util_audio_decoder_decode(int* size, u8** raw_data, double* current_pos, int packet_index, int session)
+Result_with_string Util_audio_decoder_decode(int* samples, u8** raw_data, double* current_pos, int packet_index, int session)
 {
 	int ffmpeg_result = 0;
-	int swr_size = 0;
+	int copy_size_per_ch = 0;
 	double current_frame = 0;
 	double timebase = 0;
 	Result_with_string result;
@@ -1457,7 +1659,7 @@ Result_with_string Util_audio_decoder_decode(int* size, u8** raw_data, double* c
 		Util_decoder_init_variables();
 
 	if(session < 0 || session > DEF_DECODER_MAX_SESSIONS || packet_index < 0 || packet_index > DEF_DECODER_MAX_AUDIO_TRACKS
-	|| !size || !raw_data || !current_pos)
+	|| !samples || !raw_data || !current_pos)
 		goto invalid_arg;
 
 	if(!util_decoder_opened_file[session] || !util_audio_decoder_init[session][packet_index])
@@ -1472,7 +1674,7 @@ Result_with_string Util_audio_decoder_decode(int* size, u8** raw_data, double* c
 	if(util_audio_decoder_packet[session][packet_index]->duration != 0)
 		current_frame = (double)util_audio_decoder_packet[session][packet_index]->dts / util_audio_decoder_packet[session][packet_index]->duration;
 
-	*size = 0;
+	*samples = 0;
 	*current_pos = 0;
 	
 	util_audio_decoder_raw_data[session][packet_index] = av_frame_alloc();
@@ -1502,16 +1704,22 @@ Result_with_string Util_audio_decoder_decode(int* size, u8** raw_data, double* c
 	else
 		*current_pos = current_frame * ((1000.0 / util_audio_decoder_raw_data[session][packet_index]->sample_rate) * util_audio_decoder_raw_data[session][packet_index]->nb_samples);//calc pos
 
+	copy_size_per_ch = util_audio_decoder_raw_data[session][packet_index]->nb_samples * util_audio_decoder_sample_format_size_table[util_audio_decoder_context[session][packet_index]->sample_fmt];
 	Util_safe_linear_free(*raw_data);
 	*raw_data = NULL;
-	*raw_data = (u8*)Util_safe_linear_alloc(util_audio_decoder_raw_data[session][packet_index]->nb_samples * 2 * util_audio_decoder_context[session][packet_index]->channels);
-	swr_size = swr_convert(util_audio_decoder_swr_context[session][packet_index], raw_data, util_audio_decoder_raw_data[session][packet_index]->nb_samples, (const uint8_t**)util_audio_decoder_raw_data[session][packet_index]->data, util_audio_decoder_raw_data[session][packet_index]->nb_samples);
-	if(swr_size <= 0)
+	*raw_data = (u8*)Util_safe_linear_alloc(copy_size_per_ch * util_audio_decoder_context[session][packet_index]->ch_layout.nb_channels);
+
+	if(util_audio_decoder_context[session][packet_index]->sample_fmt == AV_SAMPLE_FMT_U8P || util_audio_decoder_context[session][packet_index]->sample_fmt == AV_SAMPLE_FMT_S16P
+	|| util_audio_decoder_context[session][packet_index]->sample_fmt == AV_SAMPLE_FMT_S32P || util_audio_decoder_context[session][packet_index]->sample_fmt == AV_SAMPLE_FMT_S64P
+	|| util_audio_decoder_context[session][packet_index]->sample_fmt == AV_SAMPLE_FMT_FLTP || util_audio_decoder_context[session][packet_index]->sample_fmt == AV_SAMPLE_FMT_DBLP)
 	{
-		result.error_description = "[Error] swr_convert() failed. " + std::to_string(swr_size) + " ";
-		goto ffmpeg_api_failed;
+		for(int i = 0; i < util_audio_decoder_context[session][packet_index]->ch_layout.nb_channels; i++)
+			memcpy(((*raw_data) + (copy_size_per_ch * i)), util_audio_decoder_raw_data[session][packet_index]->data[i], copy_size_per_ch);
 	}
-	*size = swr_size * 2 * util_audio_decoder_context[session][packet_index]->channels;
+	else
+		memcpy(*raw_data, util_audio_decoder_raw_data[session][packet_index]->data[0], copy_size_per_ch * util_audio_decoder_context[session][packet_index]->ch_layout.nb_channels);
+
+	*samples = util_audio_decoder_raw_data[session][packet_index]->nb_samples;
 
 	util_audio_decoder_packet_ready[session][packet_index] = false;
 	av_packet_free(&util_audio_decoder_packet[session][packet_index]);
@@ -1607,9 +1815,9 @@ Result_with_string Util_video_decoder_decode(int packet_index, int session)
 	else
 		util_video_decoder_raw_image_current_index[session][packet_index] = 0;
 
-	svcWaitSynchronization(util_video_decoder_raw_image_mutex[session][packet_index], U64_MAX);
+	LightLock_Lock(&util_video_decoder_raw_image_mutex[session][packet_index]);
 	util_video_decoder_available_raw_image[session][packet_index]++;
-	svcReleaseMutex(util_video_decoder_raw_image_mutex[session][packet_index]);
+	LightLock_Unlock(&util_video_decoder_raw_image_mutex[session][packet_index]);
 
 	util_video_decoder_packet_ready[session][packet_index] = false;
 	av_packet_free(&util_video_decoder_packet[session][packet_index]);
@@ -1863,7 +2071,7 @@ Result_with_string Util_mvd_video_decoder_decode(int session)
 
 	//Restore cached pts
 	util_mvd_video_decoder_raw_image[session][buffer_num]->pts = util_mvd_video_decoder_cached_pts[util_mvd_video_decoder_current_cached_pts_index];
-	util_mvd_video_decoder_raw_image[session][buffer_num]->pkt_duration = util_video_decoder_packet[session][0]->duration;
+	util_mvd_video_decoder_raw_image[session][buffer_num]->duration = util_video_decoder_packet[session][0]->duration;
 	if(util_mvd_video_decoder_current_cached_pts_index + 1 < 32)
 		util_mvd_video_decoder_current_cached_pts_index++;
 	else
@@ -1876,9 +2084,9 @@ Result_with_string Util_mvd_video_decoder_decode(int session)
 	else
 		util_mvd_video_decoder_raw_image_current_index[session] = 0;
 
-	svcWaitSynchronization(util_mvd_video_decoder_raw_image_mutex[session], U64_MAX);
+	LightLock_Lock(&util_mvd_video_decoder_raw_image_mutex[session]);
 	util_mvd_video_decoder_available_raw_image[session]++;
-	svcReleaseMutex(util_mvd_video_decoder_raw_image_mutex[session]);
+	LightLock_Unlock(&util_mvd_video_decoder_raw_image_mutex[session]);
 
 	if(util_mvd_video_decoder_should_skip_process_nal_unit && !got_a_frame_after_processing_nal_unit)
 	{
@@ -1999,7 +2207,6 @@ Result_with_string Util_subtitle_decoder_decode(Subtitle_data* subtitle_data, in
 		goto ffmpeg_api_failed;
 	}
 
-	//Util_log_save("debug", "decoded " + std::to_string(decoded));
 	if(decoded > 0)
 	{
 		timebase = av_q2d(util_decoder_format_context[session]->streams[util_subtitle_decoder_stream_num[session][packet_index]]->time_base);
@@ -2009,32 +2216,18 @@ Result_with_string Util_subtitle_decoder_decode(Subtitle_data* subtitle_data, in
 			subtitle_data->end_time = subtitle_data->start_time + (util_subtitle_decoder_packet[session][packet_index]->duration * timebase * 1000);
 		}
 
-		//Util_log_save("debug", "duration : " + std::to_string(util_subtitle_decoder_packet[session][packet_index]->duration * timebase * 1000));
-		
-		//Util_log_save("debug", "dts : " + std::to_string(util_subtitle_decoder_packet[session][packet_index]->dts));
 		for(uint i = 0; i < util_subtitle_decoder_raw_data[session][packet_index]->num_rects; i++)
 		{
-			//Util_log_save("debug", "from : " + std::to_string(subtitle_data->start_time) + " to : " + std::to_string(subtitle_data->end_time));
-
 			if(util_subtitle_decoder_raw_data[session][packet_index]->rects[i]->type == SUBTITLE_NONE)
 			{
-				//Util_log_save("debug", "type : NONE");
 			}
 			if(util_subtitle_decoder_raw_data[session][packet_index]->rects[i]->type == SUBTITLE_BITMAP)
 			{
-				//Util_log_save("debug", "type : BITMAP");
 			}
 			if(util_subtitle_decoder_raw_data[session][packet_index]->rects[i]->type == SUBTITLE_TEXT)
-			{
-				//Util_log_save("debug", "type : TEXT");
-				//Util_log_save("debug", util_subtitle_decoder_raw_data[session][packet_index]->rects[i]->text);
 				subtitle_data->text = util_subtitle_decoder_raw_data[session][packet_index]->rects[i]->text;
-			}
 			if(util_subtitle_decoder_raw_data[session][packet_index]->rects[i]->type == SUBTITLE_ASS)
 			{
-				//Util_log_save("debug", "type : ASS");
-				//Util_log_save("debug", util_subtitle_decoder_raw_data[session][packet_index]->rects[i]->ass);
-
 				text = util_subtitle_decoder_raw_data[session][packet_index]->rects[i]->ass;
 				cut_pos = 0;
 				for(int i = 0; i < 8; i++)
@@ -2059,13 +2252,9 @@ Result_with_string Util_subtitle_decoder_decode(Subtitle_data* subtitle_data, in
 						}
 					}
 				}
-				/*text_length = text.length();
-					for(int i = 1; i <= text_length / 20; i++)
-						text.insert(i * 20 + i, "\n");*/
 
 				subtitle_data->text = text;
 			}
-			//Util_log_save("debug", util_subtitle_decoder_raw_data[session][packet_index]->rects[i]->text);
 		}
 	}
 
@@ -2177,8 +2366,14 @@ int Util_mvd_video_decoder_get_available_raw_image_num(int session)
 
 Result_with_string Util_video_decoder_get_image(u8** raw_data, double* current_pos, int width, int height, int packet_index, int session)
 {
-	int cpy_size[2] = { 0, 0, };
+	bool is_linear = true;
+	int cpy_size = 0;
 	int buffer_num = 0;
+	u32 y_offset = 0;
+	u32 u_offset = 0;
+	u32 v_offset = 0;
+	u32 y_size = width * height;
+	u32 uv_size = width * height / 4;
 	double framerate = 0;
 	double current_frame = 0;
 	double timebase = 0;
@@ -2205,19 +2400,18 @@ Result_with_string Util_video_decoder_get_image(u8** raw_data, double* current_p
 		goto try_again;
 	}
 
+	cpy_size = av_image_get_buffer_size(util_video_decoder_context[session][packet_index]->pix_fmt, width, height, 1);
 	*current_pos = 0;
 	Util_safe_linear_free(*raw_data);
 	*raw_data = NULL;
-	*raw_data = (u8*)Util_safe_linear_alloc(width * height * 1.5);
+	*raw_data = (u8*)Util_safe_linear_alloc(cpy_size);
 	if(!*raw_data)
 		goto out_of_memory;
 
-	cpy_size[0] = (width * height);
-	cpy_size[1] = cpy_size[0] / 4;
 	buffer_num = util_video_decoder_raw_image_ready_index[session][packet_index];
 	framerate = (double)util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][packet_index]]->avg_frame_rate.num / util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][packet_index]]->avg_frame_rate.den;
-	if(util_video_decoder_raw_image[session][packet_index][buffer_num]->pkt_duration != 0)
-		current_frame = (double)util_video_decoder_raw_image[session][packet_index][buffer_num]->pts / util_video_decoder_raw_image[session][packet_index][buffer_num]->pkt_duration;
+	if(util_video_decoder_raw_image[session][packet_index][buffer_num]->duration != 0)
+		current_frame = (double)util_video_decoder_raw_image[session][packet_index][buffer_num]->pts / util_video_decoder_raw_image[session][packet_index][buffer_num]->duration;
 
 	timebase = av_q2d(util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][packet_index]]->time_base);
 	if(timebase != 0)
@@ -2230,27 +2424,61 @@ Result_with_string Util_video_decoder_get_image(u8** raw_data, double* current_p
 	else if(framerate != 0.0)
 		*current_pos = current_frame * (1000 / framerate);//calc frame pos
 
+	y_offset = (u32)util_video_decoder_raw_image[session][packet_index][buffer_num]->data[0];
+	u_offset = (u32)util_video_decoder_raw_image[session][packet_index][buffer_num]->data[1];
+	v_offset = (u32)util_video_decoder_raw_image[session][packet_index][buffer_num]->data[2];
+
+	//Check if the decoded data is in linear format (some decoder return in not linear format).
+	//Currently, only check for YUV420P because it only occurs in h263p afaik.
+	if(util_video_decoder_context[session][packet_index]->pix_fmt == AV_PIX_FMT_YUV420P
+	&& (y_offset + y_size != u_offset || u_offset + uv_size != v_offset))
+		is_linear = false;
+
 #if DEF_DECODER_USE_DMA
-	dmaConfigInitDefault(&dma_config);
-
-	dma_result[0] = svcStartInterProcessDma(&dma_handle[0], CUR_PROCESS_HANDLE, (u32)*raw_data, CUR_PROCESS_HANDLE, (u32)util_video_decoder_raw_image[session][packet_index][buffer_num]->data[0], cpy_size[0], &dma_config);
-	dma_result[1] = svcStartInterProcessDma(&dma_handle[1], CUR_PROCESS_HANDLE, (u32)*raw_data + (width * height), CUR_PROCESS_HANDLE, (u32)util_video_decoder_raw_image[session][packet_index][buffer_num]->data[1], cpy_size[1], &dma_config);
-	dma_result[2] = svcStartInterProcessDma(&dma_handle[2], CUR_PROCESS_HANDLE, (u32)*raw_data + (width * height) + (width * height / 4), CUR_PROCESS_HANDLE, (u32)util_video_decoder_raw_image[session][packet_index][buffer_num]->data[2], cpy_size[1], &dma_config);
-
-	for(int i = 0; i < 3; i++)
+	if(is_linear)
 	{
-		if(dma_result[i] == 0)
-			svcWaitSynchronization(dma_handle[i], INT64_MAX);
+		svcFlushProcessDataCache(CUR_PROCESS_HANDLE, y_offset, cpy_size);
+
+		dmaConfigInitDefault(&dma_config);
+		dma_result[0] = svcStartInterProcessDma(&dma_handle[0], CUR_PROCESS_HANDLE, (u32)*raw_data, CUR_PROCESS_HANDLE, (u32)util_video_decoder_raw_image[session][packet_index][buffer_num]->data[0], cpy_size, &dma_config);
+
+		if(dma_result[0] == 0)
+			svcWaitSynchronization(dma_handle[0], INT64_MAX);
+
+		svcCloseHandle(dma_handle[0]);
+
+		svcFlushProcessDataCache(CUR_PROCESS_HANDLE, (u32)*raw_data, cpy_size);
 	}
+	else
+	{
+		svcFlushProcessDataCache(CUR_PROCESS_HANDLE, y_offset, y_size);
+		svcFlushProcessDataCache(CUR_PROCESS_HANDLE, u_offset, uv_size);
+		svcFlushProcessDataCache(CUR_PROCESS_HANDLE, v_offset, uv_size);
 
-	for(int i = 0; i < 3; i++)
-		svcCloseHandle(dma_handle[i]);
+		dmaConfigInitDefault(&dma_config);
+		dma_result[0] = svcStartInterProcessDma(&dma_handle[0], CUR_PROCESS_HANDLE, (u32)*raw_data, CUR_PROCESS_HANDLE, (u32)util_video_decoder_raw_image[session][packet_index][buffer_num]->data[0], y_size, &dma_config);
+		dma_result[1] = svcStartInterProcessDma(&dma_handle[1], CUR_PROCESS_HANDLE, (u32)(*raw_data) + y_size, CUR_PROCESS_HANDLE, (u32)util_video_decoder_raw_image[session][packet_index][buffer_num]->data[1], uv_size, &dma_config);
+		dma_result[2] = svcStartInterProcessDma(&dma_handle[2], CUR_PROCESS_HANDLE, (u32)(*raw_data) + y_size + uv_size, CUR_PROCESS_HANDLE, (u32)util_video_decoder_raw_image[session][packet_index][buffer_num]->data[2], uv_size, &dma_config);
 
-	svcFlushProcessDataCache(CUR_PROCESS_HANDLE, (u32)*raw_data, cpy_size[0] + (cpy_size[1] * 2));
+		for(int i = 0; i < 3; i++)
+		{
+			if(dma_result[i] == 0)
+				svcWaitSynchronization(dma_handle[i], INT64_MAX);
+
+			svcCloseHandle(dma_handle[i]);
+		}
+
+		svcFlushProcessDataCache(CUR_PROCESS_HANDLE, (u32)*raw_data, cpy_size);
+	}
 #else
-	memcpy_asm(*raw_data, util_video_decoder_raw_image[session][packet_index][buffer_num]->data[0], cpy_size[0]);
-	memcpy_asm(*raw_data + (width * height), util_video_decoder_raw_image[session][packet_index][buffer_num]->data[1], cpy_size[1]);
-	memcpy_asm(*raw_data + (width * height) + (width * height / 4), util_video_decoder_raw_image[session][packet_index][buffer_num]->data[2], cpy_size[1]);
+	if(is_linear)
+		memcpy_asm(*raw_data, util_video_decoder_raw_image[session][packet_index][buffer_num]->data[0], cpy_size);
+	else
+	{
+		memcpy_asm(*raw_data, util_video_decoder_raw_image[session][packet_index][buffer_num]->data[0], y_size);
+		memcpy_asm((*raw_data) + y_size, util_video_decoder_raw_image[session][packet_index][buffer_num]->data[1], uv_size);
+		memcpy_asm((*raw_data) + y_size + uv_size, util_video_decoder_raw_image[session][packet_index][buffer_num]->data[2], uv_size);
+	}
 #endif
 
 	av_frame_free(&util_video_decoder_raw_image[session][packet_index][buffer_num]);
@@ -2260,9 +2488,9 @@ Result_with_string Util_video_decoder_get_image(u8** raw_data, double* current_p
 	else
 		util_video_decoder_raw_image_ready_index[session][packet_index] = 0;
 
-	svcWaitSynchronization(util_video_decoder_raw_image_mutex[session][packet_index], U64_MAX);
+	LightLock_Lock(&util_video_decoder_raw_image_mutex[session][packet_index]);
 	util_video_decoder_available_raw_image[session][packet_index]--;
-	svcReleaseMutex(util_video_decoder_raw_image_mutex[session][packet_index]);
+	LightLock_Unlock(&util_video_decoder_raw_image_mutex[session][packet_index]);
 
 	return result;
 
@@ -2325,8 +2553,8 @@ Result_with_string Util_mvd_video_decoder_get_image(u8** raw_data, double* curre
 	*current_pos = 0;
 	buffer_num = util_mvd_video_decoder_raw_image_ready_index[session];
 	framerate = (double)util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][0]]->avg_frame_rate.num / util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][0]]->avg_frame_rate.den;
-	if(util_mvd_video_decoder_raw_image[session][buffer_num]->pkt_duration != 0)
-		current_frame = (double)util_mvd_video_decoder_raw_image[session][buffer_num]->pts / util_mvd_video_decoder_raw_image[session][buffer_num]->pkt_duration;
+	if(util_mvd_video_decoder_raw_image[session][buffer_num]->duration != 0)
+		current_frame = (double)util_mvd_video_decoder_raw_image[session][buffer_num]->pts / util_mvd_video_decoder_raw_image[session][buffer_num]->duration;
 
 	timebase = av_q2d(util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][0]]->time_base);
 	if(timebase != 0)
@@ -2337,6 +2565,8 @@ Result_with_string Util_mvd_video_decoder_get_image(u8** raw_data, double* curre
 	cpy_size = (width * height * 2);
 
 #if DEF_DECODER_USE_DMA
+	svcFlushProcessDataCache(CUR_PROCESS_HANDLE, (u32)util_mvd_video_decoder_raw_image[session][buffer_num]->data[0], cpy_size);
+
 	dmaConfigInitDefault(&dma_config);
 	dma_result = svcStartInterProcessDma(&dma_handle, CUR_PROCESS_HANDLE, (u32)*raw_data, CUR_PROCESS_HANDLE, (u32)util_mvd_video_decoder_raw_image[session][buffer_num]->data[0], cpy_size, &dma_config);
 
@@ -2364,9 +2594,9 @@ Result_with_string Util_mvd_video_decoder_get_image(u8** raw_data, double* curre
 	else
 		util_mvd_video_decoder_raw_image_ready_index[session] = 0;
 
-	svcWaitSynchronization(util_mvd_video_decoder_raw_image_mutex[session], U64_MAX);
+	LightLock_Lock(&util_mvd_video_decoder_raw_image_mutex[session]);
 	util_mvd_video_decoder_available_raw_image[session]--;
-	svcReleaseMutex(util_mvd_video_decoder_raw_image_mutex[session]);
+	LightLock_Unlock(&util_mvd_video_decoder_raw_image_mutex[session]);
 
 	return result;
 
@@ -2413,8 +2643,8 @@ void Util_video_decoder_skip_image(double* current_pos, int packet_index, int se
 	*current_pos = 0;
 	buffer_num = util_video_decoder_raw_image_ready_index[session][packet_index];
 	framerate = (double)util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][packet_index]]->avg_frame_rate.num / util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][packet_index]]->avg_frame_rate.den;
-	if(util_video_decoder_raw_image[session][packet_index][buffer_num]->pkt_duration != 0)
-		current_frame = (double)util_video_decoder_raw_image[session][packet_index][buffer_num]->pts / util_video_decoder_raw_image[session][packet_index][buffer_num]->pkt_duration;
+	if(util_video_decoder_raw_image[session][packet_index][buffer_num]->duration != 0)
+		current_frame = (double)util_video_decoder_raw_image[session][packet_index][buffer_num]->pts / util_video_decoder_raw_image[session][packet_index][buffer_num]->duration;
 
 	timebase = av_q2d(util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][packet_index]]->time_base);
 	if(timebase != 0)
@@ -2434,9 +2664,9 @@ void Util_video_decoder_skip_image(double* current_pos, int packet_index, int se
 	else
 		util_video_decoder_raw_image_ready_index[session][packet_index] = 0;
 
-	svcWaitSynchronization(util_video_decoder_raw_image_mutex[session][packet_index], U64_MAX);
+	LightLock_Lock(&util_video_decoder_raw_image_mutex[session][packet_index]);
 	util_video_decoder_available_raw_image[session][packet_index]--;
-	svcReleaseMutex(util_video_decoder_raw_image_mutex[session][packet_index]);
+	LightLock_Unlock(&util_video_decoder_raw_image_mutex[session][packet_index]);
 }
 
 void Util_mvd_video_decoder_skip_image(double* current_pos, int session)
@@ -2460,8 +2690,8 @@ void Util_mvd_video_decoder_skip_image(double* current_pos, int session)
 	*current_pos = 0;
 	buffer_num = util_mvd_video_decoder_raw_image_ready_index[session];
 	framerate = (double)util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][0]]->avg_frame_rate.num / util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][0]]->avg_frame_rate.den;
-	if(util_mvd_video_decoder_raw_image[session][buffer_num]->pkt_duration != 0)
-		current_frame = (double)util_mvd_video_decoder_raw_image[session][buffer_num]->pts / util_mvd_video_decoder_raw_image[session][buffer_num]->pkt_duration;
+	if(util_mvd_video_decoder_raw_image[session][buffer_num]->duration != 0)
+		current_frame = (double)util_mvd_video_decoder_raw_image[session][buffer_num]->pts / util_mvd_video_decoder_raw_image[session][buffer_num]->duration;
 
 	timebase = av_q2d(util_decoder_format_context[session]->streams[util_video_decoder_stream_num[session][0]]->time_base);
 	if(timebase != 0)
@@ -2482,9 +2712,9 @@ void Util_mvd_video_decoder_skip_image(double* current_pos, int session)
 	else
 		util_mvd_video_decoder_raw_image_ready_index[session] = 0;
 
-	svcWaitSynchronization(util_mvd_video_decoder_raw_image_mutex[session], U64_MAX);
+	LightLock_Lock(&util_mvd_video_decoder_raw_image_mutex[session]);
 	util_mvd_video_decoder_available_raw_image[session]--;
-	svcReleaseMutex(util_mvd_video_decoder_raw_image_mutex[session]);
+	LightLock_Unlock(&util_mvd_video_decoder_raw_image_mutex[session]);
 }
 
 Result_with_string Util_decoder_seek(u64 seek_pos, int flag, int session)
@@ -2548,7 +2778,6 @@ void Util_audio_decoder_exit(int session)
 			av_packet_free(&util_audio_decoder_packet[session][i]);
 			av_packet_free(&util_audio_decoder_cache_packet[session][i]);
 			av_frame_free(&util_audio_decoder_raw_data[session][i]);
-			swr_free(&util_audio_decoder_swr_context[session][i]);
 		}
 	}
 }
@@ -2565,7 +2794,6 @@ void Util_video_decoder_exit(int session)
 			avcodec_free_context(&util_video_decoder_context[session][i]);
 			av_packet_free(&util_video_decoder_packet[session][i]);
 			av_packet_free(&util_video_decoder_cache_packet[session][i]);
-			svcCloseHandle(util_video_decoder_raw_image_mutex[session][i]);
 			util_video_decoder_available_raw_image[session][i] = 0;
 			util_video_decoder_raw_image_ready_index[session][i] = 0;
 			util_video_decoder_raw_image_current_index[session][i] = 0;
@@ -2597,7 +2825,6 @@ void Util_mvd_video_decoder_exit(int session)
 		}
 		av_frame_free(&util_mvd_video_decoder_raw_image[session][i]);
 	}
-	svcCloseHandle(util_mvd_video_decoder_raw_image_mutex[session]);
 }
 
 void Util_subtitle_decoder_exit(int session)
@@ -2645,7 +2872,6 @@ void Util_decoder_close_file(int session)
 	util_decoder_cache_packet_current_index[session] = 0;
 	util_decoder_cache_packet_ready_index[session] = 0;
 	avformat_close_input(&util_decoder_format_context[session]);
-	svcCloseHandle(util_decoder_cache_packet_mutex[session]);
 }
 
 #endif

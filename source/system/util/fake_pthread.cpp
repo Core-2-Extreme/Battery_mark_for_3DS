@@ -3,6 +3,7 @@
 int util_fake_pthread_core_offset = 0;
 int util_fake_pthread_enabled_core_list[4] = { 0, 1, -3, -3, };
 int util_fake_pthread_enabled_cores = 2;
+LightLock util_fake_pthread_mutex = 1;//Initially unlocked state.
 
 void Util_fake_pthread_set_enabled_core(bool enabled_core[4])
 {
@@ -26,7 +27,7 @@ void Util_fake_pthread_set_enabled_core(bool enabled_core[4])
     util_fake_pthread_core_offset = 0;
 }
 
-int	pthread_mutex_lock(pthread_mutex_t *__mutex)
+int	pthread_mutex_lock(pthread_mutex_t* __mutex)
 {
     uint result = 0;
 
@@ -45,33 +46,40 @@ int	pthread_mutex_lock(pthread_mutex_t *__mutex)
     }
 }
 
-int	pthread_mutex_unlock(pthread_mutex_t *__mutex)
+int	pthread_mutex_unlock(pthread_mutex_t* __mutex)
 {
     return svcReleaseMutex(*(Handle*)__mutex);
 }
 
-int	pthread_mutex_init(pthread_mutex_t *__mutex, const pthread_mutexattr_t *__attr)
+int	pthread_mutex_init(pthread_mutex_t* __mutex, const pthread_mutexattr_t* __attr)
 {
     return svcCreateMutex((Handle*)__mutex, false);
 }
 
-int	pthread_mutex_destroy(pthread_mutex_t *__mutex)
+int	pthread_mutex_destroy(pthread_mutex_t* __mutex)
 {
     return svcCloseHandle(*(Handle*)__mutex);
 }
 
-int	pthread_once(pthread_once_t *__once_control, void (*__init_routine)(void))
+int	pthread_once(pthread_once_t* __once_control, void (*__init_routine)(void))
 {
-    if(__once_control->status == 0)
+    LightLock_Lock(&util_fake_pthread_mutex);
+    if(__once_control->init_executed != 0)
     {
-        __once_control->status = 1;
-        __init_routine();
-        __once_control->status = 2;
+        LightLock_Unlock(&util_fake_pthread_mutex);
+        return 0;
     }
+
+    __once_control->is_initialized = 1;
+    __once_control->init_executed = 1;
+    LightLock_Unlock(&util_fake_pthread_mutex);
+
+    __init_routine();
+
     return 0;
 }
 
-int	pthread_cond_wait(pthread_cond_t *__cond, pthread_mutex_t *__mutex)
+int	pthread_cond_wait(pthread_cond_t* __cond, pthread_mutex_t* __mutex)
 {
     uint result = 0;
     pthread_mutex_unlock(__mutex);
@@ -94,12 +102,12 @@ int	pthread_cond_wait(pthread_cond_t *__cond, pthread_mutex_t *__mutex)
     }
 }
 
-int	pthread_cond_signal(pthread_cond_t *__cond)
+int	pthread_cond_signal(pthread_cond_t* __cond)
 {
     return svcSignalEvent(*(Handle*)__cond);
 }
 
-int	pthread_cond_broadcast(pthread_cond_t *__cond)
+int	pthread_cond_broadcast(pthread_cond_t* __cond)
 {
     uint result = 0;
     
@@ -121,27 +129,27 @@ int	pthread_cond_broadcast(pthread_cond_t *__cond)
     }
 }
 
-int	pthread_cond_init(pthread_cond_t *__cond, const pthread_condattr_t *__attr)
+int	pthread_cond_init(pthread_cond_t* __cond, const pthread_condattr_t* __attr)
 {
     return svcCreateEvent((Handle*)__cond, RESET_ONESHOT);
 }
 
-int	pthread_cond_destroy(pthread_cond_t *__mutex)
+int	pthread_cond_destroy(pthread_cond_t* __mutex)
 {
     return svcCloseHandle(*(Handle*)__mutex);
 }
 
-int	pthread_create(pthread_t *__pthread, const pthread_attr_t  *__attr, void *(*__start_routine)(void *), void *__arg)
+int	pthread_create(pthread_t* __pthread, const pthread_attr_t * __attr, void* (*__start_routine)(void*), void* __arg)
 {
     Thread handle = 0;
 
     if(util_fake_pthread_enabled_cores == 0)
         return -1;
 
-    if(__attr)
-        handle = threadCreate((ThreadFunc)__start_routine, __arg, __attr->stacksize, DEF_THREAD_PRIORITY_LOW, util_fake_pthread_enabled_core_list[util_fake_pthread_core_offset], true);
+    if(__attr && __attr->is_initialized)
+        handle = threadCreate((ThreadFunc)__start_routine, __arg, __attr->stacksize, DEF_THREAD_PRIORITY_BELOW_NORMAL, util_fake_pthread_enabled_core_list[util_fake_pthread_core_offset], true);
     else
-        handle = threadCreate((ThreadFunc)__start_routine, __arg, DEF_STACKSIZE, DEF_THREAD_PRIORITY_LOW, util_fake_pthread_enabled_core_list[util_fake_pthread_core_offset], true);
+        handle = threadCreate((ThreadFunc)__start_routine, __arg, DEF_STACKSIZE, DEF_THREAD_PRIORITY_BELOW_NORMAL, util_fake_pthread_enabled_core_list[util_fake_pthread_core_offset], true);
 
     *__pthread = (pthread_t)handle;
 
@@ -156,7 +164,7 @@ int	pthread_create(pthread_t *__pthread, const pthread_attr_t  *__attr, void *(*
         return 0;
 }
 
-int	pthread_join(pthread_t __pthread, void **__value_ptr)
+int	pthread_join(pthread_t __pthread, void** __value_ptr)
 {
     int result = -1;
     while(true)
@@ -167,7 +175,7 @@ int	pthread_join(pthread_t __pthread, void **__value_ptr)
     }
 }
 
-int pthread_attr_init(pthread_attr_t *attr)
+int pthread_attr_init(pthread_attr_t* attr)
 {
     if(!attr)
         return -1;
@@ -179,7 +187,7 @@ int pthread_attr_init(pthread_attr_t *attr)
     return 0;
 }
 
-int pthread_attr_destroy(pthread_attr_t *attr)
+int pthread_attr_destroy(pthread_attr_t* attr)
 {
     if(!attr)
         return -1;
@@ -188,7 +196,7 @@ int pthread_attr_destroy(pthread_attr_t *attr)
     return 0;
 }
 
-int pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize)
+int pthread_attr_setstacksize(pthread_attr_t* attr, size_t stacksize)
 {
     if(!attr || stacksize < 16384)
         return -1;
@@ -197,7 +205,7 @@ int pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize)
     return 0;
 }
 
-int posix_memalign(void **memptr, size_t alignment, size_t size)
+int posix_memalign(void** memptr, size_t alignment, size_t size)
 {
     *memptr = memalign(alignment, size);
     if(!*memptr)

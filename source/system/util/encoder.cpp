@@ -209,8 +209,7 @@ Result_with_string Util_audio_encoder_init(int codec, int original_sample_rate, 
 	
 	util_audio_encoder_context[session]->bit_rate = bitrate;
 	util_audio_encoder_context[session]->sample_rate = encode_sample_rate;
-	util_audio_encoder_context[session]->channel_layout = AV_CH_LAYOUT_MONO;
-	util_audio_encoder_context[session]->channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_MONO);
+	util_audio_encoder_context[session]->ch_layout = AV_CHANNEL_LAYOUT_MONO;
 	util_audio_encoder_context[session]->codec_type = AVMEDIA_TYPE_AUDIO;
 	util_audio_encoder_context[session]->time_base = (AVRational){ 1, encode_sample_rate };
 	if(codec_id == AV_CODEC_ID_AAC)
@@ -234,7 +233,8 @@ Result_with_string Util_audio_encoder_init(int codec, int original_sample_rate, 
 	
 	util_audio_encoder_raw_data[session]->nb_samples = util_audio_encoder_context[session]->frame_size;
 	util_audio_encoder_raw_data[session]->format = util_audio_encoder_context[session]->sample_fmt;
-	util_audio_encoder_raw_data[session]->channel_layout = util_audio_encoder_context[session]->channel_layout;
+
+	av_channel_layout_copy(&util_audio_encoder_raw_data[session]->ch_layout, &util_audio_encoder_context[session]->ch_layout);
 
 	ffmpeg_result = av_frame_get_buffer(util_audio_encoder_raw_data[session], 0);
 	if(ffmpeg_result != 0)
@@ -250,11 +250,11 @@ Result_with_string Util_audio_encoder_init(int codec, int original_sample_rate, 
 		goto ffmpeg_api_failed;
 	}
 
-	util_audio_encoder_swr_context[session] = swr_alloc_set_opts(NULL, av_get_default_channel_layout(util_audio_encoder_context[session]->channels), util_audio_encoder_context[session]->sample_fmt, util_audio_encoder_context[session]->sample_rate,
-	av_get_default_channel_layout(util_audio_encoder_context[session]->channels), AV_SAMPLE_FMT_S16, original_sample_rate, 0, NULL);
-	if(!util_audio_encoder_swr_context[session])
+	ffmpeg_result = swr_alloc_set_opts2(&util_audio_encoder_swr_context[session], &util_audio_encoder_context[session]->ch_layout, util_audio_encoder_context[session]->sample_fmt, util_audio_encoder_context[session]->sample_rate,
+	&util_audio_encoder_context[session]->ch_layout, AV_SAMPLE_FMT_S16, original_sample_rate, 0, NULL);
+	if(ffmpeg_result != 0)
 	{
-		result.error_description = "[Error] swr_alloc_set_opts() failed. ";
+		result.error_description = "[Error] swr_alloc_set_opts() failed. " + std::to_string(ffmpeg_result) + " ";
 		goto ffmpeg_api_failed;
 	}
 
@@ -550,7 +550,7 @@ Result_with_string Util_audio_encoder_encode(int size, u8* raw_data, int session
 	if(!util_audio_encoder_init[session] || !util_encoder_wrote_header[session])
 		goto not_inited;
 
-	one_frame_size = av_samples_get_buffer_size(NULL, util_audio_encoder_context[session]->channels, util_audio_encoder_context[session]->frame_size, util_audio_encoder_context[session]->sample_fmt, 0);
+	one_frame_size = av_samples_get_buffer_size(NULL, util_audio_encoder_context[session]->ch_layout.nb_channels, util_audio_encoder_context[session]->frame_size, util_audio_encoder_context[session]->sample_fmt, 0);
 	bytes_per_sample = av_get_bytes_per_sample(util_audio_encoder_context[session]->sample_fmt);
 	
 	in_samples = size / 2;
@@ -693,7 +693,7 @@ Result_with_string Util_video_encoder_encode(u8* raw_image, int session)
 	ffmpeg_result = avcodec_send_frame(util_video_encoder_context[session], util_video_encoder_raw_data[session]);
 	if(ffmpeg_result != 0)
 	{
-		result.error_description = "avcodec_send_frame() failed " + std::to_string(ffmpeg_result);
+		result.error_description = "avcodec_send_frame() failed. " + std::to_string(ffmpeg_result);
 		goto ffmpeg_api_failed;
 	}
 
@@ -705,7 +705,7 @@ Result_with_string Util_video_encoder_encode(u8* raw_image, int session)
 		av_packet_unref(util_video_encoder_packet[session]);
 		if(ffmpeg_result != 0)
 		{
-			result.error_description = "av_interleaved_write_frame() failed " + std::to_string(ffmpeg_result);
+			result.error_description = "av_interleaved_write_frame() failed. " + std::to_string(ffmpeg_result);
 			goto ffmpeg_api_failed;
 		}
 	}
