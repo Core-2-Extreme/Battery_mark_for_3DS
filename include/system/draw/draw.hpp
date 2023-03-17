@@ -33,6 +33,22 @@ Result_with_string Draw_reinit(bool wide, bool _3d);
 void Draw_exit(void);
 
 /**
+ * @brief Get if currently 800px mode is enabled.
+ * Always return false if draw api is not initialized.
+ * @return true if 800px mode is enabled, otherwise false.
+ * @warning Thread dangerous (untested)
+*/
+bool Draw_is_800px_mode(void);
+
+/**
+ * @brief Get if currently 3d mode is enabled.
+ * Always return false if draw api is not initialized.
+ * @return true if 3d mode is enabled, otherwise false.
+ * @warning Thread dangerous (untested)
+*/
+bool Draw_is_3d_mode(void);
+
+/**
  * @brief Query frametime.
  * Always return 0 if draw api is not initialized.
  * @return Frametime (in ms).
@@ -76,15 +92,11 @@ void Draw_texture_free(Image_data* image);
  * @param buf (in) Pointer for raw image data (must be texture format).
  * @param pic_width (in) Raw image width (up to 1024).
  * @param pic_height (in) Raw image height (up to 1024).
- * @param tex_size_x (in) Texture width.
- * @param tex_size_y (in) Texture height.
- * @param color_format (in) Color format (DEF_DRAW_FORMAT_*).
  * @return On success DEF_SUCCESS, 
  * on failure DEF_ERR_*.
  * @note Thread safe
 */
-Result_with_string Draw_set_texture_data_direct(Image_data* image, u8* buf, int pic_width, int pic_height,
-int tex_size_x, int tex_size_y, int color_format);
+Result_with_string Draw_set_texture_data_direct(Image_data* image, u8* buf, int pic_width, int pic_height);
 
 /**
  * @brief Convert raw image data to texture format and set it.
@@ -92,15 +104,11 @@ int tex_size_x, int tex_size_y, int color_format);
  * @param buf (in) Pointer for raw image data.
  * @param pic_width (in) Raw image width.
  * @param pic_height (in) Raw image height.
- * @param tex_size_x (in) Texture width.
- * @param tex_size_y (in) Texture height.
- * @param color_format (in) Color format (DEF_DRAW_FORMAT_*).
  * @return On success DEF_SUCCESS, 
  * on failure DEF_ERR_*.
  * @note Thread safe
 */
-Result_with_string Draw_set_texture_data(Image_data* image, u8* buf, int pic_width, int pic_height,
-int tex_size_x, int tex_size_y, int color_format);
+Result_with_string Draw_set_texture_data(Image_data* image, u8* buf, int pic_width, int pic_height);
 
 /**
  * @brief Convert raw image data to texture format and set it.
@@ -110,15 +118,11 @@ int tex_size_x, int tex_size_y, int color_format);
  * @param pic_height (in) Raw image height.
  * @param width_offset (in) Width offset.
  * @param height_offset (in) Height offset.
- * @param tex_size_x (in) Texture width.
- * @param tex_size_y (in) Texture height.
- * @param color_format (in) Color format (DEF_DRAW_FORMAT_*).
  * @return On success DEF_SUCCESS, 
  * on failure DEF_ERR_*.
  * @note Thread safe
 */
-Result_with_string Draw_set_texture_data(Image_data* image, u8* buf, int pic_width, int pic_height,
-int width_offset, int height_offset, int tex_size_x, int tex_size_y, int color_format);
+Result_with_string Draw_set_texture_data(Image_data* image, u8* buf, int pic_width, int pic_height, int width_offset, int height_offset);
 
 /**
  * @brief Set texture filter.
@@ -173,7 +177,7 @@ void Draw(std::string text, float x, float y, float text_size_x, float text_size
  * @warning Call it from only drawing thread.
 */
 void Draw(std::string text, float x, float y, float text_size_x, float text_size_y, int abgr8888, int x_align, int y_align,
- float box_size_x, float box_size_y);
+float box_size_x, float box_size_y);
 
 /**
  * @brief Draw text.
@@ -195,7 +199,7 @@ void Draw(std::string text, float x, float y, float text_size_x, float text_size
  * @warning Call it from only drawing thread.
 */
 void Draw(std::string text, float x, float y, float text_size_x, float text_size_y, int abgr8888, int x_align, int y_align,
- float box_size_x, float box_size_y, int texture_position, C2D_Image background_image, int texture_abgr8888);
+float box_size_x, float box_size_y, int texture_position, C2D_Image background_image, int texture_abgr8888);
 
 /**
  * @brief Draw text.
@@ -217,7 +221,7 @@ void Draw(std::string text, float x, float y, float text_size_x, float text_size
  * @warning Call it from only drawing thread.
 */
 void Draw(std::string text, float x, float y, float text_size_x, float text_size_y, int abgr8888, int x_align, int y_align,
- float box_size_x, float box_size_y, int texture_position, Image_data* background_image, int texture_abgr8888);
+float box_size_x, float box_size_y, int texture_position, Image_data* background_image, int texture_abgr8888);
 
 /**
  * @brief Get free sheet index that can be used for Draw_load_texture().
@@ -266,7 +270,6 @@ void Draw_bot_ui(void);
 
 /**
  * @brief Get bottom UI's button.
- * Always return NULL if draw api is not initialized.
  * @return Bottom UI's button.
  * @warning Thread dangerous (untested)
 */
@@ -387,7 +390,7 @@ void Draw_cpu_usage_info(void);
 
 #else
 
-#define Draw_cpu_usage_info(...)
+#define Draw_cpu_usage_info()
 
 #endif
 

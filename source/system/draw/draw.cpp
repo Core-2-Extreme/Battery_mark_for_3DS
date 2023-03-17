@@ -2,11 +2,12 @@
 
 bool util_draw_init = false;
 bool util_draw_sheet_texture_free[DEF_DRAW_MAX_NUM_OF_SPRITE_SHEETS];
+bool util_draw_is_800px = false;
+bool util_draw_is_3d = false;
 double util_draw_frametime = 0;
 int util_draw_rendered_frames = 0;
 int util_draw_rendered_frames_cache = 0;
 u64 util_draw_reset_fps_counter_time = 0;
-std::string util_draw_part_text[2][1024];
 C2D_Font util_draw_system_fonts[4];
 C3D_RenderTarget* util_draw_screen[3];
 C2D_SpriteSheet util_draw_sheet_texture[DEF_DRAW_MAX_NUM_OF_SPRITE_SHEETS];
@@ -14,15 +15,12 @@ C2D_Image util_draw_wifi_icon_image[9];
 C2D_Image util_draw_battery_level_icon_image[21];
 C2D_Image util_draw_battery_charge_icon_image[1];
 C2D_Image util_draw_eco_image[2];
-std::string util_draw_japanese_kanji[3000];
-std::string util_draw_simple_chinese[6300];
 TickCounter util_draw_frame_time_stopwatch;
 Image_data util_draw_bot_ui;
 
 extern "C" void memcpy_asm(u8*, u8*, int);
 extern "C" void memcpy_asm_4b(u8*, u8*);
 
-Result_with_string Draw_load_kanji_samples(void);
 void Draw_debug_info(void);
 
 Result_with_string Draw_init(bool wide, bool _3d)
@@ -34,6 +32,8 @@ Result_with_string Draw_init(bool wide, bool _3d)
 	gfxInitDefault();
 	gfxSet3D(false);
 	gfxSetWide(false);
+	util_draw_is_800px = false;
+	util_draw_is_3d = false;
 
 	if(wide)
 		gfxSetWide(wide);
@@ -92,12 +92,11 @@ Result_with_string Draw_init(bool wide, bool _3d)
 	if(result.code != 0)
 		goto api_failed;
 
-	result = Draw_load_kanji_samples();
-	if(result.code != 0)
-		goto api_failed;
-
 	util_draw_bot_ui.c2d = var_square_image[0];
 	util_draw_reset_fps_counter_time = osGetTime() + 1000;
+	util_draw_is_800px = wide;
+	util_draw_is_3d = _3d;
+
 	util_draw_init = true;
 	return result;
 
@@ -125,13 +124,18 @@ Result_with_string Draw_reinit(bool wide, bool _3d)
 
 	if(!util_draw_init)
 		goto not_inited;
-	
-	util_draw_init = false;
+
+	//Without calling gspWaitForVBlank() twice before calling C3D_Fini(), it may hang in C3D_Fini().
+	//Not sure why.
+	gspWaitForVBlank();
+	gspWaitForVBlank();
 	C2D_Fini();
 	C3D_Fini();
 
 	gfxSet3D(false);
 	gfxSetWide(false);
+	util_draw_is_800px = false;
+	util_draw_is_3d = false;
 
 	if(wide)
 		gfxSetWide(wide);
@@ -161,7 +165,9 @@ Result_with_string Draw_reinit(bool wide, bool _3d)
 		goto other;
 	}
 
-	util_draw_init = true;
+	util_draw_is_800px = wide;
+	util_draw_is_3d = _3d;
+
 	return result;
 
 	not_inited:
@@ -170,6 +176,7 @@ Result_with_string Draw_reinit(bool wide, bool _3d)
 	return result;
 
 	other:
+	util_draw_init = false;
 	C2D_Fini();
 	C3D_Fini();
 	result.code = DEF_ERR_OTHER;
@@ -188,9 +195,29 @@ void Draw_exit(void)
 	for (int i = 0; i < 4; i++)
 		Draw_free_system_font(i);
 
+	//Without calling gspWaitForVBlank() twice before calling C3D_Fini(), it may hang in C3D_Fini().
+	//Not sure why.
+	gspWaitForVBlank();
+	gspWaitForVBlank();
 	C2D_Fini();
 	C3D_Fini();
 	gfxExit();
+}
+
+bool Draw_is_800px_mode(void)
+{
+	if(!util_draw_init)
+		return false;
+	else
+		return util_draw_is_800px;
+}
+
+bool Draw_is_3d_mode(void)
+{
+	if(!util_draw_init)
+		return false;
+	else
+		return util_draw_is_3d;
 }
 
 double Draw_query_frametime(void)
@@ -293,8 +320,7 @@ void Draw_texture_free(Image_data* image)
 	image->subtex = NULL;
 }
 
-Result_with_string Draw_set_texture_data_direct(Image_data* image, u8* buf, int pic_width, int pic_height,
-int tex_size_x, int tex_size_y, int color_format)
+Result_with_string Draw_set_texture_data_direct(Image_data* image, u8* buf, int pic_width, int pic_height)
 {
 	int pixel_size = 0;
 	int tex_offset = 0;
@@ -311,23 +337,23 @@ int tex_size_x, int tex_size_y, int color_format)
 		goto not_inited;
 
 	if(!image || !image->subtex || !image->c2d.tex || !buf || pic_width > 1024 || pic_width <= 0 
-	|| pic_height > 1024 || pic_height <= 0 || pic_width > tex_size_x || pic_height > tex_size_y
-	|| (color_format != DEF_DRAW_FORMAT_RGBA8888 && color_format != DEF_DRAW_FORMAT_RGB888 && color_format != DEF_DRAW_FORMAT_RGB565))
+	|| pic_height > 1024 || pic_height <= 0 || pic_width > image->c2d.tex->width || pic_height > image->c2d.tex->height
+	|| (image->c2d.tex->fmt != GPU_RGBA8 && image->c2d.tex->fmt != GPU_RGB8 && image->c2d.tex->fmt != GPU_RGB565))
 		goto invalid_arg;
 	
-	if(color_format == DEF_DRAW_FORMAT_RGBA8888)
+	if(image->c2d.tex->fmt == GPU_RGBA8)
 		pixel_size = 4;
-	else if(color_format == DEF_DRAW_FORMAT_RGB888)
+	else if(image->c2d.tex->fmt == GPU_RGB8)
 		pixel_size = 3;
-	else if(color_format == DEF_DRAW_FORMAT_RGB565)
+	else if(image->c2d.tex->fmt == GPU_RGB565)
 		pixel_size = 2;
 	
 	image->subtex->width = (u16)pic_width;
 	image->subtex->height = (u16)pic_height;
 	image->subtex->left = 0.0;
 	image->subtex->top = 1.0;
-	image->subtex->right = pic_width / (float)tex_size_x;
-	image->subtex->bottom = 1.0 - pic_height / (float)tex_size_y;
+	image->subtex->right = pic_width / (float)image->c2d.tex->width;
+	image->subtex->bottom = 1.0 - pic_height / (float)image->c2d.tex->height;
 	image->c2d.subtex = image->subtex;
 
 #if DEF_DRAW_USE_DMA
@@ -342,7 +368,7 @@ int tex_size_x, int tex_size_y, int color_format)
 #else
 		memcpy_asm(((u8*)image->c2d.tex->data + tex_offset), buf + buffer_offset, pic_width * 8 * pixel_size);
 #endif
-		tex_offset += tex_size_x * pixel_size * 8;
+		tex_offset += image->c2d.tex->width * pixel_size * 8;
 		buffer_offset += pic_width * pixel_size * 8;
 
 #if DEF_DRAW_USE_DMA
@@ -386,14 +412,12 @@ int tex_size_x, int tex_size_y, int color_format)
 	return result;
 }
 
-Result_with_string Draw_set_texture_data(Image_data* image, u8* buf, int pic_width, int pic_height, int tex_size_x,
-int tex_size_y, int color_format)
+Result_with_string Draw_set_texture_data(Image_data* image, u8* buf, int pic_width, int pic_height)
 {
-	return Draw_set_texture_data(image, buf, pic_width, pic_height, 0, 0, tex_size_x, tex_size_y, color_format);
+	return Draw_set_texture_data(image, buf, pic_width, pic_height, 0, 0);
 }
 
-Result_with_string Draw_set_texture_data(Image_data* image, u8* buf, int pic_width, int pic_height,
-int width_offset, int height_offset, int tex_size_x, int tex_size_y, int color_format)
+Result_with_string Draw_set_texture_data(Image_data* image, u8* buf, int pic_width, int pic_height, int width_offset, int height_offset)
 {
 	int x_max = 0;
 	int y_max = 0;
@@ -409,25 +433,25 @@ int width_offset, int height_offset, int tex_size_x, int tex_size_y, int color_f
 		goto not_inited;
 
 	if(!image || !image->subtex || !image->c2d.tex || !buf || pic_width <= 0 || pic_height <= 0
-	|| width_offset > pic_width || height_offset > pic_height || tex_size_x <= 0 || tex_size_y <= 0
-	|| (color_format != DEF_DRAW_FORMAT_RGBA8888 && color_format != DEF_DRAW_FORMAT_RGB888 && color_format != DEF_DRAW_FORMAT_RGB565))
+	|| width_offset > pic_width || height_offset > pic_height || image->c2d.tex->width <= 0 || image->c2d.tex->height <= 0
+	|| (image->c2d.tex->fmt != GPU_RGBA8 && image->c2d.tex->fmt != GPU_RGB8 && image->c2d.tex->fmt != GPU_RGB565))
 		goto invalid_arg;
 
-	if(color_format == DEF_DRAW_FORMAT_RGBA8888)
+	if(image->c2d.tex->fmt == GPU_RGBA8)
 		pixel_size = 4;
-	else if(color_format == DEF_DRAW_FORMAT_RGB888)
+	else if(image->c2d.tex->fmt == GPU_RGB8)
 		pixel_size = 3;
-	else if(color_format == DEF_DRAW_FORMAT_RGB565)
+	else if(image->c2d.tex->fmt == GPU_RGB565)
 		pixel_size = 2;
 
-	for(int i = 0; i <= tex_size_x; i+=4)
+	for(int i = 0; i <= image->c2d.tex->width; i+=4)
 	{
 		increase_list_x[i] = 4 * pixel_size;
 		increase_list_x[i + 1] = 12 * pixel_size;
 		increase_list_x[i + 2] = 4 * pixel_size;
 		increase_list_x[i + 3] = 44 * pixel_size;
 	}
-	for(int i = 0; i <= tex_size_y; i+=8)
+	for(int i = 0; i <= image->c2d.tex->height; i+=8)
 	{
 		increase_list_y[i] = 2 * pixel_size;
 		increase_list_y[i + 1] = 6 * pixel_size;
@@ -436,22 +460,22 @@ int width_offset, int height_offset, int tex_size_x, int tex_size_y, int color_f
 		increase_list_y[i + 4] = 2 * pixel_size;
 		increase_list_y[i + 5] = 6 * pixel_size;
 		increase_list_y[i + 6] = 2 * pixel_size;
-		increase_list_y[i + 7] = (tex_size_x * 8 - 42) * pixel_size;
+		increase_list_y[i + 7] = (image->c2d.tex->width * 8 - 42) * pixel_size;
 	}
 	
 	y_max = pic_height - (u32)height_offset;
 	x_max = pic_width - (u32)width_offset;
-	if (tex_size_y < y_max)
-		y_max = tex_size_y;
-	if (tex_size_x < x_max)
-		x_max = tex_size_x;
+	if (image->c2d.tex->height < y_max)
+		y_max = image->c2d.tex->height;
+	if (image->c2d.tex->width < x_max)
+		x_max = image->c2d.tex->width;
 
 	image->subtex->width = (u16)x_max;
 	image->subtex->height = (u16)y_max;
 	image->subtex->left = 0.0;
 	image->subtex->top = 1.0;
-	image->subtex->right = x_max / (float)tex_size_x;
-	image->subtex->bottom = 1.0 - y_max / (float)tex_size_y;
+	image->subtex->right = x_max / (float)image->c2d.tex->width;
+	image->subtex->bottom = 1.0 - y_max / (float)image->c2d.tex->height;
 	image->c2d.subtex = image->subtex;
 
 	if(pixel_size == 2)
@@ -534,225 +558,259 @@ void Draw_set_texture_filter(Image_data* image, bool filter)
 		C3D_TexSetFilter(image->c2d.tex, GPU_NEAREST, GPU_NEAREST);
 }
 
-void Draw_parse_text(std::string text, int* count, short font_list[2][1024])
-{
-	bool reverse = false;
-	bool found = false;
-	bool font_loaded[2] = { Exfont_is_loaded_system_font(0), Exfont_is_loaded_system_font(1), };//JPN, CHN
-	int previous_num = -3;
-	int memcmp_result = -1;
-	int array_count = 0;
-	int characters = 0;
-	std::string sample[8] = { "\u0000", "\u000A", "\u4DFF", "\uA000", "\u312F", "\u3190", "\uABFF", "\uD7B0", };
-
-	Exfont_text_parse(text, util_draw_part_text[0], 1023, &characters);
-	Exfont_text_parse(Exfont_text_sort(util_draw_part_text[0], 1023), util_draw_part_text[0], 1023, &characters);
-
-	for (int i = 0; i < characters; i++)
-	{
-		reverse = false;
-		if (memcmp((void*)util_draw_part_text[0][i].c_str(), (void*)sample[0].c_str(), 0x1) == 0)
-		{
-			font_list[0][i] = -2;
-			break;
-		}
-		else if (memcmp((void*)util_draw_part_text[0][i].c_str(), (void*)sample[1].c_str(), 0x1) == 0)
-		{
-			font_list[0][i] = -1;
-			continue;
-		}
-
-		if((memcmp((void*)util_draw_part_text[0][i].c_str(), (void*)sample[2].c_str(), 0x3) > 0 && memcmp((void*)util_draw_part_text[0][i].c_str(), (void*)sample[3].c_str(), 0x3) < 0)
-		|| (memcmp((void*)util_draw_part_text[0][i].c_str(), (void*)sample[4].c_str(), 0x3) > 0 && memcmp((void*)util_draw_part_text[0][i].c_str(), (void*)sample[5].c_str(), 0x3) < 0)
-		|| (memcmp((void*)util_draw_part_text[0][i].c_str(), (void*)sample[6].c_str(), 0x3) > 0 && memcmp((void*)util_draw_part_text[0][i].c_str(), (void*)sample[7].c_str(), 0x3) < 0))
-		{
-			if(memcmp((void*)util_draw_part_text[0][i].c_str(), (void*)sample[2].c_str(), 0x3) > 0 && memcmp((void*)util_draw_part_text[0][i].c_str(), (void*)sample[3].c_str(), 0x3) < 0)
-			{
-				found = false;
-				reverse = false;
-				memcmp_result = 1;
-
-				if(font_loaded[0])
-				{
-					for(int s = 0;;)
-					{
-						if(!reverse)
-							s += 100;
-						else
-							s--;
-
-						if((s < 0 || s > 3000) && reverse)
-							break;
-						else if(s > 3000)
-						{
-							reverse = true;
-							s = 3000;
-						}
-						else
-							memcmp_result = memcmp((void*)util_draw_part_text[0][i].c_str(), (void*)util_draw_japanese_kanji[s].c_str(), 3);
-
-						if(memcmp_result == 0)
-						{
-							font_list[0][i] = 0; //JPN
-							found = true;
-							break;
-						}
-						else if(memcmp_result < 0)
-							reverse = true;
-					}
-				}
-
-				if(!found)
-				{
-					reverse = false;
-					memcmp_result = 1;
-
-					if(font_loaded[1])
-					{
-						for(int s = 0;;)
-						{
-							if(!reverse)
-								s += 100;
-							else
-								s--;
-
-							if((s < 0 || s > 6300) && reverse)
-								break;
-							else if(s > 6300)
-							{
-								reverse = true;
-								s = 6300;
-							}
-							else
-								memcmp_result = memcmp((void*)util_draw_part_text[0][i].c_str(), (void*)util_draw_simple_chinese[s].c_str(), 3);
-
-							if(memcmp_result == 0)
-							{
-								font_list[0][i] = 1; //CHN
-								found = true;
-								break;
-							}
-							else if(memcmp_result < 0)
-								reverse = true;
-						}
-					}
-				}
-
-				if(!found)
-				  font_list[0][i] = 3; //TWN
-			}
-			else
-				font_list[0][i] = 2; //KOR
-		}
-		else
-			font_list[0][i] = 4;
-	}
-
-	util_draw_part_text[1][0] = "";
-	previous_num = font_list[0][0];
-	for (int i = 0; i < characters; i++)
-	{
-		if(font_list[0][i] == -2)
-		{
-			font_list[1][array_count + 1] = font_list[0][i];
-			break;
-		}
-		else if(previous_num != font_list[0][i] || font_list[0][i] == -1)
-		{
-			array_count++;
-			util_draw_part_text[1][array_count] = "";
-		}
-
-		util_draw_part_text[1][array_count] += util_draw_part_text[0][i];
-		font_list[1][array_count] = font_list[0][i];
-		previous_num = font_list[0][i];
-	}
-	*count = array_count;
-}
-
 void Draw_get_text_size(std::string text, float text_size_x, float text_size_y, double* out_text_size_x, double* out_text_size_y)
 {
-	short font_list[2][1024];
-	int count = 0;
+	bool new_line = false;
+	bool eof = false;
+	int start_pos = -1;
+	int array_count = 0;
 	float width = 0, height = 0, y_offset = 0, used_x = 0, used_x_max = 0, used_y_max = 0;
-	double font_height_factor = 1, font_width_factor = 1;
-	C2D_Text c2d_text;
-	C2D_TextBuf c2d_buf;
+	std::string* part_text = nullptr;
 
 	if(!util_draw_init)
 		return;
-	
-	c2d_buf = C2D_TextBufNew(4096);
-	if(!c2d_buf)
-		return;
 
-
-	Draw_parse_text(text, &count, font_list);
-
-	for (int i = 0; i <= count; i++)
+	part_text = new std::string[text.length() + 1];
+	if(!part_text)
 	{
-		if (font_list[1][i] == -2)
+		delete[] part_text;
+		part_text = nullptr;
+		return;
+	}
+
+	text_size_x *= 1.2;
+	text_size_y *= 1.2;
+
+	Exfont_text_parse(text, part_text, (text.length() + 1), &array_count);
+	array_count++;
+
+	for (int i = 0; i < array_count; i++)
+	{
+		if (part_text[i].c_str()[0] == 0x0)
+			eof = true;
+		else if (part_text[i].c_str()[0] == 0xA)
+			new_line = true;
+
+		if(start_pos == -1)
+			start_pos = i;
+
+		if(new_line || eof || i == (array_count - 1))
+		{
+			Exfont_draw_get_text_size(&part_text[start_pos], (i - start_pos), text_size_x, text_size_y, &width, &height);
+
+			start_pos = -1;
+			used_x += width;
+			if(used_x > used_x_max)
+				used_x_max = used_x;
+			if(height > used_y_max)
+				used_y_max = height;
+		}
+
+		if(eof)
 			break;
-		else if (font_list[1][i] == -1)
-		{			
-			height = 30 * text_size_y;
+
+		if(new_line)
+		{
+			height = 25 * text_size_y;
 			if(height > used_y_max)
 				used_y_max = height;
 
 			y_offset += used_y_max;
 			used_y_max = 0;
 			used_x = 0;
-			continue;
+			new_line = false;
 		}
-
-		if(!Exfont_is_loaded_external_font(0) || (font_list[1][i] >= 0 && font_list[1][i] <= 3))
-		{
-			if(!Exfont_is_loaded_external_font(0))
-				font_list[1][i] = 0;
-
-			if(font_list[1][i] == 1)
-			{
-				font_width_factor = 1;
-				font_height_factor = 0.83333;
-			}
-			else if(font_list[1][i] == 2)
-			{
-				font_width_factor = 1;
-				font_height_factor = 0.83333;
-			}
-			else if(font_list[1][i] == 3)
-			{
-				font_width_factor = 1.2;
-				font_height_factor = 0.83333;
-			}
-			else
-			{
-				font_width_factor = 1;
-				font_height_factor = 1;
-			}
-
-			C2D_TextBufClear(c2d_buf);
-			C2D_TextFontParse(&c2d_text, util_draw_system_fonts[font_list[1][i]], c2d_buf, util_draw_part_text[1][i].c_str());
-			C2D_TextOptimize(&c2d_text);
-			C2D_TextGetDimensions(&c2d_text, text_size_x * font_width_factor, text_size_y * font_height_factor, &width, &height);
-		}
-		else if(font_list[1][i] == 4)
-		{
-			font_width_factor = 1.2;
-			font_height_factor = 1.2;
-			Exfont_draw_get_text_size(util_draw_part_text[1][i], text_size_x * font_width_factor, text_size_y * font_height_factor, &width, &height);
-		}
-		
-		used_x += width;
-		if(used_x > used_x_max)
-			used_x_max = used_x;
-		if(height > used_y_max)
-			used_y_max = height;
 	}
 
 	*out_text_size_x = used_x_max;
 	*out_text_size_y = y_offset + used_y_max;
-	C2D_TextBufDelete(c2d_buf);
+	delete[] part_text;
+	part_text = nullptr;
+}
+
+void Draw(std::string text, float x, float y, float text_size_x, float text_size_y, int abgr8888, int x_align, int y_align,
+float box_size_x, float box_size_y, int texture_position, void* background_image, int texture_abgr8888, bool c2d_image_pointer)
+{
+	bool new_line = false;
+	bool eof = false;
+	int start_pos = -1;
+	int lines = 0;
+	int line_count = 0;
+	int array_count = 0;
+	float width = 0, height = 0, original_x = 0, original_y = 0, x_min = 0, y_offset = 0, used_x = 0, used_x_max = 0, used_y_max = 0;
+	float* x_start;
+	std::string* part_text = nullptr;
+	original_x = x;
+	original_y = y;
+
+	if(!util_draw_init)
+		return;
+
+	if((x_align != DEF_DRAW_X_ALIGN_LEFT && x_align != DEF_DRAW_X_ALIGN_CENTER && x_align != DEF_DRAW_X_ALIGN_RIGHT)
+	|| (y_align != DEF_DRAW_Y_ALIGN_TOP && y_align != DEF_DRAW_Y_ALIGN_CENTER && y_align != DEF_DRAW_Y_ALIGN_BOTTOM)
+	|| (texture_position != DEF_DRAW_BACKGROUND_NONE && texture_position != DEF_DRAW_BACKGROUND_ENTIRE_BOX && texture_position != DEF_DRAW_BACKGROUND_UNDER_TEXT))
+		return;
+
+	part_text = new std::string[text.length() + 1];
+	x_start = (float*)malloc(sizeof(float) * (text.length() + 1));
+	if(!part_text || !x_start)
+	{
+		delete[] part_text;
+		free(x_start);
+		part_text = nullptr;
+		x_start = NULL;
+		return;
+	}
+
+	text_size_x *= 1.2;
+	text_size_y *= 1.2;
+
+	Exfont_text_parse(text, part_text, (text.length() + 1), &array_count);
+	array_count++;
+
+	if(x_align == DEF_DRAW_X_ALIGN_LEFT && y_align == DEF_DRAW_Y_ALIGN_TOP && texture_position == DEF_DRAW_BACKGROUND_NONE)
+		x = original_x;
+	else
+	{
+		new_line = false;
+		eof = false;
+		start_pos = -1;
+
+		for (int i = 0; i < array_count; i++)
+		{
+			if (part_text[i].c_str()[0] == 0x0)
+				eof = true;
+			else if (part_text[i].c_str()[0] == 0xA)
+				new_line = true;
+
+			if(start_pos == -1)
+				start_pos = i;
+
+			if(new_line || eof || i == (array_count - 1))
+			{
+				Exfont_draw_get_text_size(&part_text[start_pos], (i - start_pos), text_size_x, text_size_y, &width, &height);
+
+				start_pos = -1;
+				used_x += width;
+				if(used_x > used_x_max)
+					used_x_max = used_x;
+				if(height > used_y_max)
+					used_y_max = height;
+			}
+
+			if(eof)
+				break;
+
+			if(new_line)
+			{
+				height = 25 * text_size_y;
+				if(height > used_y_max)
+					used_y_max = height;
+
+				y_offset += used_y_max;
+				if(x_align == DEF_DRAW_X_ALIGN_CENTER)
+					x_start[lines] = ((box_size_x - used_x) / 2) + x;
+				else if(x_align == DEF_DRAW_X_ALIGN_RIGHT)
+					x_start[lines] = box_size_x - used_x + x;
+
+				used_y_max = 0;
+				used_x = 0;
+				lines++;
+				new_line = false;
+			}
+		}
+		used_y_max = y_offset + used_y_max;
+
+		if(x_align == DEF_DRAW_X_ALIGN_CENTER)
+			x_start[lines] = ((box_size_x - used_x) / 2.0) + x;
+		else if(x_align == DEF_DRAW_X_ALIGN_RIGHT)
+			x_start[lines] = box_size_x - used_x + x;
+		if(y_align == DEF_DRAW_Y_ALIGN_CENTER)
+			y = ((box_size_y - used_y_max) / 2.0) + y;
+		else if(y_align == DEF_DRAW_Y_ALIGN_BOTTOM)
+			y = box_size_y - used_y_max + y;
+
+		lines++;
+
+		if(x_align == DEF_DRAW_X_ALIGN_LEFT)
+		{
+			x = original_x;
+			x_min = original_x;
+		}
+		else if(x_align == DEF_DRAW_X_ALIGN_CENTER || x_align == DEF_DRAW_X_ALIGN_RIGHT)
+		{
+			x = x_start[line_count];
+			x_min = x_start[0];
+			for (int i = 1; i < lines; i++)
+			{
+				if(x_min > x_start[i])
+					x_min = x_start[i];
+			}
+		}
+
+		if(c2d_image_pointer)
+		{
+			C2D_Image* c2d_pointer = (C2D_Image*)background_image;
+			if(texture_position == DEF_DRAW_BACKGROUND_ENTIRE_BOX)
+				Draw_texture(*c2d_pointer, texture_abgr8888, original_x, original_y, box_size_x, box_size_y);
+			else if(texture_position == DEF_DRAW_BACKGROUND_UNDER_TEXT)
+				Draw_texture(*c2d_pointer, texture_abgr8888, x_min, y, used_x_max, used_y_max);
+		}
+		else
+		{
+			Image_data* image_data_pointer = (Image_data*)background_image;
+			if(texture_position == DEF_DRAW_BACKGROUND_ENTIRE_BOX)
+				Draw_texture(image_data_pointer, texture_abgr8888, original_x, original_y, box_size_x, box_size_y);
+			else if(texture_position == DEF_DRAW_BACKGROUND_UNDER_TEXT)
+				Draw_texture(image_data_pointer, texture_abgr8888, x_min, y, used_x_max, used_y_max);
+		}
+	}
+
+	new_line = false;
+	eof = false;
+	start_pos = -1;
+	for (int i = 0; i < array_count; i++)
+	{
+		if (part_text[i].c_str()[0] == 0x0)
+			eof = true;
+		else if (part_text[i].c_str()[0] == 0xA)
+			new_line = true;
+
+		if(start_pos == -1)
+			start_pos = i;
+
+		if(new_line || eof || i == (array_count - 1))
+		{
+			Exfont_draw_external_fonts(&part_text[start_pos], (i - start_pos), x, y, text_size_x, text_size_y, abgr8888, &width, &height);
+
+			start_pos = -1;
+			x += width;
+		}
+
+		if(eof)
+			break;
+
+		if(new_line)
+		{
+			y += 25 * text_size_y;
+			if(x_align == DEF_DRAW_X_ALIGN_LEFT)
+				x = original_x;
+			else if(x_align == DEF_DRAW_X_ALIGN_CENTER || x_align == DEF_DRAW_X_ALIGN_RIGHT)
+			{
+				line_count++;
+				x = x_start[line_count];
+			}
+			else
+				x = original_x;
+
+			new_line = false;
+		}
+	}
+
+	delete[] part_text;
+	free(x_start);
+	part_text = nullptr;
+	x_start = NULL;
 }
 
 void Draw(std::string text, float x, float y, float text_size_x, float text_size_y, int abgr8888)
@@ -761,433 +819,21 @@ void Draw(std::string text, float x, float y, float text_size_x, float text_size
 }
 
 void Draw(std::string text, float x, float y, float text_size_x, float text_size_y, int abgr8888, int x_align, int y_align,
- float box_size_x, float box_size_y)
+float box_size_x, float box_size_y)
 {
 	Draw(text, x, y, text_size_x, text_size_y, abgr8888, x_align, y_align, box_size_x, box_size_y, DEF_DRAW_BACKGROUND_NONE, var_null_image, DEF_DRAW_NO_COLOR);
 }
 
-//todo : merge code
 void Draw(std::string text, float x, float y, float text_size_x, float text_size_y, int abgr8888, int x_align, int y_align,
- float box_size_x, float box_size_y, int texture_position, C2D_Image background_image, int texture_abgr8888)
+float box_size_x, float box_size_y, int texture_position, C2D_Image background_image, int texture_abgr8888)
 {
-	short font_list[2][1024];
-	float x_start [1024];
-	int lines = 0;
-	int line_count = 0;
-	int array_count = 0;
-	float width = 0, height = 0, original_x = 0, original_y = 0, x_min = 0, y_offset = 0, used_x = 0, used_x_max = 0, used_y_max = 0;
-	double font_height_factor = 1, font_width_factor = 1, font_draw_height_factor = 1, font_draw_width_factor = 1;
-	C2D_Text c2d_text;
-	C2D_TextBuf c2d_buf;
-	original_x = x;
-	original_y = y;
-
-	if(!util_draw_init)
-		return;
-	
-	if((x_align != DEF_DRAW_X_ALIGN_LEFT && x_align != DEF_DRAW_X_ALIGN_CENTER && x_align != DEF_DRAW_X_ALIGN_RIGHT)
-	|| (y_align != DEF_DRAW_Y_ALIGN_TOP && y_align != DEF_DRAW_Y_ALIGN_CENTER && y_align != DEF_DRAW_Y_ALIGN_BOTTOM)
-	|| (texture_position != DEF_DRAW_BACKGROUND_NONE && texture_position != DEF_DRAW_BACKGROUND_ENTIRE_BOX && texture_position != DEF_DRAW_BACKGROUND_UNDER_TEXT))
-		return;
-
-	c2d_buf = C2D_TextBufNew(4096);
-	if(!c2d_buf)
-		return;
-
-
-	Draw_parse_text(text, &array_count, font_list);
-
-	if(x_align == DEF_DRAW_X_ALIGN_LEFT && y_align == DEF_DRAW_Y_ALIGN_TOP && texture_position == DEF_DRAW_BACKGROUND_NONE)
-			x = original_x;
-	else
-	{
-		for (int i = 0; i <= array_count; i++)
-		{
-			if (font_list[1][i] == -2)
-				break;
-			else if (font_list[1][i] == -1)
-			{
-				height = 30 * text_size_y;
-				if(height > used_y_max)
-					used_y_max = height;
-
-				y_offset += used_y_max;
-				if(x_align == DEF_DRAW_X_ALIGN_CENTER)
-					x_start[lines] = ((box_size_x - used_x) / 2) + x;
-				else if(x_align == DEF_DRAW_X_ALIGN_RIGHT)
-					x_start[lines] = box_size_x - used_x + x;
-
-				used_y_max = 0;
-				used_x = 0;
-				lines++;
-				continue;
-			}
-
-			if(!Exfont_is_loaded_external_font(0) || (font_list[1][i] >= 0 && font_list[1][i] <= 3))
-			{
-				if(!Exfont_is_loaded_external_font(0))
-					font_list[1][i] = 0;
-
-				if(font_list[1][i] == 1)
-				{
-					font_width_factor = 1;
-					font_height_factor = 0.83333;
-				}
-				else if(font_list[1][i] == 2)
-				{
-					font_width_factor = 1;
-					font_height_factor = 0.83333;
-				}
-				else if(font_list[1][i] == 3)
-				{
-					font_width_factor = 1.2;
-					font_height_factor = 0.83333;
-				}
-				else
-				{
-					font_width_factor = 1;
-					font_height_factor = 1;
-				}
-
-				C2D_TextBufClear(c2d_buf);
-				C2D_TextFontParse(&c2d_text, util_draw_system_fonts[font_list[1][i]], c2d_buf, util_draw_part_text[1][i].c_str());
-				C2D_TextOptimize(&c2d_text);
-				C2D_TextGetDimensions(&c2d_text, text_size_x * font_width_factor, text_size_y * font_height_factor, &width, &height);
-			}
-			else if(font_list[1][i] == 4)
-			{
-				font_width_factor = 1.2;
-				font_height_factor = 1.2;
-				Exfont_draw_get_text_size(util_draw_part_text[1][i], text_size_x * font_width_factor, text_size_y * font_height_factor, &width, &height);
-			}
-			
-			used_x += width;
-			if(used_x > used_x_max)
-				used_x_max = used_x;
-			if(height > used_y_max)
-				used_y_max = height;
-		}
-		used_y_max = y_offset + used_y_max;
-
-		if(x_align == DEF_DRAW_X_ALIGN_CENTER)
-			x_start[lines] = ((box_size_x - used_x) / 2.0) + x;
-		else if(x_align == DEF_DRAW_X_ALIGN_RIGHT)
-			x_start[lines] = box_size_x - used_x + x;
-		if(y_align == DEF_DRAW_Y_ALIGN_CENTER)
-			y = ((box_size_y - used_y_max) / 2.0) + y;
-		else if(y_align == DEF_DRAW_Y_ALIGN_BOTTOM)
-			y = box_size_y - used_y_max + y;
-
-		lines++;
-
-		if(x_align == DEF_DRAW_X_ALIGN_LEFT)
-		{
-			x = original_x;
-			x_min = original_x;
-		}
-		else if(x_align == DEF_DRAW_X_ALIGN_CENTER || x_align == DEF_DRAW_X_ALIGN_RIGHT)
-		{
-			x = x_start[line_count];
-			x_min = x_start[0];
-			for (int i = 1; i < lines; i++)
-			{
-				if(x_min > x_start[i])
-					x_min = x_start[i];
-			}
-		}
-
-		if(texture_position == DEF_DRAW_BACKGROUND_ENTIRE_BOX)
-			Draw_texture(background_image, texture_abgr8888, original_x, original_y, box_size_x, box_size_y);
-		else if(texture_position == DEF_DRAW_BACKGROUND_UNDER_TEXT)
-			Draw_texture(background_image, texture_abgr8888, x_min, y, used_x_max, used_y_max);
-	}
-
-	for (int i = 0; i <= array_count; i++)
-	{
-		if (font_list[1][i] == -2)
-			break;
-		else if (font_list[1][i] == -1)
-		{
-			y += 30 * text_size_y;
-			if(x_align == DEF_DRAW_X_ALIGN_LEFT)
-				x = original_x;
-			else if(x_align == DEF_DRAW_X_ALIGN_CENTER || x_align == DEF_DRAW_X_ALIGN_RIGHT)
-			{
-				line_count++;
-				x = x_start[line_count];
-			}
-			else
-				x = original_x;
-
-			continue;
-		}
-
-		if(!Exfont_is_loaded_external_font(0) || (font_list[1][i] >= 0 && font_list[1][i] <= 3))
-		{
-			if(!Exfont_is_loaded_external_font(0))
-				font_list[1][i] = 0;
-
-			C2D_TextBufClear(c2d_buf);
-			if(font_list[1][i] == 1)
-			{
-				y_offset = 4 * text_size_y;
-				font_width_factor = 1;
-				font_height_factor = 0.83333;
-				font_draw_width_factor = 0.83333;
-				font_draw_height_factor = 0.83333;
-			}
-			else if(font_list[1][i] == 2)
-			{
-				y_offset = 4 * text_size_y;
-				font_width_factor = 1;
-				font_height_factor = 0.83333;
-				font_draw_width_factor = 0.83333;
-				font_draw_height_factor = 0.83333;
-			}
-			else if(font_list[1][i] == 3)
-			{
-				y_offset = 4.5 * text_size_y;
-				font_width_factor = 1.2;
-				font_height_factor = 0.83333;
-				font_draw_width_factor = 0.83333;
-				font_draw_height_factor = 0.83333;
-			}
-			else
-			{
-				y_offset = 0;
-				font_width_factor = 1;
-				font_height_factor = 1;
-				font_draw_width_factor = 1;
-				font_draw_height_factor = 1;
-			}
-
-			C2D_TextFontParse(&c2d_text, util_draw_system_fonts[font_list[1][i]], c2d_buf, util_draw_part_text[1][i].c_str());
-			C2D_TextOptimize(&c2d_text);
-			C2D_TextGetDimensions(&c2d_text, text_size_x * font_width_factor, text_size_y * font_height_factor, &width, &height);
-			C2D_DrawText(&c2d_text, C2D_WithColor, x, y + y_offset, 0.0, text_size_x * font_draw_width_factor, text_size_y * font_draw_height_factor, abgr8888);
-		}
-		else if(font_list[1][i] == 4)
-		{
-			font_draw_width_factor = 1.2;
-			font_draw_height_factor = 1.2;
-			Exfont_draw_external_fonts(util_draw_part_text[1][i], x, y, text_size_x * font_draw_width_factor, text_size_y * font_draw_height_factor, abgr8888, &width, &height);
-		}
-
-		x += width;
-	}
-	C2D_TextBufDelete(c2d_buf);
+	Draw(text, x, y, text_size_x, text_size_y, abgr8888, x_align, y_align, box_size_x, box_size_y, texture_position, &background_image, texture_abgr8888, true);
 }
 
-//todo : merge code
 void Draw(std::string text, float x, float y, float text_size_x, float text_size_y, int abgr8888, int x_align, int y_align,
- float box_size_x, float box_size_y, int texture_position, Image_data* background_image, int texture_abgr8888)
+float box_size_x, float box_size_y, int texture_position, Image_data* background_image, int texture_abgr8888)
 {
-	short font_list[2][1024];
-	float x_start [1024];
-	int lines = 0;
-	int line_count = 0;
-	int array_count = 0;
-	float width = 0, height = 0, original_x = 0, original_y = 0, x_min = 0, y_offset = 0, used_x = 0, used_x_max = 0, used_y_max = 0;
-	double font_height_factor = 1, font_width_factor = 1, font_draw_height_factor = 1, font_draw_width_factor = 1;
-	C2D_Text c2d_text;
-	C2D_TextBuf c2d_buf;
-	original_x = x;
-	original_y = y;
-
-	if(!util_draw_init)
-		return;
-	
-	if((x_align != DEF_DRAW_X_ALIGN_LEFT && x_align != DEF_DRAW_X_ALIGN_CENTER && x_align != DEF_DRAW_X_ALIGN_RIGHT)
-	|| (y_align != DEF_DRAW_Y_ALIGN_TOP && y_align != DEF_DRAW_Y_ALIGN_CENTER && y_align != DEF_DRAW_Y_ALIGN_BOTTOM)
-	|| (texture_position != DEF_DRAW_BACKGROUND_NONE && texture_position != DEF_DRAW_BACKGROUND_ENTIRE_BOX && texture_position != DEF_DRAW_BACKGROUND_UNDER_TEXT))
-		return;
-
-	c2d_buf = C2D_TextBufNew(4096);
-	if(!c2d_buf)
-		return;
-
-
-	Draw_parse_text(text, &array_count, font_list);
-
-	if(x_align == DEF_DRAW_X_ALIGN_LEFT && y_align == DEF_DRAW_Y_ALIGN_TOP && texture_position == DEF_DRAW_BACKGROUND_NONE)
-			x = original_x;
-	else
-	{
-		for (int i = 0; i <= array_count; i++)
-		{
-			if (font_list[1][i] == -2)
-				break;
-			else if (font_list[1][i] == -1)
-			{
-				height = 30 * text_size_y;
-				if(height > used_y_max)
-					used_y_max = height;
-
-				y_offset += used_y_max;
-				if(x_align == DEF_DRAW_X_ALIGN_CENTER)
-					x_start[lines] = ((box_size_x - used_x) / 2) + x;
-				else if(x_align == DEF_DRAW_X_ALIGN_RIGHT)
-					x_start[lines] = box_size_x - used_x + x;
-
-				used_y_max = 0;
-				used_x = 0;
-				lines++;
-				continue;
-			}
-
-			if(!Exfont_is_loaded_external_font(0) || (font_list[1][i] >= 0 && font_list[1][i] <= 3))
-			{
-				if(!Exfont_is_loaded_external_font(0))
-					font_list[1][i] = 0;
-
-				if(font_list[1][i] == 1)
-				{
-					font_width_factor = 1;
-					font_height_factor = 0.83333;
-				}
-				else if(font_list[1][i] == 2)
-				{
-					font_width_factor = 1;
-					font_height_factor = 0.83333;
-				}
-				else if(font_list[1][i] == 3)
-				{
-					font_width_factor = 1.2;
-					font_height_factor = 0.83333;
-				}
-				else
-				{
-					font_width_factor = 1;
-					font_height_factor = 1;
-				}
-
-				C2D_TextBufClear(c2d_buf);
-				C2D_TextFontParse(&c2d_text, util_draw_system_fonts[font_list[1][i]], c2d_buf, util_draw_part_text[1][i].c_str());
-				C2D_TextOptimize(&c2d_text);
-				C2D_TextGetDimensions(&c2d_text, text_size_x * font_width_factor, text_size_y * font_height_factor, &width, &height);
-			}
-			else if(font_list[1][i] == 4)
-			{
-				font_width_factor = 1.2;
-				font_height_factor = 1.2;
-				Exfont_draw_get_text_size(util_draw_part_text[1][i], text_size_x * font_width_factor, text_size_y * font_height_factor, &width, &height);
-			}
-			
-			used_x += width;
-			if(used_x > used_x_max)
-				used_x_max = used_x;
-			if(height > used_y_max)
-				used_y_max = height;
-		}
-		used_y_max = y_offset + used_y_max;
-
-		if(x_align == DEF_DRAW_X_ALIGN_CENTER)
-			x_start[lines] = ((box_size_x - used_x) / 2.0) + x;
-		else if(x_align == DEF_DRAW_X_ALIGN_RIGHT)
-			x_start[lines] = box_size_x - used_x + x;
-		if(y_align == DEF_DRAW_Y_ALIGN_CENTER)
-			y = ((box_size_y - used_y_max) / 2.0) + y;
-		else if(y_align == DEF_DRAW_Y_ALIGN_BOTTOM)
-			y = box_size_y - used_y_max + y;
-
-		lines++;
-
-		if(x_align == DEF_DRAW_X_ALIGN_LEFT)
-		{
-			x = original_x;
-			x_min = original_x;
-		}
-		else if(x_align == DEF_DRAW_X_ALIGN_CENTER || x_align == DEF_DRAW_X_ALIGN_RIGHT)
-		{
-			x = x_start[line_count];
-			x_min = x_start[0];
-			for (int i = 1; i < lines; i++)
-			{
-				if(x_min > x_start[i])
-					x_min = x_start[i];
-			}
-		}
-
-		if(texture_position == DEF_DRAW_BACKGROUND_ENTIRE_BOX)
-			Draw_texture(background_image, texture_abgr8888, original_x, original_y, box_size_x, box_size_y);
-		else if(texture_position == DEF_DRAW_BACKGROUND_UNDER_TEXT)
-			Draw_texture(background_image, texture_abgr8888, x_min, y, used_x_max, used_y_max);
-	}
-
-	for (int i = 0; i <= array_count; i++)
-	{
-		if (font_list[1][i] == -2)
-			break;
-		else if (font_list[1][i] == -1)
-		{
-			y += 30 * text_size_y;
-			if(x_align == DEF_DRAW_X_ALIGN_LEFT)
-				x = original_x;
-			else if(x_align == DEF_DRAW_X_ALIGN_CENTER || x_align == DEF_DRAW_X_ALIGN_RIGHT)
-			{
-				line_count++;
-				x = x_start[line_count];
-			}
-			else
-				x = original_x;
-
-			continue;
-		}
-
-		if(!Exfont_is_loaded_external_font(0) || (font_list[1][i] >= 0 && font_list[1][i] <= 3))
-		{
-			if(!Exfont_is_loaded_external_font(0))
-				font_list[1][i] = 0;
-
-			C2D_TextBufClear(c2d_buf);
-			if(font_list[1][i] == 1)
-			{
-				y_offset = 4 * text_size_y;
-				font_width_factor = 1;
-				font_height_factor = 0.83333;
-				font_draw_width_factor = 0.83333;
-				font_draw_height_factor = 0.83333;
-			}
-			else if(font_list[1][i] == 2)
-			{
-				y_offset = 4 * text_size_y;
-				font_width_factor = 1;
-				font_height_factor = 0.83333;
-				font_draw_width_factor = 0.83333;
-				font_draw_height_factor = 0.83333;
-			}
-			else if(font_list[1][i] == 3)
-			{
-				y_offset = 4.5 * text_size_y;
-				font_width_factor = 1.2;
-				font_height_factor = 0.83333;
-				font_draw_width_factor = 0.83333;
-				font_draw_height_factor = 0.83333;
-			}
-			else
-			{
-				y_offset = 0;
-				font_width_factor = 1;
-				font_height_factor = 1;
-				font_draw_width_factor = 1;
-				font_draw_height_factor = 1;
-			}
-
-			C2D_TextFontParse(&c2d_text, util_draw_system_fonts[font_list[1][i]], c2d_buf, util_draw_part_text[1][i].c_str());
-			C2D_TextOptimize(&c2d_text);
-			C2D_TextGetDimensions(&c2d_text, text_size_x * font_width_factor, text_size_y * font_height_factor, &width, &height);
-			C2D_DrawText(&c2d_text, C2D_WithColor, x, y + y_offset, 0.0, text_size_x * font_draw_width_factor, text_size_y * font_draw_height_factor, abgr8888);
-		}
-		else if(font_list[1][i] == 4)
-		{
-			font_draw_width_factor = 1.2;
-			font_draw_height_factor = 1.2;
-			Exfont_draw_external_fonts(util_draw_part_text[1][i], x, y, text_size_x * font_draw_width_factor, text_size_y * font_draw_height_factor, abgr8888, &width, &height);
-		}
-
-		x += width;
-	}
-	C2D_TextBufDelete(c2d_buf);
+	Draw(text, x, y, text_size_x, text_size_y, abgr8888, x_align, y_align, box_size_x, box_size_y, texture_position, background_image, texture_abgr8888, false);
 }
 
 int Draw_get_free_sheet_num(void)
@@ -1290,9 +936,6 @@ void Draw_bot_ui(void)
 
 Image_data* Draw_get_bot_ui_button(void)
 {
-	if(!util_draw_init)
-		return NULL;
-
 	return &util_draw_bot_ui;
 }
 
@@ -1427,32 +1070,6 @@ void Draw_debug_info(void)
 	Draw("Watch(int): " + std::to_string(Util_get_watch_int_usage()) + "/" + std::to_string(DEF_DRAW_MAX_WATCH_INT_VARIABLES) + "(" + std::to_string((double)Util_get_watch_int_usage() / DEF_DRAW_MAX_WATCH_INT_VARIABLES * 100).substr(0, 4) + "%)", 0, 210, 0.35, 0.35, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 300, 10, DEF_DRAW_BACKGROUND_UNDER_TEXT, var_square_image[0], DEF_DRAW_WEAK_BLUE);
 	Draw("Watch(double): " + std::to_string(Util_get_watch_double_usage()) + "/" + std::to_string(DEF_DRAW_MAX_WATCH_DOUBLE_VARIABLES) + "(" + std::to_string((double)Util_get_watch_double_usage() / DEF_DRAW_MAX_WATCH_DOUBLE_VARIABLES * 100).substr(0, 4) + "%)", 0, 220, 0.35, 0.35, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 300, 10, DEF_DRAW_BACKGROUND_UNDER_TEXT, var_square_image[0], DEF_DRAW_WEAK_BLUE);
 	Draw("Watch(string): " + std::to_string(Util_get_watch_string_usage()) + "/" + std::to_string(DEF_DRAW_MAX_WATCH_STRING_VARIABLES) + "(" + std::to_string((double)Util_get_watch_string_usage() / DEF_DRAW_MAX_WATCH_STRING_VARIABLES * 100).substr(0, 4) + "%)", 0, 230, 0.35, 0.35, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 300, 10, DEF_DRAW_BACKGROUND_UNDER_TEXT, var_square_image[0], DEF_DRAW_WEAK_BLUE);
-}
-
-Result_with_string Draw_load_kanji_samples(void)
-{
-	int characters = 0;
-	u8* fs_buffer = NULL;
-	u32 read_size = 0;
-	Result_with_string result;
-
-	result = Util_file_load_from_rom("kanji.txt", "romfs:/gfx/font/sample/", &fs_buffer, 0x8000, &read_size);
-	if(result.code == 0)
-	{
-		Exfont_text_parse((char*)fs_buffer, util_draw_japanese_kanji, 3000, &characters);
-		Util_safe_linear_free(fs_buffer);
-		fs_buffer = NULL;
-	}
-
-	result = Util_file_load_from_rom("hanyu_s.txt", "romfs:/gfx/font/sample/", &fs_buffer, 0x8000, &read_size);
-	if(result.code == 0)
-	{
-		Exfont_text_parse((char*)fs_buffer, util_draw_simple_chinese, 6300, &characters);
-		Util_safe_linear_free(fs_buffer);
-		fs_buffer = NULL;
-	}
-
-	return result;
 }
 
 Result_with_string Draw_load_system_font(int system_font_num)
