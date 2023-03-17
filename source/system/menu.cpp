@@ -42,6 +42,7 @@ bool menu_update_available = false;
 bool menu_init_request[9] = { false, false, false, false, false, false, false, false, false, };
 bool menu_exit_request[8] = { false, false, false, false, false, false, false, false, };
 int menu_icon_texture_num[9] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, };
+void (*menu_worker_thread_callbacks[DEF_MENU_NUM_OF_CALLBACKS])(void) = { NULL, };
 std::string menu_msg[DEF_MENU_NUM_OF_MSG];
 Thread menu_worker_thread, menu_hid_thread;
 C2D_Image menu_icon_image[10];
@@ -427,6 +428,50 @@ void Menu_exit(void)
 	Draw_exit();
 
 	Util_log_save(DEF_MENU_EXIT_STR, "Exited.");
+}
+
+bool Menu_add_worker_thread_callback(void (*callback)(void))
+{
+	LightLock_Lock(&menu_callback_mutex);
+
+	for(int i = 0; i < DEF_MENU_NUM_OF_CALLBACKS; i++)
+	{
+		if(menu_worker_thread_callbacks[i] == callback)
+			goto success;//Already exist.
+	}
+
+	for(int i = 0; i < DEF_MENU_NUM_OF_CALLBACKS; i++)
+	{
+		if(!menu_worker_thread_callbacks[i])
+		{
+			menu_worker_thread_callbacks[i] = callback;
+			goto success;
+		}
+	}
+
+	//No free spaces left.
+	LightLock_Unlock(&menu_callback_mutex);
+	return false;
+
+	success:
+	LightLock_Unlock(&menu_callback_mutex);
+	return true;
+}
+
+void Menu_remove_worker_thread_callback(void (*callback)(void))
+{
+	LightLock_Lock(&menu_callback_mutex);
+
+	for(int i = 0; i < DEF_MENU_NUM_OF_CALLBACKS; i++)
+	{
+		if(menu_worker_thread_callbacks[i] == callback)
+		{
+			menu_worker_thread_callbacks[i] = NULL;
+			break;
+		}
+	}
+
+	LightLock_Unlock(&menu_callback_mutex);
 }
 
 void Menu_main(void)
