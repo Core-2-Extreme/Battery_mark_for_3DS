@@ -50,7 +50,6 @@ double sem_touch_x_move_left = 0.0;
 double sem_touch_y_move_left = 0.0;
 std::string sem_msg[DEF_SEM_NUM_OF_MSG];
 std::string sem_newest_ver_data[6];//0 newest version number, 1 3dsx available, 2 cia available, 3 3dsx dl url, 4 cia dl url, 5 patch note
-Thread sem_worker_thread;
 Image_data sem_back_button, sem_scroll_bar, sem_menu_button[9], sem_english_button, sem_japanese_button,
 sem_hungarian_button, sem_chinese_button, sem_italian_button, sem_spanish_button, sem_romanian_button, sem_polish_button, sem_night_mode_on_button,
 sem_night_mode_off_button, sem_flash_mode_button, sem_screen_brightness_slider, sem_screen_brightness_bar, sem_screen_off_time_slider,
@@ -59,6 +58,9 @@ sem_scroll_speed_bar, sem_system_font_button[4], sem_load_all_ex_font_button, se
 sem_ex_font_button[DEF_EXFONT_NUM_OF_FONT_NAME], sem_wifi_on_button, sem_wifi_off_button, sem_allow_send_info_button,
 sem_deny_send_info_button, sem_debug_mode_on_button, sem_debug_mode_off_button, sem_eco_mode_on_button, sem_eco_mode_off_button,
 sem_record_both_lcd_button, sem_record_top_lcd_button, sem_record_bottom_lcd_button, sem_use_fake_model_button;
+#if DEF_ENABLE_CPU_MONITOR_API
+	bool sem_is_cpu_usage_monitor_running = false;
+#endif
 
 #if ((DEF_ENABLE_CURL_API || DEF_ENABLE_HTTPC_API) && DEF_SEM_ENABLE_UPDATER)
 
@@ -107,7 +109,7 @@ void Sem_record_thread(void* arg);
 
 #endif
 
-void Sem_worker_thread(void* arg);
+void Sem_worker_callback(void);
 
 #if ((DEF_ENABLE_CURL_API || DEF_ENABLE_HTTPC_API) && DEF_SEM_ENABLE_UPDATER)
 
@@ -338,6 +340,9 @@ void Sem_init(void)
 	Util_add_watch(&sem_record_top_lcd_button.selected);
 	Util_add_watch(&sem_record_bottom_lcd_button.selected);
 
+	result.code = Menu_add_worker_thread_callback(Sem_worker_callback);
+	Util_log_save(DEF_SEM_INIT_STR, "Menu_add_worker_thread_callback()...", result.code);
+
 	Sem_resume();
 	sem_already_init = true;
 	Util_log_save(DEF_SEM_INIT_STR, "Initialized.");
@@ -425,6 +430,7 @@ void Sem_exit(void)
 	sem_already_init = false;
 	sem_thread_suspend = false;
 	sem_thread_run = false;
+	Menu_remove_worker_thread_callback(Sem_worker_callback);
 
 	log_num = Util_log_save(DEF_SEM_EXIT_STR, "Util_file_save_to_file()...");
 	result = Util_file_save_to_file("settings.txt", DEF_MAIN_DIR, (u8*)data.c_str(), data.length(), true);
@@ -433,9 +439,6 @@ void Sem_exit(void)
 	log_num = Util_log_save(DEF_SEM_EXIT_STR, "Util_file_save_to_file()...");
 	result = Util_file_save_to_file("fake_model.txt", DEF_MAIN_DIR, &sem_fake_model_num, 1, true);
 	Util_log_add(log_num, result.string, result.code);
-
-	Util_log_save(DEF_SEM_EXIT_STR, "threadJoin()...", threadJoin(sem_worker_thread, DEF_THREAD_WAIT_TIME));
-	threadFree(sem_worker_thread);
 
 #if ((DEF_ENABLE_CURL_API || DEF_ENABLE_HTTPC_API) && DEF_SEM_ENABLE_UPDATER)
 	Util_log_save(DEF_SEM_EXIT_STR, "threadJoin()...", threadJoin(sem_update_thread, DEF_THREAD_WAIT_TIME));
@@ -1841,113 +1844,107 @@ void Sem_record_thread(void* arg)
 
 #endif
 
-void Sem_worker_thread(void* arg)
+void Sem_worker_callback(void)
 {
-	Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Thread started.");
-
-#if DEF_ENABLE_CPU_MONITOR_API
-	bool cpu_usage_monitor_running = false;
-#endif
-
 	Result_with_string result;
 
-	while (sem_thread_run)
+	if (sem_already_init)
 	{
 		if (sem_reload_msg_request)
 		{
 			result = Sem_load_msg(var_lang);
-			Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sem_load_msg()..." + result.string + result.error_description, result.code);
+			Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sem_load_msg()..." + result.string + result.error_description, result.code);
 			if (result.code != 0)
 			{
 				result = Sem_load_msg("en");
-				Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sem_load_msg()..." + result.string + result.error_description, result.code);
+				Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sem_load_msg()..." + result.string + result.error_description, result.code);
 			}
 
 			result = Menu_load_msg(var_lang);
-			Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Menu_load_msg()..." + result.string + result.error_description, result.code);
+			Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Menu_load_msg()..." + result.string + result.error_description, result.code);
 			if (result.code != 0)
 			{
 				result = Menu_load_msg("en");
-				Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Menu_load_msg()..." + result.string + result.error_description, result.code);
+				Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Menu_load_msg()..." + result.string + result.error_description, result.code);
 			}
 			
 			#ifdef DEF_ENABLE_BMARK
 			result = Bmark_load_msg(var_lang);
-			Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Bmark_load_msg()..." + result.string + result.error_description, result.code);
+			Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Bmark_load_msg()..." + result.string + result.error_description, result.code);
 			if (result.code != 0)
 			{
 				result = Bmark_load_msg("en");
-				Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Bmark_load_msg()..." + result.string + result.error_description, result.code);
+				Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Bmark_load_msg()..." + result.string + result.error_description, result.code);
 			}
 			#endif
 
 			#ifdef DEF_ENABLE_BMR
 			result = Bmr_load_msg(var_lang);
-			Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Bmr_load_msg()..." + result.string + result.error_description, result.code);
+			Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Bmr_load_msg()..." + result.string + result.error_description, result.code);
 			if (result.code != 0)
 			{
 				result = Bmr_load_msg("en");
-				Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Bmr_load_msg()..." + result.string + result.error_description, result.code);
+				Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Bmr_load_msg()..." + result.string + result.error_description, result.code);
 			}
 			#endif
 
 			#ifdef DEF_ENABLE_SUB_APP2
 			result = Sapp2_load_msg(var_lang);
-			Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sapp2_load_msg()..." + result.string + result.error_description, result.code);
+			Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sapp2_load_msg()..." + result.string + result.error_description, result.code);
 			if (result.code != 0)
 			{
 				result = Sapp2_load_msg("en");
-				Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sapp2_load_msg()..." + result.string + result.error_description, result.code);
+				Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sapp2_load_msg()..." + result.string + result.error_description, result.code);
 			}
 			#endif
 
 			#ifdef DEF_ENABLE_SUB_APP3
 			result = Sapp3_load_msg(var_lang);
-			Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sapp3_load_msg()..." + result.string + result.error_description, result.code);
+			Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sapp3_load_msg()..." + result.string + result.error_description, result.code);
 			if (result.code != 0)
 			{
 				result = Sapp3_load_msg("en");
-				Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sapp4_load_msg()..." + result.string + result.error_description, result.code);
+				Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sapp4_load_msg()..." + result.string + result.error_description, result.code);
 			}
 			#endif
 
 			#ifdef DEF_ENABLE_SUB_APP4
 			result = Sapp4_load_msg(var_lang);
-			Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sapp4_load_msg()..." + result.string + result.error_description, result.code);
+			Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sapp4_load_msg()..." + result.string + result.error_description, result.code);
 			if (result.code != 0)
 			{
 				result = Sapp4_load_msg("en");
-				Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sapp4_load_msg()..." + result.string + result.error_description, result.code);
+				Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sapp4_load_msg()..." + result.string + result.error_description, result.code);
 			}
 			#endif
 
 			#ifdef DEF_ENABLE_SUB_APP5
 			result = Sapp5_load_msg(var_lang);
-			Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sapp5_load_msg()..." + result.string + result.error_description, result.code);
+			Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sapp5_load_msg()..." + result.string + result.error_description, result.code);
 			if (result.code != 0)
 			{
 				result = Sapp5_load_msg("en");
-				Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sapp5_load_msg()..." + result.string + result.error_description, result.code);
+				Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sapp5_load_msg()..." + result.string + result.error_description, result.code);
 			}
 			#endif
 
 			#ifdef DEF_ENABLE_SUB_APP6
 			result = Sapp6_load_msg(var_lang);
-			Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sapp6_load_msg()..." + result.string + result.error_description, result.code);
+			Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sapp6_load_msg()..." + result.string + result.error_description, result.code);
 			if (result.code != 0)
 			{
 				result = Sapp6_load_msg("en");
-				Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sapp6_load_msg()..." + result.string + result.error_description, result.code);
+				Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sapp6_load_msg()..." + result.string + result.error_description, result.code);
 			}
 			#endif
 
 			#ifdef DEF_ENABLE_SUB_APP7
 			result = Sapp7_load_msg(var_lang);
-			Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sapp7_load_msg()..." + result.string + result.error_description, result.code);
+			Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sapp7_load_msg()..." + result.string + result.error_description, result.code);
 			if (result.code != 0)
 			{
 				result = Sapp7_load_msg("en");
-				Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Sapp7_load_msg()..." + result.string + result.error_description, result.code);
+				Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Sapp7_load_msg()..." + result.string + result.error_description, result.code);
 			}
 			#endif
 
@@ -1957,21 +1954,21 @@ void Sem_worker_thread(void* arg)
 		else if(sem_change_brightness_request)
 		{
 			result = Util_cset_set_screen_brightness(true, true, var_lcd_brightness);
-			Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Util_cset_set_screen_brightness()..." + result.string + result.error_description, result.code);
+			Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Util_cset_set_screen_brightness()..." + result.string + result.error_description, result.code);
 			sem_change_brightness_request = false;
 		}
 #if DEF_ENABLE_CPU_MONITOR_API
-		else if(cpu_usage_monitor_running != var_monitor_cpu_usage)
+		else if(sem_is_cpu_usage_monitor_running != var_monitor_cpu_usage)
 		{
 			if(var_monitor_cpu_usage)
 			{
 				result = Util_cpu_usage_monitor_init();
-				Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Util_cpu_usage_monitor_init()..." + result.string + result.error_description, result.code);
+				Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Util_cpu_usage_monitor_init()..." + result.string + result.error_description, result.code);
 				if(result.code == 0)
-					cpu_usage_monitor_running = true;
+					sem_is_cpu_usage_monitor_running = true;
 				else
 				{
-					Util_err_set_error_message(result.string, result.error_description, DEF_SEM_WORKER_THREAD_STR, result.code);
+					Util_err_set_error_message(result.string, result.error_description, DEF_SEM_WORKER_CALLBACK_STR, result.code);
 					Util_err_set_error_show_flag(true);
 					var_monitor_cpu_usage = false;
 				}
@@ -1979,16 +1976,23 @@ void Sem_worker_thread(void* arg)
 			else
 			{
 				Util_cpu_usage_monitor_exit();
-				cpu_usage_monitor_running = false;
+				sem_is_cpu_usage_monitor_running = false;
 			}
 		}
 #endif
-		else
-			usleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
-	}
+		else if(sem_dump_log_request)
+		{
+			char file_name[64];
+			sprintf(file_name, "%04d_%02d_%02d_%02d_%02d_%02d.txt", var_years, var_months, var_days, var_hours, var_minutes, var_seconds);
 
-	Util_log_save(DEF_SEM_WORKER_THREAD_STR, "Thread exit.");
-	threadExit(0);
+			result = Util_log_dump(file_name, DEF_MAIN_DIR + "logs/");
+			Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Util_log_dump()..." + result.string + result.error_description, result.code);
+			if(result.code == 0)
+				Util_log_save(DEF_SEM_WORKER_CALLBACK_STR, "Log file was dumped at : " + DEF_MAIN_DIR + "logs/" + file_name);
+
+			sem_dump_log_request = false;
+		}
+	}
 }
 
 #if ((DEF_ENABLE_CURL_API || DEF_ENABLE_HTTPC_API) && DEF_SEM_ENABLE_UPDATER)
