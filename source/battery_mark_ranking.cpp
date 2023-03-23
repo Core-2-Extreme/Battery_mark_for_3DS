@@ -352,6 +352,7 @@ void Bmr_suspend(void)
 
 void Bmr_hid(Hid_info key)
 {
+	//Do nothing if app is suspended.
 	if(aptShouldJumpToHome())
 		return;
 
