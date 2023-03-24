@@ -40,7 +40,7 @@ struct Audio_info
 	std::string format_name = "";	//Audio codec name.
 	double duration = 0;			//Audio track duration in seconds.
 	std::string track_lang = "";	//Track languages
-	int sample_format = DEF_CONVERTER_SAMPLE_FORMAT_NONE;	//Audio sample format (DEF_CONVERTER_SAMPLE_FORMAT_*).
+	Sample_format sample_format = SAMPLE_FORMAT_NONE;	//Audio sample format.
 };
 
 struct Video_info
@@ -53,7 +53,7 @@ struct Video_info
 	int thread_type = DEF_DECODER_THREAD_TYPE_NONE;	//Threading method (DEF_DECODER_THREAD_TYPE_*).
 	int sar_width = 1;				//Sample aspect ratio for width.
 	int sar_height = 1;				//Sample aspect ratio for height.
-	int pixel_format = DEF_CONVERTER_PIXEL_FORMAT_NONE;	//Video pixel format (DEF_CONVERTER_PIXEL_FORMAT_*).
+	Pixel_format pixel_format = PIXEL_FORMAT_NONE;	//Video pixel format.
 };
 
 struct Color_converter_parameters
@@ -64,8 +64,8 @@ struct Color_converter_parameters
 	int in_height = 0;			//(in)  Source image height.
 	int out_width = 0;			//(in)  Converted image width.
 	int out_height = 0;			//(in)  Converted image height.
-	int in_color_format = DEF_CONVERTER_PIXEL_FORMAT_NONE;	//(in) Source image pixel format (DEF_CONVERTER_PIXEL_FORMAT_*).
-	int out_color_format = DEF_CONVERTER_PIXEL_FORMAT_NONE;	//(in) Converted image pixel format (DEF_CONVERTER_PIXEL_FORMAT_*).
+	Pixel_format in_color_format = PIXEL_FORMAT_NONE;	//(in) Source image pixel format.
+	Pixel_format out_color_format = PIXEL_FORMAT_NONE;	//(in) Converted image pixel format.
 };
 
 struct Audio_converter_parameters
@@ -78,8 +78,8 @@ struct Audio_converter_parameters
 	int out_samples = 0;		//(out)  Number of converted audio samples per channel.
 	int out_ch = 0;				//(in)  Converted audio ch.
 	int out_sample_rate = 0;	//(in)  Converted audio saple rate in Hz.
-	int in_sample_format = DEF_CONVERTER_SAMPLE_FORMAT_NONE;	//(in) Source audio sample format (DEF_CONVERTER_SAMPLE_FORMAT_*).
-	int out_sample_format = DEF_CONVERTER_SAMPLE_FORMAT_NONE;	//(in) Converted audio sample format (DEF_CONVERTER_SAMPLE_FORMAT_*).
+	Sample_format in_sample_format = SAMPLE_FORMAT_NONE;	//(in) Source audio sample format.
+	Sample_format out_sample_format = SAMPLE_FORMAT_NONE;	//(in) Converted audio sample format.
 };
 
 struct Subtitle_info

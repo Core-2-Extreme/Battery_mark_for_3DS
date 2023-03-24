@@ -8,8 +8,8 @@ extern "C"
 #include "libavutil/imgutils.h"
 }
 
-//Pixel format translation table DEF_CONVERTER_PIXEL_FORMAT_* -> AV_PIX_FMT_*.
-AVPixelFormat util_converter_pixel_format_table[] = 
+//Translation table for Pixel_format -> AVPixelFormat.
+AVPixelFormat util_converter_pixel_format_table[PIXEL_FORMAT_MAX] = 
 {
 	//YUV*
 	AV_PIX_FMT_YUV410P,
@@ -169,8 +169,8 @@ extern "C"
 #include "libswresample/swresample.h"
 }
 
-//Sample format translation table DEF_CONVERTER_SAMPLE_FORMAT_* -> AV_SAMPLE_FMT_*.
-AVSampleFormat util_converter_sample_format_table[] = 
+//Translation table for Sample_format -> AVSampleFormat.
+AVSampleFormat util_converter_sample_format_table[SAMPLE_FORMAT_MAX] = 
 {
     AV_SAMPLE_FMT_U8,
     AV_SAMPLE_FMT_U8P,
@@ -245,7 +245,7 @@ Result_with_string Util_converter_convert_color(Color_converter_parameters* para
 	SwsContext* sws_context = NULL;
 
 	if(!parameters || !parameters->source || parameters->in_width <= 0 || parameters->in_height <= 0 || parameters->out_width <= 0 || parameters->out_height <= 0
-	|| parameters->in_color_format < 0 || parameters->in_color_format > DEF_CONVERTER_PIXEL_FORMAT_MAX || parameters->out_color_format < 0 || parameters->out_color_format > DEF_CONVERTER_PIXEL_FORMAT_MAX)
+	|| parameters->in_color_format < 0 || parameters->in_color_format > PIXEL_FORMAT_MAX || parameters->out_color_format < 0 || parameters->out_color_format > PIXEL_FORMAT_MAX)
 		goto invalid_arg;
 
 	//Get required buffer size for output data.
@@ -329,8 +329,8 @@ Result_with_string Util_converter_convert_audio(Audio_converter_parameters* para
 	SwrContext* swr_context = NULL;
 
 	if(!parameters || !parameters->source || parameters->in_ch <= 0 || parameters->in_ch > 8 || parameters->in_sample_rate <= 0 || parameters->in_samples <= 0
-	|| parameters->in_sample_format < 0 || parameters->in_sample_format > DEF_CONVERTER_SAMPLE_FORMAT_MAX || parameters->out_ch <= 0 || parameters->out_ch > 8
-	|| parameters->out_sample_rate <= 0 || parameters->out_sample_format < 0 || parameters->out_sample_format > DEF_CONVERTER_SAMPLE_FORMAT_MAX)
+	|| parameters->in_sample_format <= SAMPLE_FORMAT_NONE || parameters->in_sample_format > SAMPLE_FORMAT_MAX || parameters->out_ch <= 0 || parameters->out_ch > 8
+	|| parameters->out_sample_rate <= 0 || parameters->out_sample_format <= SAMPLE_FORMAT_NONE || parameters->out_sample_format > SAMPLE_FORMAT_MAX)
 		goto invalid_arg;
 
 	parameters->out_samples = 0;
@@ -364,16 +364,16 @@ Result_with_string Util_converter_convert_audio(Audio_converter_parameters* para
 	src_data[0] = parameters->source;
 	dst_data[0] = parameters->converted;
 
-	if(parameters->in_sample_format == DEF_CONVERTER_SAMPLE_FORMAT_U8P || parameters->in_sample_format == DEF_CONVERTER_SAMPLE_FORMAT_S16P
-	|| parameters->in_sample_format == DEF_CONVERTER_SAMPLE_FORMAT_S32P || parameters->in_sample_format == DEF_CONVERTER_SAMPLE_FORMAT_S64P
-	|| parameters->in_sample_format == DEF_CONVERTER_SAMPLE_FORMAT_FLOAT32P || parameters->in_sample_format == DEF_CONVERTER_SAMPLE_FORMAT_DOUBLE64P)
+	if(parameters->in_sample_format == SAMPLE_FORMAT_U8P || parameters->in_sample_format == SAMPLE_FORMAT_S16P
+	|| parameters->in_sample_format == SAMPLE_FORMAT_S32P || parameters->in_sample_format == SAMPLE_FORMAT_S64P
+	|| parameters->in_sample_format == SAMPLE_FORMAT_FLOAT32P || parameters->in_sample_format == SAMPLE_FORMAT_DOUBLE64P)
 	{
 		for(int i = 1; i < parameters->in_ch; i++)
 			src_data[i] = parameters->source + (parameters->in_samples * util_converter_sample_format_size_table[parameters->in_sample_format] * i);
 	}
-	if(parameters->out_sample_format == DEF_CONVERTER_SAMPLE_FORMAT_U8P || parameters->out_sample_format == DEF_CONVERTER_SAMPLE_FORMAT_S16P
-	|| parameters->out_sample_format == DEF_CONVERTER_SAMPLE_FORMAT_S32P || parameters->out_sample_format == DEF_CONVERTER_SAMPLE_FORMAT_S64P
-	|| parameters->out_sample_format == DEF_CONVERTER_SAMPLE_FORMAT_FLOAT32P || parameters->out_sample_format == DEF_CONVERTER_SAMPLE_FORMAT_DOUBLE64P)
+	if(parameters->out_sample_format == SAMPLE_FORMAT_U8P || parameters->out_sample_format == SAMPLE_FORMAT_S16P
+	|| parameters->out_sample_format == SAMPLE_FORMAT_S32P || parameters->out_sample_format == SAMPLE_FORMAT_S64P
+	|| parameters->out_sample_format == SAMPLE_FORMAT_FLOAT32P || parameters->out_sample_format == SAMPLE_FORMAT_DOUBLE64P)
 	{
 		for(int i = 1; i < parameters->out_ch; i++)
 			dst_data[i] = parameters->converted + (parameters->out_samples * util_converter_sample_format_size_table[parameters->out_sample_format] * i);

@@ -246,22 +246,22 @@ int Draw_convert_to_pos(int height, int width, int img_height, int img_width, in
 	return pos * pixel_size;
 }
 
-Result_with_string Draw_texture_init(Image_data* image, int tex_size_x, int tex_size_y, int color_format)
+Result_with_string Draw_texture_init(Image_data* image, int tex_size_x, int tex_size_y, Pixel_format color_format)
 {
-	int color = 0;
+	GPU_TEXCOLOR color = GPU_RGBA8;
 	Result_with_string result;
 	if(!util_draw_init)
 		goto not_inited;
 
 	if(!image || tex_size_x <= 0 || tex_size_y <= 0
-	|| (color_format != DEF_DRAW_FORMAT_RGBA8888 && color_format != DEF_DRAW_FORMAT_RGB888 && color_format != DEF_DRAW_FORMAT_RGB565))
+	|| (color_format != PIXEL_FORMAT_ABGR8888 && color_format != PIXEL_FORMAT_BGR888 && color_format != PIXEL_FORMAT_RGB565LE))
 		goto invalid_arg;
 
-	if(color_format == DEF_DRAW_FORMAT_RGBA8888)
+	if(color_format == PIXEL_FORMAT_ABGR8888)
 		color = GPU_RGBA8;
-	else if(color_format == DEF_DRAW_FORMAT_RGB888)
+	else if(color_format == PIXEL_FORMAT_BGR888)
 		color = GPU_RGB8;
-	else if(color_format == DEF_DRAW_FORMAT_RGB565)
+	else if(color_format == PIXEL_FORMAT_RGB565LE)
 		color = GPU_RGB565;
 
 	image->subtex = (Tex3DS_SubTexture*)Util_safe_linear_alloc(sizeof(Tex3DS_SubTexture*));
@@ -269,7 +269,7 @@ Result_with_string Draw_texture_init(Image_data* image, int tex_size_x, int tex_
 	if(!image->subtex || !image->c2d.tex)
 		goto out_of_linear_memory;
 	
-	if (!C3D_TexInit(image->c2d.tex, (u16)tex_size_x, (u16)tex_size_y, (GPU_TEXCOLOR)color))
+	if (!C3D_TexInit(image->c2d.tex, (u16)tex_size_x, (u16)tex_size_y, color))
 		goto out_of_linear_memory;
 
 	image->c2d.subtex = image->subtex;

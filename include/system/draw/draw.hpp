@@ -69,12 +69,12 @@ double Draw_query_fps(void);
  * @param image (out) Pointer for texture.
  * @param tex_size_x (in) Texture width (must be power of 2).
  * @param tex_size_y (in) Texture height (must be power of 2).
- * @param color_format (in) Color format (DEF_DRAW_FORMAT_*).
+ * @param color_format (in) Color format (PIXEL_FORMAT_ABGR8888, PIXEL_FORMAT_BGR888 or PIXEL_FORMAT_RGB565LE).
  * @return On success DEF_SUCCESS, 
  * on failure DEF_ERR_*.
  * @note Thread safe
 */
-Result_with_string Draw_texture_init(Image_data* image, int tex_size_x, int tex_size_y, int color_format);
+Result_with_string Draw_texture_init(Image_data* image, int tex_size_x, int tex_size_y, Pixel_format color_format);
 
 /**
  * @brief Uninitialize a texture.

@@ -1776,10 +1776,10 @@ void Sem_record_thread(void* arg)
 				}
 				
 				parameters.converted = NULL;
-				parameters.in_color_format = DEF_CONVERTER_PIXEL_FORMAT_BGR888;
+				parameters.in_color_format = PIXEL_FORMAT_BGR888;
 				parameters.in_height = rec_height;
 				parameters.in_width = rec_width;
-				parameters.out_color_format = DEF_CONVERTER_PIXEL_FORMAT_YUV420P;
+				parameters.out_color_format = PIXEL_FORMAT_YUV420P;
 				parameters.out_height = rec_height;
 				parameters.out_width = rec_width;
 				parameters.source = both_bgr;
