@@ -598,7 +598,7 @@ void Sem_main(void)
 	{
 		var_need_reflesh = false;
 		Draw_frame_ready();
-		Draw_screen_ready(0, back_color);
+		Draw_screen_ready(SCREEN_TOP_LEFT, back_color);
 
 		if(Util_log_query_log_show_flag())
 			Util_log_draw();
@@ -608,7 +608,7 @@ void Sem_main(void)
 		if(var_monitor_cpu_usage)
 			Draw_cpu_usage_info();
 
-		Draw_screen_ready(1, back_color);
+		Draw_screen_ready(SCREEN_BOTTOM, back_color);
 
 		if (sem_selected_menu_mode >= DEF_SEM_MENU_UPDATE && sem_selected_menu_mode <= DEF_SEM_MENU_RECORDING)
 		{
@@ -616,8 +616,8 @@ void Sem_main(void)
 			if (draw_y + sem_y_offset >= -30 && draw_y + sem_y_offset <= 240)
 			{
 				//Back
-				Draw(sem_msg[DEF_SEM_BACK_MSG], 0.0, draw_y + sem_y_offset, 0.55, 0.55, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER,
-				55, 25, DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_back_button, sem_back_button.selected ? DEF_DRAW_RED : DEF_DRAW_WEAK_RED);
+				Draw(sem_msg[DEF_SEM_BACK_MSG], 0.0, draw_y + sem_y_offset, 0.55, 0.55, color, X_ALIGN_CENTER, Y_ALIGN_CENTER,
+				55, 25, BACKGROUND_ENTIRE_BOX, &sem_back_button, sem_back_button.selected ? DEF_DRAW_RED : DEF_DRAW_WEAK_RED);
 			}
 		}
 
@@ -631,47 +631,47 @@ void Sem_main(void)
 		if (sem_selected_menu_mode == DEF_SEM_MENU_TOP)
 		{
 			//Update
-			Draw(sem_msg[DEF_SEM_UPDATE_MSG], 0, 0, 0.75, 0.75, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_UPDATE], sem_menu_button[DEF_SEM_MENU_UPDATE].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_UPDATE_MSG], 0, 0, 0.75, 0.75, color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_UPDATE], sem_menu_button[DEF_SEM_MENU_UPDATE].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Lang
-			Draw(sem_msg[DEF_SEM_LANGAGES_MSG], 0, 25, 0.75, 0.75, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_LANGAGES], sem_menu_button[DEF_SEM_MENU_LANGAGES].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_LANGAGES_MSG], 0, 25, 0.75, 0.75, color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_LANGAGES], sem_menu_button[DEF_SEM_MENU_LANGAGES].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//LCD
-			Draw(sem_msg[DEF_SEM_LCD_MSG], 0, 50, 0.75, 0.75, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_LCD], sem_menu_button[DEF_SEM_MENU_LCD].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_LCD_MSG], 0, 50, 0.75, 0.75, color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_LCD], sem_menu_button[DEF_SEM_MENU_LCD].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Control
-			Draw(sem_msg[DEF_SEM_CONTROL_MSG], 0, 75, 0.75, 0.75, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_CONTROL], sem_menu_button[DEF_SEM_MENU_CONTROL].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_CONTROL_MSG], 0, 75, 0.75, 0.75, color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_CONTROL], sem_menu_button[DEF_SEM_MENU_CONTROL].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Font
-			Draw(sem_msg[DEF_SEM_FONT_MSG], 0, 100, 0.75, 0.75, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_FONT], sem_menu_button[DEF_SEM_MENU_FONT].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_FONT_MSG], 0, 100, 0.75, 0.75, color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_FONT], sem_menu_button[DEF_SEM_MENU_FONT].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Wireless
-			Draw(sem_msg[DEF_SEM_WIFI_MSG], 0, 125, 0.75, 0.75, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_WIFI], sem_menu_button[DEF_SEM_MENU_WIFI].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_WIFI_MSG], 0, 125, 0.75, 0.75, color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_WIFI], sem_menu_button[DEF_SEM_MENU_WIFI].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Advanced
-			Draw(sem_msg[DEF_SEM_ADVANCED_MSG], 0, 150, 0.75, 0.75, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_ADVANCED], sem_menu_button[DEF_SEM_MENU_ADVANCED].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_ADVANCED_MSG], 0, 150, 0.75, 0.75, color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_ADVANCED], sem_menu_button[DEF_SEM_MENU_ADVANCED].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Battery
-			Draw(sem_msg[DEF_SEM_BATTERY_MSG], 0, 175, 0.75, 0.75, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_BATTERY], sem_menu_button[DEF_SEM_MENU_BATTERY].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_BATTERY_MSG], 0, 175, 0.75, 0.75, color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_BATTERY], sem_menu_button[DEF_SEM_MENU_BATTERY].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Screen recording
-			Draw(sem_msg[DEF_SEM_RECORDING_MSG], 0, 200, 0.75, 0.75, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_RECORDING], sem_menu_button[DEF_SEM_MENU_RECORDING].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_RECORDING_MSG], 0, 200, 0.75, 0.75, color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_menu_button[DEF_SEM_MENU_RECORDING], sem_menu_button[DEF_SEM_MENU_RECORDING].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 		}
 		else if (sem_selected_menu_mode == DEF_SEM_MENU_UPDATE)
 		{
 #if ((DEF_ENABLE_CURL_API || DEF_ENABLE_HTTPC_API) && DEF_SEM_ENABLE_UPDATER)
 			//Check for updates
-			Draw(sem_msg[DEF_SEM_CHECK_UPDATE_MSG], 10, 25, 0.75, 0.75, color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_check_update_button, sem_check_update_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_CHECK_UPDATE_MSG], 10, 25, 0.75, 0.75, color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_check_update_button, sem_check_update_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			if (sem_show_patch_note_request)
 			{
@@ -760,40 +760,40 @@ void Sem_main(void)
 			//Languages
 
 			//English
-			Draw(sem_msg[DEF_SEM_ENGLISH_MSG], 10, 25 + sem_y_offset, 0.75, 0.75, (var_lang == "en") ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_english_button, sem_english_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_ENGLISH_MSG], 10, 25 + sem_y_offset, 0.75, 0.75, (var_lang == "en") ? DEF_DRAW_RED : color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_english_button, sem_english_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Japanese
-			Draw(sem_msg[DEF_SEM_JAPANESE_MSG], 10, 50 + sem_y_offset, 0.75, 0.75, (var_lang == "jp") ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_japanese_button, sem_japanese_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_JAPANESE_MSG], 10, 50 + sem_y_offset, 0.75, 0.75, (var_lang == "jp") ? DEF_DRAW_RED : color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_japanese_button, sem_japanese_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Hungarian
-			Draw(sem_msg[DEF_SEM_HUNGARIAN_MSG], 10, 75 + sem_y_offset, 0.75, 0.75, (var_lang == "hu") ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_hungarian_button, sem_hungarian_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_HUNGARIAN_MSG], 10, 75 + sem_y_offset, 0.75, 0.75, (var_lang == "hu") ? DEF_DRAW_RED : color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_hungarian_button, sem_hungarian_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Chinese
-			Draw(sem_msg[DEF_SEM_CHINESE_MSG], 10, 100 + sem_y_offset, 0.75, 0.75, (var_lang == "zh-cn") ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_chinese_button, sem_chinese_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_CHINESE_MSG], 10, 100 + sem_y_offset, 0.75, 0.75, (var_lang == "zh-cn") ? DEF_DRAW_RED : color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_chinese_button, sem_chinese_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Italian
-			Draw(sem_msg[DEF_SEM_ITALIAN_MSG], 10, 125 + sem_y_offset, 0.75, 0.75, (var_lang == "it") ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_italian_button, sem_italian_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_ITALIAN_MSG], 10, 125 + sem_y_offset, 0.75, 0.75, (var_lang == "it") ? DEF_DRAW_RED : color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_italian_button, sem_italian_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Spanish
-			Draw(sem_msg[DEF_SEM_SPANISH_MSG], 10, 150 + sem_y_offset, 0.75, 0.75, (var_lang == "es") ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_spanish_button, sem_spanish_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_SPANISH_MSG], 10, 150 + sem_y_offset, 0.75, 0.75, (var_lang == "es") ? DEF_DRAW_RED : color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_spanish_button, sem_spanish_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Romanian
-			Draw(sem_msg[DEF_SEM_ROMANIAN_MSG], 10, 175 + sem_y_offset, 0.75, 0.75, (var_lang == "ro") ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_romanian_button, sem_romanian_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_ROMANIAN_MSG], 10, 175 + sem_y_offset, 0.75, 0.75, (var_lang == "ro") ? DEF_DRAW_RED : color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_romanian_button, sem_romanian_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Polish
-			Draw(sem_msg[DEF_SEM_POLISH_MSG], 10, 200 + sem_y_offset, 0.75, 0.75, (var_lang == "pl") ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_polish_button, sem_polish_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_POLISH_MSG], 10, 200 + sem_y_offset, 0.75, 0.75, (var_lang == "pl") ? DEF_DRAW_RED : color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_polish_button, sem_polish_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Ryukyuan
-			Draw(sem_msg[DEF_SEM_RYUKYUAN_MSG], 10, 225 + sem_y_offset, 0.75, 0.75, (var_lang == "ryu") ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_ryukyuan_button, sem_ryukyuan_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_RYUKYUAN_MSG], 10, 225 + sem_y_offset, 0.75, 0.75, (var_lang == "ryu") ? DEF_DRAW_RED : color, X_ALIGN_LEFT, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_ryukyuan_button, sem_ryukyuan_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 		}
 		else if (sem_selected_menu_mode == DEF_SEM_MENU_LCD)
 		{
@@ -832,16 +832,16 @@ void Sem_main(void)
 			//Night mode
 			Draw(sem_msg[DEF_SEM_NIGHT_MODE_MSG], 0, 25, 0.5, 0.5, color);
 			//ON
-			Draw(sem_msg[DEF_SEM_ON_MSG], 10, 40, 0.55, 0.55, var_night_mode ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_night_mode_on_button, sem_night_mode_on_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_ON_MSG], 10, 40, 0.55, 0.55, var_night_mode ? DEF_DRAW_RED : color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 140, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_night_mode_on_button, sem_night_mode_on_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//OFF
-			Draw(sem_msg[DEF_SEM_OFF_MSG], 170, 40, 0.55, 0.55, var_night_mode ? color : DEF_DRAW_RED, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_night_mode_off_button, sem_night_mode_off_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_OFF_MSG], 170, 40, 0.55, 0.55, var_night_mode ? color : DEF_DRAW_RED, X_ALIGN_CENTER, Y_ALIGN_CENTER, 140, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_night_mode_off_button, sem_night_mode_off_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Flash
-			Draw(sem_msg[DEF_SEM_FLASH_MSG], 10, 65, 0.8, 0.8, var_flash_mode ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 300, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_flash_mode_button, sem_flash_mode_button.selected ? DEF_DRAW_RED : DEF_DRAW_WEAK_RED);
+			Draw(sem_msg[DEF_SEM_FLASH_MSG], 10, 65, 0.8, 0.8, var_flash_mode ? DEF_DRAW_RED : color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 300, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_flash_mode_button, sem_flash_mode_button.selected ? DEF_DRAW_RED : DEF_DRAW_WEAK_RED);
 
 			//Screen brightness
 			Draw(sem_msg[DEF_SEM_BRIGHTNESS_MSG] + std::to_string(var_lcd_brightness), 0, 95, 0.5, 0.5, color);
@@ -858,17 +858,17 @@ void Sem_main(void)
 			//Screen mode
 			Draw(sem_msg[DEF_SEM_LCD_MODE_MSG], 0, 175, 0.5, 0.5, color);
 			//800px
-			Draw(sem_msg[DEF_SEM_800PX_MSG], 10, 190, 0.65, 0.65, (var_screen_mode == DEF_SEM_SCREEN_800PX) ? DEF_DRAW_RED : cache_color[0], DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 65, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_800px_mode_button, sem_800px_mode_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_800PX_MSG], 10, 190, 0.65, 0.65, (var_screen_mode == DEF_SEM_SCREEN_800PX) ? DEF_DRAW_RED : cache_color[0], X_ALIGN_CENTER, Y_ALIGN_CENTER, 65, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_800px_mode_button, sem_800px_mode_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 			//3D
-			Draw(sem_msg[DEF_SEM_3D_MSG], 85, 190, 0.65, 0.65, (var_screen_mode == DEF_SEM_SCREEN_3D) ? DEF_DRAW_RED : cache_color[1], DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 65, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_3d_mode_button, sem_3d_mode_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_3D_MSG], 85, 190, 0.65, 0.65, (var_screen_mode == DEF_SEM_SCREEN_3D) ? DEF_DRAW_RED : cache_color[1], X_ALIGN_CENTER, Y_ALIGN_CENTER, 65, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_3d_mode_button, sem_3d_mode_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 			//Nothing
-			Draw(sem_msg[DEF_SEM_400PX_MSG], 160, 190, 0.65, 0.65, (var_screen_mode == DEF_SEM_SCREEN_400PX) ? DEF_DRAW_RED : cache_color[2], DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 65, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_400px_mode_button, sem_400px_mode_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_400PX_MSG], 160, 190, 0.65, 0.65, (var_screen_mode == DEF_SEM_SCREEN_400PX) ? DEF_DRAW_RED : cache_color[2], X_ALIGN_CENTER, Y_ALIGN_CENTER, 65, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_400px_mode_button, sem_400px_mode_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 			//Auto
-			Draw(sem_msg[DEF_SEM_AUTO_MSG], 235, 190, 0.65, 0.65, (var_screen_mode == DEF_SEM_SCREEN_AUTO) ? DEF_DRAW_RED : cache_color[2], DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 65, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_auto_mode_button, sem_auto_mode_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_AUTO_MSG], 235, 190, 0.65, 0.65, (var_screen_mode == DEF_SEM_SCREEN_AUTO) ? DEF_DRAW_RED : cache_color[2], X_ALIGN_CENTER, Y_ALIGN_CENTER, 65, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_auto_mode_button, sem_auto_mode_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 		}
 		else if (sem_selected_menu_mode == DEF_SEM_MENU_CONTROL)
 		{
@@ -890,12 +890,12 @@ void Sem_main(void)
 					cache_color[0] = DEF_DRAW_WEAK_BLACK;
 
 				//Load all
-				Draw(sem_msg[DEF_SEM_LOAD_ALL_FONT_MSG], 10, 30 + sem_y_offset, 0.65, 0.65, cache_color[0], DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 150, 20,
-				DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_load_all_ex_font_button, sem_load_all_ex_font_button.selected ? DEF_DRAW_RED : DEF_DRAW_WEAK_RED);
+				Draw(sem_msg[DEF_SEM_LOAD_ALL_FONT_MSG], 10, 30 + sem_y_offset, 0.65, 0.65, cache_color[0], X_ALIGN_CENTER, Y_ALIGN_CENTER, 150, 20,
+				BACKGROUND_ENTIRE_BOX, &sem_load_all_ex_font_button, sem_load_all_ex_font_button.selected ? DEF_DRAW_RED : DEF_DRAW_WEAK_RED);
 
 				//Unload all
-				Draw(sem_msg[DEF_SEM_UNLOAD_ALL_FONT_MSG], 160, 30 + sem_y_offset, 0.65, 0.65, cache_color[0], DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 150, 20,
-				DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_unload_all_ex_font_button, sem_unload_all_ex_font_button.selected ? DEF_DRAW_YELLOW : DEF_DRAW_WEAK_YELLOW);
+				Draw(sem_msg[DEF_SEM_UNLOAD_ALL_FONT_MSG], 160, 30 + sem_y_offset, 0.65, 0.65, cache_color[0], X_ALIGN_CENTER, Y_ALIGN_CENTER, 150, 20,
+				BACKGROUND_ENTIRE_BOX, &sem_unload_all_ex_font_button, sem_unload_all_ex_font_button.selected ? DEF_DRAW_YELLOW : DEF_DRAW_WEAK_YELLOW);
 			}
 
 			draw_x = 10.0;
@@ -919,8 +919,8 @@ void Sem_main(void)
 
 				if (draw_y + sem_y_offset >= -30 && draw_y + sem_y_offset <= 240)
 				{
-					Draw(Exfont_query_external_font_name(i), draw_x, draw_y + sem_y_offset, 0.45, 0.45, cache_color[i], DEF_DRAW_X_ALIGN_LEFT, DEF_DRAW_Y_ALIGN_CENTER, 300, 20,
-					DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_ex_font_button[i], sem_ex_font_button[i].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+					Draw(Exfont_query_external_font_name(i), draw_x, draw_y + sem_y_offset, 0.45, 0.45, cache_color[i], X_ALIGN_LEFT, Y_ALIGN_CENTER, 300, 20,
+					BACKGROUND_ENTIRE_BOX, &sem_ex_font_button[i], sem_ex_font_button[i].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 				}
 				draw_y += 20.0;
 			}
@@ -930,12 +930,12 @@ void Sem_main(void)
 			//Wifi
 			Draw(sem_msg[DEF_SEM_WIFI_MODE_MSG], 0, 25, 0.5, 0.5, color);
 			//ON
-			Draw(sem_msg[DEF_SEM_ON_MSG], 10, 40, 0.55, 0.55, var_wifi_enabled ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 90, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_wifi_on_button, sem_wifi_on_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_ON_MSG], 10, 40, 0.55, 0.55, var_wifi_enabled ? DEF_DRAW_RED : color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 90, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_wifi_on_button, sem_wifi_on_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//OFF
-			Draw(sem_msg[DEF_SEM_OFF_MSG], 110, 40, 0.55, 0.55, var_wifi_enabled ? color : DEF_DRAW_RED, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 90, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_wifi_off_button, sem_wifi_off_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_OFF_MSG], 110, 40, 0.55, 0.55, var_wifi_enabled ? color : DEF_DRAW_RED, X_ALIGN_CENTER, Y_ALIGN_CENTER, 90, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_wifi_off_button, sem_wifi_off_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Connected SSID
 			Draw(sem_msg[DEF_SEM_CONNECTED_SSID_MSG] + var_connected_ssid, 0, 65, 0.425, 0.425, color);
@@ -945,48 +945,48 @@ void Sem_main(void)
 			//Allow send app info
 			Draw(sem_msg[DEF_SEM_SEND_INFO_MODE_MSG], 0, 25, 0.5, 0.5, color);
 			//Allow
-			Draw(sem_msg[DEF_SEM_ALLOW_MSG], 10, 40, 0.65, 0.65, var_allow_send_app_info ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 90, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_allow_send_info_button, sem_allow_send_info_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_ALLOW_MSG], 10, 40, 0.65, 0.65, var_allow_send_app_info ? DEF_DRAW_RED : color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 90, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_allow_send_info_button, sem_allow_send_info_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 			//Deny
-			Draw(sem_msg[DEF_SEM_DENY_MSG], 110, 40, 0.65, 0.65, var_allow_send_app_info ? color : DEF_DRAW_RED, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 90, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_deny_send_info_button, sem_deny_send_info_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_DENY_MSG], 110, 40, 0.65, 0.65, var_allow_send_app_info ? color : DEF_DRAW_RED, X_ALIGN_CENTER, Y_ALIGN_CENTER, 90, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_deny_send_info_button, sem_deny_send_info_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Debug mode
 			Draw(sem_msg[DEF_SEM_DEBUG_MODE_MSG], 0, 65, 0.5, 0.5, color);
 			//ON
-			Draw(sem_msg[DEF_SEM_ON_MSG], 10, 80, 0.55, 0.55, var_debug_mode ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 90, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_debug_mode_on_button, sem_debug_mode_on_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_ON_MSG], 10, 80, 0.55, 0.55, var_debug_mode ? DEF_DRAW_RED : color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 90, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_debug_mode_on_button, sem_debug_mode_on_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//OFF
-			Draw(sem_msg[DEF_SEM_OFF_MSG], 110, 80, 0.55, 0.55, var_debug_mode ? color : DEF_DRAW_RED, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 90, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_debug_mode_off_button, sem_debug_mode_off_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_OFF_MSG], 110, 80, 0.55, 0.55, var_debug_mode ? color : DEF_DRAW_RED, X_ALIGN_CENTER, Y_ALIGN_CENTER, 90, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_debug_mode_off_button, sem_debug_mode_off_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Fake model
 			Draw(sem_msg[DEF_SEM_FAKE_MODEL_MSG], 0, 105, 0.5, 0.5, color);
 			if(sem_fake_model_num <= 5)
 			{
-				Draw(sem_msg[DEF_SEM_ON_MSG] + " (" + var_model_name[sem_fake_model_num] + ")", 10, 135, 0.65, 0.65, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 190, 20,
-				DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_use_fake_model_button, sem_use_fake_model_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+				Draw(sem_msg[DEF_SEM_ON_MSG] + " (" + var_model_name[sem_fake_model_num] + ")", 10, 135, 0.65, 0.65, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 190, 20,
+				BACKGROUND_ENTIRE_BOX, &sem_use_fake_model_button, sem_use_fake_model_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 			}
 			else
 			{
-				Draw(sem_msg[DEF_SEM_OFF_MSG], 10, 135, 0.65, 0.65, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 190, 20,
-				DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_use_fake_model_button, sem_use_fake_model_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+				Draw(sem_msg[DEF_SEM_OFF_MSG], 10, 135, 0.65, 0.65, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 190, 20,
+				BACKGROUND_ENTIRE_BOX, &sem_use_fake_model_button, sem_use_fake_model_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 			}
 
-			Draw(sem_msg[DEF_SEM_DUMP_LOGS_MSG], 10, 165, 0.5, 0.5, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 190, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_dump_log_button, sem_dump_log_button.selected  ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_DUMP_LOGS_MSG], 10, 165, 0.5, 0.5, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 190, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_dump_log_button, sem_dump_log_button.selected  ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 #if DEF_ENABLE_CPU_MONITOR_API
 			//CPU usage monitor
 			Draw(sem_msg[DEF_SEM_CPU_USAGE_MONITOR_MSG], 0, 185, 0.5, 0.5, color);
 			//ON
-			Draw(sem_msg[DEF_SEM_ON_MSG], 10, 200, 0.55, 0.55, var_monitor_cpu_usage ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 90, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_monitor_cpu_usage_on_button, sem_monitor_cpu_usage_on_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_ON_MSG], 10, 200, 0.55, 0.55, var_monitor_cpu_usage ? DEF_DRAW_RED : color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 90, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_monitor_cpu_usage_on_button, sem_monitor_cpu_usage_on_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//OFF
-			Draw(sem_msg[DEF_SEM_OFF_MSG], 110, 200, 0.55, 0.55, var_monitor_cpu_usage ? color : DEF_DRAW_RED, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 90, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_monitor_cpu_usage_off_button, sem_monitor_cpu_usage_off_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_OFF_MSG], 110, 200, 0.55, 0.55, var_monitor_cpu_usage ? color : DEF_DRAW_RED, X_ALIGN_CENTER, Y_ALIGN_CENTER, 90, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_monitor_cpu_usage_off_button, sem_monitor_cpu_usage_off_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 #endif
 		}
 		else if (sem_selected_menu_mode == DEF_SEM_MENU_BATTERY)
@@ -994,12 +994,12 @@ void Sem_main(void)
 			//Eco mode
 			Draw(sem_msg[DEF_SEM_ECO_MODE_MSG], 0, 25, 0.5, 0.5, color);
 			//ON
-			Draw(sem_msg[DEF_SEM_ON_MSG], 10, 40, 0.55, 0.55, var_eco_mode ? DEF_DRAW_RED : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 90, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_eco_mode_on_button, sem_eco_mode_on_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_ON_MSG], 10, 40, 0.55, 0.55, var_eco_mode ? DEF_DRAW_RED : color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 90, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_eco_mode_on_button, sem_eco_mode_on_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//OFF
-			Draw(sem_msg[DEF_SEM_OFF_MSG], 110, 40, 0.55, 0.55, var_eco_mode ? color : DEF_DRAW_RED, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 90, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_eco_mode_off_button, sem_eco_mode_off_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[DEF_SEM_OFF_MSG], 110, 40, 0.55, 0.55, var_eco_mode ? color : DEF_DRAW_RED, X_ALIGN_CENTER, Y_ALIGN_CENTER, 90, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_eco_mode_off_button, sem_eco_mode_off_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 		}
 		else if (sem_selected_menu_mode == DEF_SEM_MENU_RECORDING)
 		{
@@ -1010,16 +1010,16 @@ void Sem_main(void)
 				cache_color[0] = DEF_DRAW_WEAK_BLACK;
 
 			//Record both screen
-			Draw(sem_msg[sem_record_request ? DEF_SEM_STOP_RECORDING_MSG : DEF_SEM_RECORD_BOTH_LCD_MSG], 10, 25, 0.475, 0.475, cache_color[0], DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_record_both_lcd_button, sem_record_both_lcd_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[sem_record_request ? DEF_SEM_STOP_RECORDING_MSG : DEF_SEM_RECORD_BOTH_LCD_MSG], 10, 25, 0.475, 0.475, cache_color[0], X_ALIGN_CENTER, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_record_both_lcd_button, sem_record_both_lcd_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Record top screen
-			Draw(sem_msg[sem_record_request ? DEF_SEM_STOP_RECORDING_MSG : DEF_SEM_RECORD_TOP_LCD_MSG], 10, 60, 0.475, 0.475, cache_color[0], DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_record_top_lcd_button, sem_record_top_lcd_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[sem_record_request ? DEF_SEM_STOP_RECORDING_MSG : DEF_SEM_RECORD_TOP_LCD_MSG], 10, 60, 0.475, 0.475, cache_color[0], X_ALIGN_CENTER, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_record_top_lcd_button, sem_record_top_lcd_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			//Record bottom screen
-			Draw(sem_msg[sem_record_request ? DEF_SEM_STOP_RECORDING_MSG : DEF_SEM_RECORD_BOTTOM_LCD_MSG], 10, 95, 0.475, 0.475, cache_color[0], DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 240, 20,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &sem_record_bottom_lcd_button, sem_record_bottom_lcd_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(sem_msg[sem_record_request ? DEF_SEM_STOP_RECORDING_MSG : DEF_SEM_RECORD_BOTTOM_LCD_MSG], 10, 95, 0.475, 0.475, cache_color[0], X_ALIGN_CENTER, Y_ALIGN_CENTER, 240, 20,
+			BACKGROUND_ENTIRE_BOX, &sem_record_bottom_lcd_button, sem_record_bottom_lcd_button.selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			if(var_screen_mode == DEF_SEM_SCREEN_800PX)
 				Draw(sem_msg[DEF_SEM_CANNOT_RECORD_MSG], 10, 120, 0.5, 0.5, DEF_DRAW_RED);

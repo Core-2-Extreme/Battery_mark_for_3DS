@@ -179,6 +179,50 @@ enum Sample_format
     SAMPLE_FORMAT_MAX,
 };
 
+enum Screen
+{
+    SCREEN_INVALID      = -1,
+
+    SCREEN_TOP_LEFT     = 0,    //Top screen for left eye.
+    SCREEN_BOTTOM       = 1,    //Bottom screen.
+    SCREEN_TOP_RIGHT    = 2,    //Top screen for right eye, this is used when 3D mode is enabled.
+
+    SCREEN_MAX,
+};
+
+enum Text_align_x
+{
+    X_ALIGN_INVALID = -1,
+
+    X_ALIGN_LEFT,   //Align text left (default).
+    X_ALIGN_CENTER, //Align text center.
+    X_ALIGN_RIGHT,  //Align text right.
+
+    X_ALIGN_MAX,
+};
+
+enum Text_align_y
+{
+    Y_ALIGN_INVALID = -1,
+
+    Y_ALIGN_TOP,    //Align text top (default).
+    Y_ALIGN_CENTER, //Align text center.
+    Y_ALIGN_BOTTOM, //Align text bottom.
+
+    Y_ALIGN_MAX,
+};
+
+enum Background
+{
+    BACKGROUND_INVALID = -1,
+
+    BACKGROUND_NONE,        //No background texture (default).
+    BACKGROUND_ENTIRE_BOX,  //Draw background texture entire box.
+    BACKGROUND_UNDER_TEXT,  //Only draw background texture under text.
+
+    BACKGROUND_MAX,
+};
+
 struct Result_with_string
 {
 	std::string string = "[Success] ";

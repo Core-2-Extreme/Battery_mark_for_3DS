@@ -198,9 +198,9 @@ void Menu_init(void)
 
 	Util_log_save(DEF_MENU_INIT_STR, "Draw_init()...", Draw_init(is_800px, is_3d).code);
 	Draw_frame_ready();
-	Draw_screen_ready(0, DEF_DRAW_WHITE);
+	Draw_screen_ready(SCREEN_TOP_LEFT, DEF_DRAW_WHITE);
 	Draw_top_ui();
-	Draw_screen_ready(1, DEF_DRAW_WHITE);
+	Draw_screen_ready(SCREEN_BOTTOM, DEF_DRAW_WHITE);
 	Draw_bot_ui();
 	Draw_apply_draw();
 	Sem_draw_init();
@@ -553,16 +553,16 @@ void Menu_main(void)
 			}
 
 			Draw_frame_ready();
-			Draw_screen_ready(0, back_color);
+			Draw_screen_ready(SCREEN_TOP_LEFT, back_color);
 
 			if(menu_check_exit_request)
 			{
-				Draw(menu_msg[DEF_MENU_EXIST_MSG], 0, 105, 0.5, 0.5, color, DEF_DRAW_X_ALIGN_CENTER,
-					DEF_DRAW_Y_ALIGN_CENTER, 400, 20);
-				Draw(menu_msg[DEF_MENU_CONFIRM_MSG], 10, 140, 0.5, 0.5, DEF_DRAW_GREEN, DEF_DRAW_X_ALIGN_RIGHT,
-					DEF_DRAW_Y_ALIGN_CENTER, 190, 20);
-				Draw(menu_msg[DEF_MENU_CANCEL_MSG], 210, 140, 0.5, 0.5, DEF_DRAW_RED, DEF_DRAW_X_ALIGN_LEFT,
-					DEF_DRAW_Y_ALIGN_CENTER, 190, 20);
+				Draw(menu_msg[DEF_MENU_EXIST_MSG], 0, 105, 0.5, 0.5, color, X_ALIGN_CENTER,
+					Y_ALIGN_CENTER, 400, 20);
+				Draw(menu_msg[DEF_MENU_CONFIRM_MSG], 10, 140, 0.5, 0.5, DEF_DRAW_GREEN, X_ALIGN_RIGHT,
+					Y_ALIGN_CENTER, 190, 20);
+				Draw(menu_msg[DEF_MENU_CANCEL_MSG], 210, 140, 0.5, 0.5, DEF_DRAW_RED, X_ALIGN_LEFT,
+					Y_ALIGN_CENTER, 190, 20);
 			}
 			else if(menu_update_available)
 			{
@@ -578,7 +578,7 @@ void Menu_main(void)
 			if(var_monitor_cpu_usage)
 				Draw_cpu_usage_info();
 
-			Draw_screen_ready(1, back_color);
+			Draw_screen_ready(SCREEN_BOTTOM, back_color);
 
 			#ifdef DEF_ENABLE_BMARK
 			Draw_texture(&menu_sapp_button[0], menu_sapp_button[0].selected ? DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA, 0, 0, 60, 60);
@@ -587,7 +587,7 @@ void Menu_main(void)
 			Draw_texture(menu_icon_image[0], 0, 0, 60, 60);
 			#endif
 			#ifdef DEF_BMARK_ENABLE_NAME
-			Draw(DEF_BMARK_NAME, 0, 0, 0.4, 0.4, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 60, 60);
+			Draw(DEF_BMARK_NAME, 0, 0, 0.4, 0.4, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 60, 60);
 			#endif
 
 			if(Bmark_query_init_flag())
@@ -603,7 +603,7 @@ void Menu_main(void)
 			Draw_texture(menu_icon_image[1], 80, 0, 60, 60);
 			#endif
 			#ifdef DEF_BMR_ENABLE_NAME
-			Draw(DEF_BMR_NAME, 80, 0, 0.4, 0.4, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 60, 60);
+			Draw(DEF_BMR_NAME, 80, 0, 0.4, 0.4, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 60, 60);
 			#endif
 
 			if(Bmr_query_init_flag())
@@ -619,7 +619,7 @@ void Menu_main(void)
 			Draw_texture(menu_icon_image[2], 160, 0, 60, 60);
 			#endif
 			#ifdef DEF_SAPP2_ENABLE_NAME
-			Draw(DEF_SAPP2_NAME, 160, 0, 0.4, 0.4, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 60, 60);
+			Draw(DEF_SAPP2_NAME, 160, 0, 0.4, 0.4, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 60, 60);
 			#endif
 
 			if(Sapp2_query_init_flag())
@@ -635,7 +635,7 @@ void Menu_main(void)
 			Draw_texture(menu_icon_image[3], 240, 0, 60, 60);
 			#endif
 			#ifdef DEF_SAPP3_ENABLE_NAME
-			Draw(DEF_SAPP3_NAME, 240, 0, 0.4, 0.4, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 60, 60);
+			Draw(DEF_SAPP3_NAME, 240, 0, 0.4, 0.4, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 60, 60);
 			#endif
 
 			if(Sapp3_query_init_flag())
@@ -651,7 +651,7 @@ void Menu_main(void)
 			Draw_texture(menu_icon_image[4], 0, 80, 60, 60);
 			#endif
 			#ifdef DEF_SAPP4_ENABLE_NAME
-			Draw(DEF_SAPP4_NAME, 0, 80, 0.4, 0.4, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 60, 60);
+			Draw(DEF_SAPP4_NAME, 0, 80, 0.4, 0.4, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 60, 60);
 			#endif
 
 			if(Sapp4_query_init_flag())
@@ -667,7 +667,7 @@ void Menu_main(void)
 			Draw_texture(menu_icon_image[5], 80, 80, 60, 60);
 			#endif
 			#ifdef DEF_SAPP5_ENABLE_NAME
-			Draw(DEF_SAPP5_NAME, 80, 80, 0.4, 0.4, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 60, 60);
+			Draw(DEF_SAPP5_NAME, 80, 80, 0.4, 0.4, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 60, 60);
 			#endif
 
 			if(Sapp5_query_init_flag())
@@ -683,7 +683,7 @@ void Menu_main(void)
 			Draw_texture(menu_icon_image[6], 160, 80, 60, 60);
 			#endif
 			#ifdef DEF_SAPP6_ENABLE_NAME
-			Draw(DEF_SAPP6_NAME, 160, 80, 0.4, 0.4, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 60, 60);
+			Draw(DEF_SAPP6_NAME, 160, 80, 0.4, 0.4, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 60, 60);
 			#endif
 
 			if(Sapp6_query_init_flag())
@@ -699,7 +699,7 @@ void Menu_main(void)
 			Draw_texture(menu_icon_image[7], 240, 80, 60, 60);
 			#endif
 			#ifdef DEF_SAPP7_ENABLE_NAME
-			Draw(DEF_SAPP7_NAME, 240, 80, 0.4, 0.4, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 60, 60);
+			Draw(DEF_SAPP7_NAME, 240, 80, 0.4, 0.4, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 60, 60);
 			#endif
 
 			if(Sapp7_query_init_flag())
