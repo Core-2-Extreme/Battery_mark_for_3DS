@@ -171,8 +171,8 @@ void Draw(std::string text, float x, float y, float text_size_x, float text_size
  * @param abgr8888 (in) Font color.
  * @param x_align (in) Text align for x direction.
  * @param y_align (in) Text align for y direction.
- * @param x_size (in) If is X_ALIGN_LEFT, this is ignored otherwise virtual box width (in px).
- * @param y_size (in) If is Y_ALIGN_TOP, this is ignored otherwise virtual box height (in px).
+ * @param x_size (in) If align is X_ALIGN_LEFT, this is ignored otherwise virtual box width (in px).
+ * @param y_size (in) If align is Y_ALIGN_TOP, this is ignored otherwise virtual box height (in px).
  * @warning Thread dangerous (untested)
  * @warning Call it from only drawing thread.
 */
@@ -190,8 +190,8 @@ Text_align_y y_align, float box_size_x, float box_size_y);
  * @param abgr8888 (in) Font color.
  * @param x_align (in) Text align for x direction.
  * @param y_align (in) Text align for y direction.
- * @param x_size (in) If is X_ALIGN_LEFT, this is ignored otherwise virtual box width (in px).
- * @param y_size (in) If is Y_ALIGN_TOP, this is ignored otherwise virtual box height (in px).
+ * @param x_size (in) If align is X_ALIGN_LEFT, this is ignored otherwise virtual box width (in px).
+ * @param y_size (in) If align is Y_ALIGN_TOP, this is ignored otherwise virtual box height (in px).
  * @param texture_position (in) Background texture position.
  * @param background_image (in) C2D Texture data.
  * @param texture_abgr8888 (in) Texture color.
@@ -212,8 +212,8 @@ Text_align_y y_align, float box_size_x, float box_size_y, Background texture_pos
  * @param abgr8888 (in) Font color.
  * @param x_align (in) Text align for x direction.
  * @param y_align (in) Text align for y direction.
- * @param x_size (in) If is X_ALIGN_LEFT, this is ignored otherwise virtual box width (in px).
- * @param y_size (in) If is Y_ALIGN_TOP, this is ignored otherwise virtual box height (in px).
+ * @param x_size (in) If align is X_ALIGN_LEFT, this is ignored otherwise virtual box width (in px).
+ * @param y_size (in) If align is Y_ALIGN_TOP, this is ignored otherwise virtual box height (in px).
  * @param texture_position (in) Background texture position.
  * @param background_image (in&out) Image data.
  * @param texture_abgr8888 (in) Texture color.
