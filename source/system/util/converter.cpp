@@ -245,7 +245,7 @@ Result_with_string Util_converter_convert_color(Color_converter_parameters* para
 	SwsContext* sws_context = NULL;
 
 	if(!parameters || !parameters->source || parameters->in_width <= 0 || parameters->in_height <= 0 || parameters->out_width <= 0 || parameters->out_height <= 0
-	|| parameters->in_color_format < 0 || parameters->in_color_format > PIXEL_FORMAT_MAX || parameters->out_color_format < 0 || parameters->out_color_format > PIXEL_FORMAT_MAX)
+	|| parameters->in_color_format <= PIXEL_FORMAT_INVALID || parameters->in_color_format >= PIXEL_FORMAT_MAX || parameters->out_color_format <= PIXEL_FORMAT_INVALID || parameters->out_color_format >= PIXEL_FORMAT_MAX)
 		goto invalid_arg;
 
 	//Get required buffer size for output data.
@@ -329,8 +329,8 @@ Result_with_string Util_converter_convert_audio(Audio_converter_parameters* para
 	SwrContext* swr_context = NULL;
 
 	if(!parameters || !parameters->source || parameters->in_ch <= 0 || parameters->in_ch > 8 || parameters->in_sample_rate <= 0 || parameters->in_samples <= 0
-	|| parameters->in_sample_format <= SAMPLE_FORMAT_NONE || parameters->in_sample_format > SAMPLE_FORMAT_MAX || parameters->out_ch <= 0 || parameters->out_ch > 8
-	|| parameters->out_sample_rate <= 0 || parameters->out_sample_format <= SAMPLE_FORMAT_NONE || parameters->out_sample_format > SAMPLE_FORMAT_MAX)
+	|| parameters->in_sample_format <= SAMPLE_FORMAT_INVALID || parameters->in_sample_format >= SAMPLE_FORMAT_MAX || parameters->out_ch <= 0 || parameters->out_ch > 8
+	|| parameters->out_sample_rate <= 0 || parameters->out_sample_format <= SAMPLE_FORMAT_INVALID || parameters->out_sample_format >= SAMPLE_FORMAT_MAX)
 		goto invalid_arg;
 
 	parameters->out_samples = 0;
