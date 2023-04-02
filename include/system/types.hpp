@@ -223,6 +223,13 @@ enum Background
     BACKGROUND_MAX,
 };
 
+enum Queue_option
+{
+    QUEUE_OPTION_NONE = 0,                  //Default.
+    QUEUE_OPTION_DO_NOT_ADD_IF_EXIST = 1,   //Do not add the event if the same event id exist.
+    QUEUE_OPTION_SEND_TO_FRONT = 2,         //Send an event to the front of the queue, use it for high priority event.
+};
+
 struct Result_with_string
 {
 	std::string string = "[Success] ";
@@ -410,4 +417,14 @@ struct Hid_info
 	int touch_y_move = 0;
 	int held_time = 0;
 	u64 ts = 0;
+};
+
+struct Queue
+{
+	u32* data;
+	u32* event_id;
+	s32 max_items;
+	s32 next_index;
+	LightEvent receive_wait_event;
+	LightEvent send_wait_event;
 };

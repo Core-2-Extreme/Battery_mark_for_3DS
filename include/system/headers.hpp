@@ -31,6 +31,7 @@
 #include "system/util/encoder.hpp"
 #include "system/util/mic.hpp"
 #include "system/util/muxer.hpp"
+#include "system/util/queue.hpp"
 #include "system/util/speaker.hpp"
 #include "system/util/swkbd.hpp"
 #include "system/util/util.hpp"

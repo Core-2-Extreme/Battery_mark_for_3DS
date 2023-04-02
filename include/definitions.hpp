@@ -71,6 +71,7 @@
 #define DEF_BMARK_MAIN_STR (std::string)"Bmark/Main"
 #define DEF_BMARK_INIT_STR (std::string)"Bmark/Init"
 #define DEF_BMARK_EXIT_STR (std::string)"Bmark/Exit"
+#define DEF_BMARK_HID_CALLBACK_STR (std::string)"Bmark/Hid callback"
 #define DEF_BMARK_WATCH_THREAD_STR (std::string)"Bmark/Watch thread"
 #define DEF_BMARK_VIDEO_THREAD_STR (std::string)"Bmark/Video thread"
 #define DEF_BMARK_COPY_THREAD_STR (std::string)"Bmark/Copy thread"
@@ -121,6 +122,7 @@
 #define DEF_BMR_MAIN_STR (std::string)"Bmr/Main"
 #define DEF_BMR_INIT_STR (std::string)"Bmr/Init"
 #define DEF_BMR_EXIT_STR (std::string)"Bmr/Exit"
+#define DEF_BMR_HID_CALLBACK_STR (std::string)"Bmr/Hid callback"
 #define DEF_BMR_WORKER_THREAD_STR (std::string)"Bmr/Worker thread"
 
 #define DEF_BMR_MODEL_MSG 0
@@ -152,6 +154,7 @@
 #define DEF_SAPP2_MAIN_STR (std::string)"Sapp2/Main"
 #define DEF_SAPP2_INIT_STR (std::string)"Sapp2/Init"
 #define DEF_SAPP2_EXIT_STR (std::string)"Sapp2/Exit"
+#define DEF_SAPP2_HID_CALLBACK_STR (std::string)"Sapp2/Hid callback"
 #define DEF_SAPP2_WORKER_THREAD_STR (std::string)"Sapp2/Worker thread"
 
 //sample app 3
@@ -164,7 +167,7 @@
 #define DEF_SAPP3_MAIN_STR (std::string)"Sapp3/Main"
 #define DEF_SAPP3_INIT_STR (std::string)"Sapp3/Init"
 #define DEF_SAPP3_EXIT_STR (std::string)"Sapp3/Exit"
-#define DEF_SAPP3_WORKER_THREAD_STR (std::string)"Sapp3/Worker thread"
+#define DEF_SAPP3_HID_CALLBACK_STR (std::string)"Sapp3/Hid callback"
 
 //sample app 4
 #define DEF_SAPP4_NUM_OF_MSG 1
@@ -176,6 +179,7 @@
 #define DEF_SAPP4_MAIN_STR (std::string)"Sapp4/Main"
 #define DEF_SAPP4_INIT_STR (std::string)"Sapp4/Init"
 #define DEF_SAPP4_EXIT_STR (std::string)"Sapp4/Exit"
+#define DEF_SAPP4_HID_CALLBACK_STR (std::string)"Sapp4/Hid callback"
 #define DEF_SAPP4_WORKER_THREAD_STR (std::string)"Sapp4/Worker thread"
 
 //sample app 5
@@ -188,6 +192,7 @@
 #define DEF_SAPP5_MAIN_STR (std::string)"Sapp5/Main"
 #define DEF_SAPP5_INIT_STR (std::string)"Sapp5/Init"
 #define DEF_SAPP5_EXIT_STR (std::string)"Sapp5/Exit"
+#define DEF_SAPP5_HID_CALLBACK_STR (std::string)"Sapp5/Hid callback"
 #define DEF_SAPP5_WORKER_THREAD_STR (std::string)"Sapp5/Worker thread"
 
 //sample app 6
@@ -200,6 +205,7 @@
 #define DEF_SAPP6_MAIN_STR (std::string)"Sapp6/Main"
 #define DEF_SAPP6_INIT_STR (std::string)"Sapp6/Init"
 #define DEF_SAPP6_EXIT_STR (std::string)"Sapp6/Exit"
+#define DEF_SAPP6_HID_CALLBACK_STR (std::string)"Sapp6/Hid callback"
 #define DEF_SAPP6_WORKER_THREAD_STR (std::string)"Sapp6/Worker thread"
 
 //sample app 7
@@ -212,4 +218,5 @@
 #define DEF_SAPP7_MAIN_STR (std::string)"Sapp7/Main"
 #define DEF_SAPP7_INIT_STR (std::string)"Sapp7/Init"
 #define DEF_SAPP7_EXIT_STR (std::string)"Sapp7/Exit"
+#define DEF_SAPP7_HID_CALLBACK_STR (std::string)"Sapp7/Hid callback"
 #define DEF_SAPP7_WORKER_THREAD_STR (std::string)"Sapp7/Worker thread"
