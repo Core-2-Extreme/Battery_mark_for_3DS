@@ -25,6 +25,7 @@ Result_with_string Util_queue_create(Queue* queue, int max_items)
 	memset(queue->data, 0x0, (max_items * sizeof(u32)));
 	queue->max_items = max_items;
 	queue->next_index = 0;
+	queue->reference_count = 0;
 
 	LightEvent_Init(&queue->receive_wait_event, RESET_ONESHOT);
 	LightEvent_Init(&queue->send_wait_event, RESET_ONESHOT);
@@ -64,8 +65,10 @@ Result_with_string Util_queue_add(Queue* queue, u32 event_id, void* data, s64 wa
 
 	LightLock_Lock(&util_queue_mutex);
 
-	if(!queue->data || !queue->event_id)
+	if(!queue->data || !queue->event_id || queue->deleting)
 		goto not_inited;
+
+	queue->reference_count++;
 
 	if(queue->next_index >= queue->max_items && wait_us > 0)
 	{
@@ -73,6 +76,10 @@ Result_with_string Util_queue_add(Queue* queue, u32 event_id, void* data, s64 wa
 		LightLock_Unlock(&util_queue_mutex);
 		LightEvent_WaitTimeout(&queue->send_wait_event, wait_us * 1000);
 		LightLock_Lock(&util_queue_mutex);
+
+		//It may possible to start delting this queue on different thread while waiting.
+		if(queue->deleting)
+			goto deleting;
 	}
 
 	if(queue->next_index >= queue->max_items)
@@ -117,6 +124,7 @@ Result_with_string Util_queue_add(Queue* queue, u32 event_id, void* data, s64 wa
 		LightEvent_Signal(&queue->receive_wait_event);
 	}
 
+	queue->reference_count--;
 	LightLock_Unlock(&util_queue_mutex);
 
 	return result;
@@ -132,13 +140,22 @@ Result_with_string Util_queue_add(Queue* queue, u32 event_id, void* data, s64 wa
 	result.string = DEF_ERR_NOT_INITIALIZED_STR;
 	return result;
 
+	deleting:
+	queue->reference_count--;
+	LightLock_Unlock(&util_queue_mutex);
+	result.code = DEF_ERR_NOT_INITIALIZED;
+	result.string = DEF_ERR_NOT_INITIALIZED_STR;
+	return result;
+
 	out_of_memory:
+	queue->reference_count--;
 	LightLock_Unlock(&util_queue_mutex);
 	result.code = DEF_ERR_OUT_OF_MEMORY;
 	result.string = DEF_ERR_OUT_OF_MEMORY_STR;
 	return result;
 
 	already_exist://Treat it as success.
+	queue->reference_count--;
 	LightLock_Unlock(&util_queue_mutex);
 	return result;
 }
@@ -152,8 +169,10 @@ Result_with_string Util_queue_get(Queue* queue, u32* event_id, void** data, s64 
 
 	LightLock_Lock(&util_queue_mutex);
 
-	if(!queue->data || !queue->event_id)
+	if(!queue->data || !queue->event_id || queue->deleting)
 		goto not_inited;
+
+	queue->reference_count++;
 
 	if(queue->next_index <= 0 && wait_us > 0)
 	{
@@ -161,6 +180,10 @@ Result_with_string Util_queue_get(Queue* queue, u32* event_id, void** data, s64 
 		LightLock_Unlock(&util_queue_mutex);
 		LightEvent_WaitTimeout(&queue->receive_wait_event, wait_us * 1000);
 		LightLock_Lock(&util_queue_mutex);
+
+		//It may possible to start delting this queue on different thread while waiting.
+		if(queue->deleting)
+			goto deleting;
 	}
 
 	if(queue->next_index <= 0)
@@ -201,6 +224,7 @@ Result_with_string Util_queue_get(Queue* queue, u32* event_id, void** data, s64 
 		LightEvent_Signal(&queue->send_wait_event);
 	}
 
+	queue->reference_count--;
 	LightLock_Unlock(&util_queue_mutex);
 
 	return result;
@@ -216,21 +240,35 @@ Result_with_string Util_queue_get(Queue* queue, u32* event_id, void** data, s64 
 	result.string = DEF_ERR_NOT_INITIALIZED_STR;
 	return result;
 
+	deleting:
+	queue->reference_count--;
+	LightLock_Unlock(&util_queue_mutex);
+	result.code = DEF_ERR_NOT_INITIALIZED;
+	result.string = DEF_ERR_NOT_INITIALIZED_STR;
+	return result;
+
 	try_again:
+	queue->reference_count--;
 	LightLock_Unlock(&util_queue_mutex);
 	result.code = DEF_ERR_TRY_AGAIN;
 	result.string = DEF_ERR_TRY_AGAIN_STR;
 	return result;
 }
 
-bool Util_queue_is_event_exist(Queue* queue, u32 event_id)
+bool Util_queue_check_event_exist(Queue* queue, u32 event_id)
 {
 	bool exist = false;
 
-	if(!queue || !queue->data || !queue->event_id)
+	if(!queue)
 		return false;
 
 	LightLock_Lock(&util_queue_mutex);
+
+	if(!queue->data || !queue->event_id || queue->deleting)
+	{
+		LightLock_Unlock(&util_queue_mutex);
+		return false;
+	}
 
 	for(int i = 0; i < queue->next_index; i++)
 	{
@@ -250,10 +288,16 @@ int Util_queue_get_free_space(Queue* queue)
 {
 	int free = 0;
 
-	if(!queue || !queue->data || !queue->event_id)
+	if(!queue)
 		return 0;
 
 	LightLock_Lock(&util_queue_mutex);
+
+	if(!queue->data || !queue->event_id || queue->deleting)
+	{
+		LightLock_Unlock(&util_queue_mutex);
+		return false;
+	}
 
 	free = queue->max_items - queue->next_index;
 
@@ -264,10 +308,21 @@ int Util_queue_get_free_space(Queue* queue)
 
 void Util_queue_delete(Queue* queue)
 {
-	if(!queue || !queue->data || !queue->event_id)
+	if(!queue || !queue->data || !queue->event_id || queue->deleting)
 		return;
 
 	LightLock_Lock(&util_queue_mutex);
+	queue->deleting = true;
+
+	//Wait for all threads to exit Util_queue*() functions.
+	while(queue->reference_count > 0)
+	{
+		LightLock_Unlock(&util_queue_mutex);
+		LightEvent_Signal(&queue->receive_wait_event);
+		LightEvent_Signal(&queue->send_wait_event);
+		usleep(1000);
+		LightLock_Lock(&util_queue_mutex);
+	}
 
 	for(int i = 0; i < queue->max_items; i++)
 	{

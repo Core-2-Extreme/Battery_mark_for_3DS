@@ -43,7 +43,7 @@ Result_with_string Util_queue_get(Queue* queue, u32* event_id, void** data, s64 
  * @param event_id (in) Event id to check.
  * @note Thread safe
 */
-bool Util_queue_is_event_exist(Queue* queue, u32 event_id);
+bool Util_queue_check_event_exist(Queue* queue, u32 event_id);
 
 /**
  * @brief Check how many spaces left in the queue.

@@ -421,10 +421,12 @@ struct Hid_info
 
 struct Queue
 {
+    bool deleting;
 	u32* data;
 	u32* event_id;
 	s32 max_items;
 	s32 next_index;
+    s32 reference_count;
 	LightEvent receive_wait_event;
 	LightEvent send_wait_event;
 };
