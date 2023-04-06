@@ -13,13 +13,12 @@ Result_with_string Util_mic_init(int buffer_size);
 
 /**
  * @brief Start recording.
- * Available sample rate are : 32728, 16364, 10909 and 8182
- * @param sample_rate (in) Audio sample rate (in Hz).
+ * @param sample_rate_mode (in) Audio sample rate.
  * @return On success DEF_SUCCESS, 
  * on failure DEF_ERR_* or Nintendo API's error.
  * @warning Thread dangerous (untested)
 */
-Result_with_string Util_mic_start_recording(int sample_rate);
+Result_with_string Util_mic_start_recording(Mic_sample_rate sample_rate_mode);
 
 /**
  * @brief Stop recording.
