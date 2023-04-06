@@ -176,8 +176,8 @@ void Util_converter_y2r_exit(void);
 
 #else
 
-#define Util_converter_y2r_init(...) Util_return_result_with_string(var_disabled_result)
+#define Util_converter_y2r_init() Util_return_result_with_string(var_disabled_result)
 #define Util_converter_y2r_yuv420p_to_rgb565le(...) Util_return_result_with_string(var_disabled_result)
-#define Util_converter_y2r_exit(...)
+#define Util_converter_y2r_exit()
 
 #endif

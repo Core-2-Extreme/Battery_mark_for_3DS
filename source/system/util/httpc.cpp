@@ -38,7 +38,7 @@ Result_with_string Util_httpc_init(int buffer_size)
 	return result;
 }
 
-void Util_httpc_exit()
+void Util_httpc_exit(void)
 {
 	if(!util_httpc_init)
 		return;

@@ -116,6 +116,6 @@ void Util_cam_exit(void);
 #define Util_cam_set_camera(...) Util_return_result_with_string(var_disabled_result)
 #define Util_cam_set_exposure(...) Util_return_result_with_string(var_disabled_result)
 #define Util_cam_set_noise_filter(...) Util_return_result_with_string(var_disabled_result)
-#define Util_cam_exit(...)
+#define Util_cam_exit()
 
 #endif

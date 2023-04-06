@@ -168,6 +168,7 @@
 #define DEF_SAPP3_INIT_STR (std::string)"Sapp3/Init"
 #define DEF_SAPP3_EXIT_STR (std::string)"Sapp3/Exit"
 #define DEF_SAPP3_HID_CALLBACK_STR (std::string)"Sapp3/Hid callback"
+#define DEF_SAPP3_WORKER_THREAD_STR (std::string)"Sapp3/Worker thread"
 
 //sample app 4
 #define DEF_SAPP4_NUM_OF_MSG 1

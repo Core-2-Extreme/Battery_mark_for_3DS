@@ -101,7 +101,7 @@ void Util_encoder_close_output_file(int session);
 /**
  * @brief Encode image file.
  * @param file_path (in) File path.
- * @param raw_data (in) Pointer for raw image (RGB888LE).
+ * @param raw_data (in) Pointer for raw image (BGR888).
  * @param width (in) Image width.
  * @param height (in) Image height.
  * @param format (in) Image format DEF_ENCODER_IMAGE_CODEC_*.

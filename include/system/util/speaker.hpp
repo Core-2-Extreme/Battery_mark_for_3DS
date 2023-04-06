@@ -102,7 +102,7 @@ void Util_speaker_exit(void);
 
 #else
 
-#define Util_speaker_init(...) Util_return_result_with_string(var_disabled_result)
+#define Util_speaker_init() Util_return_result_with_string(var_disabled_result)
 #define Util_speaker_set_audio_info(...) Util_return_result_with_string(var_disabled_result)
 #define Util_speaker_add_buffer(...) Util_return_result_with_string(var_disabled_result)
 #define Util_speaker_get_available_buffer_num(...) Util_return_int(0)
@@ -112,6 +112,6 @@ void Util_speaker_exit(void);
 #define Util_speaker_resume(...)
 #define Util_speaker_is_paused(...) Util_return_bool(false)
 #define Util_speaker_is_playing(...) Util_return_bool(false)
-#define Util_speaker_exit(...)
+#define Util_speaker_exit()
 
 #endif

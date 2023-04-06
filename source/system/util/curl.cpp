@@ -72,7 +72,7 @@ Result_with_string Util_curl_init(int buffer_size)
 	return result;
 }
 
-void Util_curl_exit()
+void Util_curl_exit(void)
 {
 	if(!util_curl_init)
 		return;

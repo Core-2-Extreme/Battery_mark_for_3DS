@@ -35,7 +35,7 @@ Result_with_string Util_mic_init(int buffer_size)
 	result.code = MICU_SetAllowShellClosed(true);
 	if(result.code != 0)
 	{
-		result.error_description = "[Error] MICU_SetAllowShellClosed(() failed. ";
+		result.error_description = "[Error] MICU_SetAllowShellClosed() failed. ";
 		goto nintendo_api_failed_0;
 	}
 

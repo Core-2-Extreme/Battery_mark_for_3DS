@@ -28,8 +28,8 @@ float Util_cpu_usage_monitor_get_cpu_usage(s8 core_id);
 
 #else
 
-#define Util_cpu_usage_monitor_init(...) Util_return_result_with_string(var_disabled_result)
-#define Util_cpu_usage_monitor_exit(...)
+#define Util_cpu_usage_monitor_init() Util_return_result_with_string(var_disabled_result)
+#define Util_cpu_usage_monitor_exit()
 #define Util_cpu_usage_monitor_get_cpu_usage(...) Util_return_double(NAN)
 
 #endif

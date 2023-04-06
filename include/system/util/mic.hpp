@@ -67,10 +67,10 @@ void Util_mic_exit(void);
 
 #define Util_mic_init(...) Util_return_result_with_string(var_disabled_result)
 #define Util_mic_start_recording(...) Util_return_result_with_string(var_disabled_result)
-#define Util_mic_stop_recording(...)
-#define Util_mic_is_recording(...) Util_return_bool(false)
-#define Util_mic_query_remaining_buffer_time(...) Util_return_int(0)
+#define Util_mic_stop_recording()
+#define Util_mic_is_recording() Util_return_bool(false)
+#define Util_mic_query_remaining_buffer_time() Util_return_int(0)
 #define Util_mic_get_audio_data(...) Util_return_result_with_string(var_disabled_result)
-#define Util_mic_exit(...)
+#define Util_mic_exit()
 
 #endif

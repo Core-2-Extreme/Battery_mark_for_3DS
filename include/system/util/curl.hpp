@@ -16,7 +16,7 @@ Result_with_string Util_curl_init(int buffer_size);
  * Do nothing if curl api is not initialized.
  * @warning Thread dangerous (untested)
 */
-void Util_curl_exit();
+void Util_curl_exit(void);
 
 /**
  * @brief Make a http get request.
@@ -441,7 +441,7 @@ int (*read_callback)(void* buffer, int max_size, void* user_data), void* user_da
 #else
 
 #define Util_curl_init(...) Util_return_result_with_string(var_disabled_result)
-#define Util_curl_exit(...)
+#define Util_curl_exit()
 #define Util_curl_dl_data(...) Util_return_result_with_string(var_disabled_result)
 #define Util_curl_save_data(...) Util_return_result_with_string(var_disabled_result)
 #define Util_curl_post_and_dl_data(...) Util_return_result_with_string(var_disabled_result)
