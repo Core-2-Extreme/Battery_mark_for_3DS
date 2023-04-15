@@ -140,7 +140,7 @@ int Util_expl_query_size(int index)
 		return 0;
 }
 
-int Util_expl_query_type(int index)
+File_type Util_expl_query_type(int index)
 {
 	if(!util_expl_init)
 		return FILE_TYPE_NONE;

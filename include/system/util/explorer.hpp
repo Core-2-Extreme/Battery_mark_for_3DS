@@ -61,12 +61,12 @@ int Util_expl_query_size(int index);
 
 /**
  * @brief Query file type.
- * Always return DEF_EXPL_TYPE_UNKNOWN if explorer api is not initialized.
+ * Always return FILE_TYPE_NONE if explorer api is not initialized.
  * @param index (in) File index.
- * @return File type (combination of DEF_EXPL_TYPE_*).
+ * @return File type.
  * @warning Thread dangerous (untested)
 */
-int Util_expl_query_type(int index);
+File_type Util_expl_query_type(int index);
 
 /**
  * @brief Query explorer show flag.
@@ -131,7 +131,7 @@ void Util_expl_main(Hid_info key);
 #define Util_expl_query_current_file_index() Util_return_int(-1)
 #define Util_expl_query_file_name(...) Util_return_string("")
 #define Util_expl_query_size(...) Util_return_int(0)
-#define Util_expl_query_type(...) Util_return_int(DEF_EXPL_TYPE_UNKNOWN)
+#define Util_expl_query_type(...) Util_return_int(FILE_TYPE_NONE)
 #define Util_expl_query_show_flag() Util_return_bool(false)
 #define Util_expl_set_callback(...)
 #define Util_expl_set_cancel_callback(...)
