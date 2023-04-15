@@ -131,15 +131,15 @@ Result_with_string Util_cset_set_screen_state(bool top_screen, bool bottom_scree
 	return result;
 }
 
-Result_with_string Util_cset_sleep_system(int wake_up_event)
+Result_with_string Util_cset_sleep_system(Wake_up_event wake_up_events)
 {
 	PtmWakeEvents wake_up_event_mask;
 	Result_with_string result;
 
-	if(!(wake_up_event & DEF_CSET_WAKE_UP_PRESS_HOME_BUTTON) && !(wake_up_event & DEF_CSET_WAKE_UP_OPEN_SHELL)) 
+	if(!(wake_up_events & WAKE_UP_EVENT_PRESS_HOME_BUTTON) && !(wake_up_events & WAKE_UP_EVENT_OPEN_SHELL)) 
 		goto invalid_arg;
 
-	wake_up_event_mask.mcu_interupt_mask = wake_up_event;
+	wake_up_event_mask.mcu_interupt_mask = (u32)wake_up_events;
 	wake_up_event_mask.pdn_wake_events = 0;
 
 	result.code = APT_SleepSystem(&wake_up_event_mask);

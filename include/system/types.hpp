@@ -343,9 +343,16 @@ enum Mic_sample_rate
 
 enum Queue_option
 {
-    QUEUE_OPTION_NONE = 0,                  //Default.
-    QUEUE_OPTION_DO_NOT_ADD_IF_EXIST = 1,   //Do not add the event if the same event id exist.
-    QUEUE_OPTION_SEND_TO_FRONT = 2,         //Send an event to the front of the queue, use it for high priority event.
+    QUEUE_OPTION_NONE                   = 0,        //Default.
+    QUEUE_OPTION_DO_NOT_ADD_IF_EXIST    = (1 << 1), //Do not add the event if the same event id exist.
+    QUEUE_OPTION_SEND_TO_FRONT          = (1 << 2), //Send an event to the front of the queue, use it for high priority event.
+};
+
+enum Wake_up_event
+{
+    WAKE_UP_EVENT_NONE              = 0,        //No wake up event.
+    WAKE_UP_EVENT_PRESS_HOME_BUTTON = (1 << 2), //Wake up if home button is pressed.
+    WAKE_UP_EVENT_OPEN_SHELL        = (1 << 5), //Wake up if shell is opened.
 };
 
 struct Result_with_string
