@@ -37,8 +37,6 @@ bool util_video_decoder_slice_cores[4] = { false, true, false, false, };
 bool util_video_decoder_changeable_buffer_size[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
 bool util_video_decoder_cache_packet_ready[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
 bool util_video_decoder_packet_ready[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
-//int util_video_decoder_previous_pts[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
-//int util_video_decoder_increase_per_pts[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
 int util_video_decoder_available_raw_image[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
 int util_video_decoder_raw_image_ready_index[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
 int util_video_decoder_raw_image_current_index[DEF_DECODER_MAX_SESSIONS][DEF_DECODER_MAX_VIDEO_TRACKS];
@@ -791,7 +789,12 @@ Result_with_string Util_video_decoder_init(int low_resolution, int num_of_video_
 		else if(util_video_decoder_context[session][i]->thread_type == FF_THREAD_SLICE)
 			Util_fake_pthread_set_enabled_core(util_video_decoder_slice_cores);
 
+		//Disable deprecated warning as it needs to be used here.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 		util_video_decoder_context[session][i]->thread_safe_callbacks = 1;
+#pragma GCC diagnostic pop
+
 		util_video_decoder_context[session][i]->get_buffer2 = Util_video_decoder_allocate_buffer;
 
 		ffmpeg_result = avcodec_open2(util_video_decoder_context[session][i], util_video_decoder_codec[session][i], NULL);
