@@ -99,8 +99,12 @@ Result_with_string Util_speaker_add_buffer(int play_ch, u8* buffer, int size)
 	{
 		if(util_ndsp_buffer[play_ch][i].status == NDSP_WBUF_FREE || util_ndsp_buffer[play_ch][i].status == NDSP_WBUF_DONE)
 		{
-			free_queue = i;
-			break;
+			//Free unused data if exist.
+			Util_safe_linear_free((void*)util_ndsp_buffer[play_ch][i].data_vaddr);
+			util_ndsp_buffer[play_ch][i].data_vaddr = NULL;
+
+			if(free_queue == -1)
+				free_queue = i;
 		}
 	}
 
@@ -110,8 +114,6 @@ Result_with_string Util_speaker_add_buffer(int play_ch, u8* buffer, int size)
 		goto try_again;
 	}
 
-	Util_safe_linear_free((void*)util_ndsp_buffer[play_ch][free_queue].data_vaddr);
-	util_ndsp_buffer[play_ch][free_queue].data_vaddr = NULL;
 	util_ndsp_buffer[play_ch][free_queue].data_vaddr = (u8*)Util_safe_linear_alloc(size);
 	if(!util_ndsp_buffer[play_ch][free_queue].data_vaddr)
 		goto out_of_linear_memory;
