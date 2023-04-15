@@ -433,6 +433,18 @@ enum Image_codec
     IMAGE_CODEC_MAX,
 };
 
+enum Keyboard_button
+{
+    KEYBOARD_BUTTON_INVALID = -1,
+
+    KEYBOARD_BUTTON_NONE,   //No button was pressed.
+    KEYBOARD_BUTTON_LEFT,   //Left button (usually cancel) was pressed.
+    KEYBOARD_BUTTON_MIDDLE, //Middle button (usually I forgot) was pressed.
+    KEYBOARD_BUTTON_RIGHT,  //Right button (usually confirm) was pressed.
+
+    KEYBOARD_BUTTON_MAX,
+};
+
 struct Result_with_string
 {
 	std::string string = "[Success] ";

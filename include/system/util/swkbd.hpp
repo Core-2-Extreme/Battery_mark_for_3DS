@@ -89,13 +89,13 @@ Result_with_string Util_swkbd_launch(std::string* out_data);
 /**
  * @brief Launch software keyboard.
  * @param out_data (out) Pointer for user input text.
- * @param pressed_button (out) Pressed button (DEF_SWKBD_BUTTON_*).
+ * @param pressed_button (out) Pressed button.
  * @return On success DEF_SUCCESS, 
  * on failure DEF_ERR_*.
  * @warning Call it from only drawing thread.
  * @warning Thread dangerous (untested)
 */
-Result_with_string Util_swkbd_launch(std::string* out_data, int* pressed_button);
+Result_with_string Util_swkbd_launch(std::string* out_data, Keyboard_button* pressed_button);
 
 /**
  * @brief Uninitialize a software keyboard.
