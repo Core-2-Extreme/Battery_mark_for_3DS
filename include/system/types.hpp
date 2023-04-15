@@ -355,6 +355,15 @@ enum Wake_up_event
     WAKE_UP_EVENT_OPEN_SHELL        = (1 << 5), //Wake up if shell is opened.
 };
 
+enum File_type
+{
+    FILE_TYPE_NONE      = 0,    //File type is not set.
+    FILE_TYPE_FILE      = 1,    //This entry is a file.
+    FILE_TYPE_DIR       = 2,    //This entry is a directory.
+    FILE_TYPE_READ_ONLY = 4,    //This entry is read only.
+    FILE_TYPE_HIDDEN    = 8,    //This entry is hidden.
+};
+
 struct Result_with_string
 {
 	std::string string = "[Success] ";

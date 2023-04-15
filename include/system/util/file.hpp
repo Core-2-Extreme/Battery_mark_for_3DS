@@ -125,4 +125,4 @@ Result_with_string Util_file_check_file_exist(std::string file_name, std::string
  * on failure DEF_ERR_* or Nintendo API's error.
  * @note Thread safe
 */
-Result_with_string Util_file_read_dir(std::string dir_path, int* detected, std::string file_name[], int type[], int array_length);
+Result_with_string Util_file_read_dir(std::string dir_path, int* detected, std::string file_name[], File_type type[], int array_length);

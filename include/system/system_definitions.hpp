@@ -236,11 +236,6 @@
 #define DEF_EXPL_INIT_STR (std::string)"Expl/Init"
 #define DEF_EXPL_EXIT_STR (std::string)"Expl/Exit"
 #define DEF_EXPL_READ_DIR_CALLBACK_STR (std::string)"Expl/Read dir callback"
-#define DEF_EXPL_TYPE_UNKNOWN 0
-#define DEF_EXPL_TYPE_FILE 1
-#define DEF_EXPL_TYPE_DIR 2
-#define DEF_EXPL_TYPE_READ_ONLY 4
-#define DEF_EXPL_TYPE_HIDDEN 8
 
 //external font
 #define DEF_EXFONT_NUM_OF_ONE_BYTE_FONT     1
@@ -305,12 +300,6 @@
 #define DEF_EXFONT_INIT_STR (std::string)"Exfont/Init"
 #define DEF_EXFONT_EXIT_STR (std::string)"Exfont/Exit"
 #define DEF_EXFONT_LOAD_FONT_CALLBACK_STR (std::string)"Exfont/Load font callback"
-
-//file
-#define DEF_FILE_TYPE_FILE 1
-#define DEF_FILE_TYPE_DIR 2
-#define DEF_FILE_TYPE_READ_ONLY 4
-#define DEF_FILE_TYPE_HIDDEN 8
 
 //fake pthread
 #ifndef _POSIX_THREADS
