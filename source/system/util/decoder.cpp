@@ -708,7 +708,7 @@ void Util_video_decoder_set_enabled_cores(bool frame_threading_cores[4], bool sl
 	}
 }
 
-Result_with_string Util_video_decoder_init(int low_resolution, int num_of_video_tracks, int num_of_threads, int thread_type, int session)
+Result_with_string Util_video_decoder_init(int low_resolution, int num_of_video_tracks, int num_of_threads, Multi_thread_type thread_type, int session)
 {
 	int ffmpeg_result = 0;
 	Result_with_string result;
@@ -765,7 +765,7 @@ Result_with_string Util_video_decoder_init(int low_resolution, int num_of_video_
 
 		util_video_decoder_context[session][i]->flags = AV_CODEC_FLAG_OUTPUT_CORRUPT;
 		util_video_decoder_context[session][i]->thread_count = num_of_threads;
-		if(thread_type == DEF_DECODER_THREAD_TYPE_AUTO)
+		if(thread_type == THREAD_TYPE_AUTO)
 		{
 			if(util_video_decoder_codec[session][i]->capabilities & AV_CODEC_CAP_FRAME_THREADS)
 				util_video_decoder_context[session][i]->thread_type = FF_THREAD_FRAME;
@@ -774,9 +774,9 @@ Result_with_string Util_video_decoder_init(int low_resolution, int num_of_video_
 			else
 				util_video_decoder_context[session][i]->thread_type = FF_THREAD_FRAME;
 		}
-		else if(thread_type == DEF_DECODER_THREAD_TYPE_SLICE && util_video_decoder_codec[session][i]->capabilities & AV_CODEC_CAP_SLICE_THREADS)
+		else if(thread_type == THREAD_TYPE_SLICE && util_video_decoder_codec[session][i]->capabilities & AV_CODEC_CAP_SLICE_THREADS)
 			util_video_decoder_context[session][i]->thread_type = FF_THREAD_SLICE;
-		else if(thread_type == DEF_DECODER_THREAD_TYPE_FRAME && util_video_decoder_codec[session][i]->capabilities & AV_CODEC_CAP_FRAME_THREADS)
+		else if(thread_type == THREAD_TYPE_FRAME && util_video_decoder_codec[session][i]->capabilities & AV_CODEC_CAP_FRAME_THREADS)
 			util_video_decoder_context[session][i]->thread_type = FF_THREAD_FRAME;
 		else
 		{
@@ -1068,11 +1068,11 @@ void Util_video_decoder_get_info(Video_info* video_info, int video_index, int se
 	video_info->format_name = util_video_decoder_codec[session][video_index]->long_name;
 	video_info->duration = (double)util_decoder_format_context[session]->duration / AV_TIME_BASE;
 	if(util_video_decoder_context[session][video_index]->thread_type == FF_THREAD_FRAME)
-		video_info->thread_type = DEF_DECODER_THREAD_TYPE_FRAME;
+		video_info->thread_type = THREAD_TYPE_FRAME;
 	else if(util_video_decoder_context[session][video_index]->thread_type == FF_THREAD_SLICE)
-		video_info->thread_type = DEF_DECODER_THREAD_TYPE_SLICE;
+		video_info->thread_type = THREAD_TYPE_SLICE;
 	else
-		video_info->thread_type = DEF_DECODER_THREAD_TYPE_NONE;
+		video_info->thread_type = THREAD_TYPE_NONE;
 
 	if(util_video_decoder_context[session][video_index]->pix_fmt < 0 || util_video_decoder_context[session][video_index]->pix_fmt >= AV_PIX_FMT_NB)
 		video_info->pixel_format = PIXEL_FORMAT_INVALID;
@@ -1206,7 +1206,7 @@ Result_with_string Util_decoder_read_packet(int session)
 	return result;
 }
 
-Result_with_string Util_decoder_parse_packet(int* type, int* packet_index, bool* key_frame, int session)
+Result_with_string Util_decoder_parse_packet(Packet_type* type, int* packet_index, bool* key_frame, int session)
 {
 	Result_with_string result;
 	int ffmpeg_result = 0;
@@ -1221,7 +1221,7 @@ Result_with_string Util_decoder_parse_packet(int* type, int* packet_index, bool*
 	
 	*key_frame = false;
 	*packet_index = -1;
-	*type = DEF_DECODER_PACKET_TYPE_UNKNOWN;
+	*type = PACKET_TYPE_UNKNOWN;
 
 	LightLock_Lock(&util_decoder_cache_packet_mutex[session]);
 	if(util_decoder_available_cache_packet[session] <= 0)
@@ -1251,13 +1251,13 @@ Result_with_string Util_decoder_parse_packet(int* type, int* packet_index, bool*
 				goto ffmpeg_api_failed;
 			}
 			*packet_index = i;
-			*type = DEF_DECODER_PACKET_TYPE_AUDIO;
+			*type = PACKET_TYPE_AUDIO;
 			util_audio_decoder_cache_packet_ready[session][i] = true;
 			break;
 		}
 	}
 
-	if(*type == DEF_DECODER_PACKET_TYPE_UNKNOWN)
+	if(*type == PACKET_TYPE_UNKNOWN)
 	{
 		for(int i = 0; i < DEF_DECODER_MAX_VIDEO_TRACKS; i++)
 		{
@@ -1279,7 +1279,7 @@ Result_with_string Util_decoder_parse_packet(int* type, int* packet_index, bool*
 					goto ffmpeg_api_failed;
 				}
 				*packet_index = i;
-				*type = DEF_DECODER_PACKET_TYPE_VIDEO;
+				*type = PACKET_TYPE_VIDEO;
 				*key_frame = util_video_decoder_cache_packet[session][i]->flags & AV_PKT_FLAG_KEY;
 				util_video_decoder_cache_packet_ready[session][i] = true;
 				break;
@@ -1287,7 +1287,7 @@ Result_with_string Util_decoder_parse_packet(int* type, int* packet_index, bool*
 		}
 	}
 
-	if(*type == DEF_DECODER_PACKET_TYPE_UNKNOWN)
+	if(*type == PACKET_TYPE_UNKNOWN)
 	{
 		for(int i = 0; i < DEF_DECODER_MAX_SUBTITLE_TRACKS; i++)
 		{
@@ -1309,7 +1309,7 @@ Result_with_string Util_decoder_parse_packet(int* type, int* packet_index, bool*
 					goto ffmpeg_api_failed;
 				}
 				*packet_index = i;
-				*type = DEF_DECODER_PACKET_TYPE_SUBTITLE;
+				*type = PACKET_TYPE_SUBTITLE;
 				util_subtitle_decoder_cache_packet_ready[session][i] = true;
 				break;
 			}
@@ -2735,7 +2735,7 @@ void Util_mvd_video_decoder_skip_image(double* current_pos, int session)
 	LightLock_Unlock(&util_mvd_video_decoder_raw_image_mutex[session]);
 }
 
-Result_with_string Util_decoder_seek(u64 seek_pos, int flag, int session)
+Result_with_string Util_decoder_seek(u64 seek_pos, Seek_flag flag, int session)
 {
 	int ffmpeg_result = 0;
 	int ffmpeg_seek_flag = 0;
@@ -2749,16 +2749,16 @@ Result_with_string Util_decoder_seek(u64 seek_pos, int flag, int session)
 	if(!util_decoder_opened_file[session])
 		goto not_inited;
 	
-	if(flag == DEF_DECODER_SEEK_FLAG_BACKWARD)
+	if(flag & SEEK_FLAG_BACKWARD)
 		ffmpeg_seek_flag |= AVSEEK_FLAG_BACKWARD;
-	if(flag == DEF_DECODER_SEEK_FLAG_BYTE)
+	if(flag & SEEK_FLAG_BYTE)
 		ffmpeg_seek_flag |= AVSEEK_FLAG_BYTE;
-	if(flag == DEF_DECODER_SEEK_FLAG_ANY)
+	if(flag & SEEK_FLAG_ANY)
 		ffmpeg_seek_flag |= AVSEEK_FLAG_ANY;
-	if(flag == DEF_DECODER_SEEK_FLAG_FRAME)
+	if(flag & SEEK_FLAG_FRAME)
 		ffmpeg_seek_flag |= AVSEEK_FLAG_FRAME;
 
-	ffmpeg_result = avformat_seek_file(util_decoder_format_context[session], -1, INT64_MIN, seek_pos * 1000, INT64_MAX, ffmpeg_seek_flag);//AVSEEK_FLAG_FRAME 8 AVSEEK_FLAG_ANY 4  AVSEEK_FLAG_BACKWORD 1
+	ffmpeg_result = avformat_seek_file(util_decoder_format_context[session], -1, INT64_MIN, seek_pos * 1000, INT64_MAX, ffmpeg_seek_flag);
 	if(ffmpeg_result < 0)
 	{
 		result.error_description = "[Error] avformat_seek_file() failed. " + std::to_string(ffmpeg_result) + " ";
