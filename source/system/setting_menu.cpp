@@ -1688,7 +1688,7 @@ void Sem_record_thread(void* arg)
 				sem_record_request = false;
 
 			log_num = Util_log_save(DEF_SEM_RECORD_THREAD_STR, "Util_video_encoder_init()...");
-			result = Util_video_encoder_init(DEF_ENCODER_VIDEO_CODEC_MJPEG, rec_width, rec_height, 1500000, rec_framerate, 0);
+			result = Util_video_encoder_init(VIDEO_CODEC_MJPEG, rec_width, rec_height, 1500000, rec_framerate, 0);
 			Util_log_add(log_num, result.string + result.error_description, result.code);
 			if(result.code != 0)
 				sem_record_request = false;
