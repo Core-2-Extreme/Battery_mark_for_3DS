@@ -1,4 +1,6 @@
-#pragma once
+#ifndef BMR_HPP
+#define BMR_HPP
+
 #include "system/types.hpp"
 
 bool Bmr_query_init_flag(void);
@@ -18,3 +20,5 @@ void Bmr_init(bool draw);
 void Bmr_exit(bool draw);
 
 void Bmr_main(void);
+
+#endif

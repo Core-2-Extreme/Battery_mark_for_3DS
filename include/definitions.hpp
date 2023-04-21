@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DEFINITIONS_HPP
+#define DEFINITIONS_HPP
 
 //settings
 #define DEF_MAIN_DIR (std::string)"/Battery_mark/"
@@ -221,3 +222,5 @@
 #define DEF_SAPP7_EXIT_STR (std::string)"Sapp7/Exit"
 #define DEF_SAPP7_HID_CALLBACK_STR (std::string)"Sapp7/Hid callback"
 #define DEF_SAPP7_WORKER_THREAD_STR (std::string)"Sapp7/Worker thread"
+
+#endif

@@ -1,6 +1,22 @@
-﻿#include "system/headers.hpp"
+﻿#include "definitions.hpp"
+#include "system/types.hpp"
 
 #include "system/setting_menu.hpp"
+#include "system/variables.hpp"
+
+#include "system/draw/draw.hpp"
+#include "system/draw/external_font.hpp"
+
+#include "system/util/change_setting.hpp"
+#include "system/util/cpu_usage.hpp"
+#include "system/util/curl.hpp"
+#include "system/util/error.hpp"
+#include "system/util/explorer.hpp"
+#include "system/util/file.hpp"
+#include "system/util/hid.hpp"
+#include "system/util/httpc.hpp"
+#include "system/util/log.hpp"
+#include "system/util/util.hpp"
 
 #ifdef DEF_ENABLE_BMARK
 #include "battery_mark.hpp"
@@ -33,6 +49,9 @@
 #ifdef DEF_ENABLE_SUB_APP7
 #include "sub_app7.hpp"
 #endif
+
+//Include myself.
+#include "system/menu.hpp"
 
 bool menu_thread_run = false;
 bool menu_main_run = true;
@@ -903,7 +922,7 @@ void Menu_hid_callback(void)
 					{
 						menu_exit_request[0] = true;
 						while(menu_exit_request[0])
-							usleep(20000);
+							Util_sleep(20000);
 					}
 					else if (Util_hid_is_pressed(key, menu_sapp_button[0]))
 						menu_sapp_button[0].selected = true;
@@ -913,7 +932,7 @@ void Menu_hid_callback(void)
 						{
 							menu_init_request[0] = true;
 							while(menu_init_request[0])
-								usleep(20000);
+								Util_sleep(20000);
 						}
 						else
 							Bmark_resume();
@@ -926,7 +945,7 @@ void Menu_hid_callback(void)
 					{
 						menu_exit_request[1] = true;
 						while(menu_exit_request[1])
-							usleep(20000);
+							Util_sleep(20000);
 					}
 					else if (Util_hid_is_pressed(key, menu_sapp_button[1]))
 						menu_sapp_button[1].selected = true;
@@ -936,7 +955,7 @@ void Menu_hid_callback(void)
 						{
 							menu_init_request[1] = true;
 							while(menu_init_request[1])
-								usleep(20000);
+								Util_sleep(20000);
 						}
 						else
 							Bmr_resume();
@@ -949,7 +968,7 @@ void Menu_hid_callback(void)
 					{
 						menu_exit_request[2] = true;
 						while(menu_exit_request[2])
-							usleep(20000);
+							Util_sleep(20000);
 					}
 					else if (Util_hid_is_pressed(key, menu_sapp_button[2]))
 						menu_sapp_button[2].selected = true;
@@ -959,7 +978,7 @@ void Menu_hid_callback(void)
 						{
 							menu_init_request[2] = true;
 							while(menu_init_request[2])
-								usleep(20000);
+								Util_sleep(20000);
 						}
 						else
 							Sapp2_resume();
@@ -972,7 +991,7 @@ void Menu_hid_callback(void)
 					{
 						menu_exit_request[3] = true;
 						while(menu_exit_request[3])
-							usleep(20000);
+							Util_sleep(20000);
 					}
 					else if (Util_hid_is_pressed(key, menu_sapp_button[3]))
 						menu_sapp_button[3].selected = true;
@@ -982,7 +1001,7 @@ void Menu_hid_callback(void)
 						{
 							menu_init_request[3] = true;
 							while(menu_init_request[3])
-								usleep(20000);
+								Util_sleep(20000);
 						}
 						else
 							Sapp3_resume();
@@ -995,7 +1014,7 @@ void Menu_hid_callback(void)
 					{
 						menu_exit_request[4] = true;
 						while(menu_exit_request[4])
-							usleep(20000);
+							Util_sleep(20000);
 					}
 					else if (Util_hid_is_pressed(key, menu_sapp_button[4]))
 						menu_sapp_button[4].selected = true;
@@ -1005,7 +1024,7 @@ void Menu_hid_callback(void)
 						{
 							menu_init_request[4] = true;
 							while(menu_init_request[4])
-								usleep(20000);
+								Util_sleep(20000);
 						}
 						else
 							Sapp4_resume();
@@ -1018,7 +1037,7 @@ void Menu_hid_callback(void)
 					{
 						menu_exit_request[5] = true;
 						while(menu_exit_request[5])
-							usleep(20000);
+							Util_sleep(20000);
 					}
 					else if (Util_hid_is_pressed(key, menu_sapp_button[5]))
 						menu_sapp_button[5].selected = true;
@@ -1028,7 +1047,7 @@ void Menu_hid_callback(void)
 						{
 							menu_init_request[5] = true;
 							while(menu_init_request[5])
-								usleep(20000);
+								Util_sleep(20000);
 						}
 						else
 							Sapp5_resume();
@@ -1041,7 +1060,7 @@ void Menu_hid_callback(void)
 					{
 						menu_exit_request[6] = true;
 						while(menu_exit_request[6])
-							usleep(20000);
+							Util_sleep(20000);
 					}
 					else if (Util_hid_is_pressed(key, menu_sapp_button[6]))
 						menu_sapp_button[6].selected = true;
@@ -1051,7 +1070,7 @@ void Menu_hid_callback(void)
 						{
 							menu_init_request[6] = true;
 							while(menu_init_request[6])
-								usleep(20000);
+								Util_sleep(20000);
 						}
 						else
 							Sapp6_resume();
@@ -1064,7 +1083,7 @@ void Menu_hid_callback(void)
 					{
 						menu_exit_request[7] = true;
 						while(menu_exit_request[7])
-							usleep(20000);
+							Util_sleep(20000);
 					}
 					else if (Util_hid_is_pressed(key, menu_sapp_button[7]))
 						menu_sapp_button[7].selected = true;
@@ -1074,7 +1093,7 @@ void Menu_hid_callback(void)
 						{
 							menu_init_request[7] = true;
 							while(menu_init_request[7])
-								usleep(20000);
+								Util_sleep(20000);
 						}
 						else
 							Sapp7_resume();
@@ -1088,7 +1107,7 @@ void Menu_hid_callback(void)
 						{
 							menu_init_request[8] = true;
 							while(menu_init_request[8])
-								usleep(20000);
+								Util_sleep(20000);
 						}
 						else
 							Sem_resume();
@@ -1300,7 +1319,7 @@ void Menu_check_connectivity_thread(void* arg)
 				var_connect_test_succes = false;
 		}
 		else
-			usleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
+			Util_sleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
 
 		count++;
 	}

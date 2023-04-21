@@ -1,4 +1,11 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
+#include "system/types.hpp"
+
+#include "system/util/fake_pthread.hpp"
+#include "system/util/util.hpp"
+
+//Include myself.
+#include "system/util/decoder.hpp"
 
 #if DEF_ENABLE_VIDEO_AUDIO_DECODER_API
 
@@ -1969,7 +1976,7 @@ Result_with_string Util_mvd_video_decoder_decode(int session)
 		source_offset += 4;
 		if(source_offset + size > util_video_decoder_packet[session][0]->size || size < 0)
 		{
-			Util_log_save("debug", "unexpected nal size : " + std::to_string(size));
+			// Util_log_save("debug", "unexpected nal size : " + std::to_string(size));
 			goto ffmpeg_api_failed;
 		}
 		

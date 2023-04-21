@@ -1,6 +1,8 @@
-#pragma once
+#ifndef SWKBD_HPP
+#define SWKBD_HPP
 
 #if DEF_ENABLE_SWKBD_API
+#include "system/types.hpp"
 
 /**
  * @brief Initialize a software keyboard.
@@ -110,5 +112,7 @@ void Util_swkbd_exit(void);
 #define Util_swkbd_set_dic_word(...) Util_return_result_with_string(var_disabled_result)
 #define Util_swkbd_launch(...) Util_return_result_with_string(var_disabled_result)
 #define Util_swkbd_exit()
+
+#endif
 
 #endif

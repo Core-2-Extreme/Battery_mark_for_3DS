@@ -1,4 +1,7 @@
-#pragma once
+#ifndef QUEUE_HPP
+#define QUEUE_HPP
+
+#include "system/types.hpp"
 
 /**
  * @brief Create the queue.
@@ -60,3 +63,5 @@ int Util_queue_get_free_space(Queue* queue);
  * @note Thread safe
 */
 void Util_queue_delete(Queue* queue);
+
+#endif

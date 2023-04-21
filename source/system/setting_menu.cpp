@@ -1,7 +1,27 @@
-﻿#include "system/headers.hpp"
+﻿#include "definitions.hpp"
+#include "system/types.hpp"
 
-#include "system/setting_menu.hpp"
 #include "system/menu.hpp"
+#include "system/variables.hpp"
+
+#include "system/draw/draw.hpp"
+#include "system/draw/external_font.hpp"
+
+#include "system/util/change_setting.hpp"
+#include "system/util/converter.hpp"
+#include "system/util/cpu_usage.hpp"
+#include "system/util/curl.hpp"
+#include "system/util/encoder.hpp"
+#include "system/util/error.hpp"
+#include "system/util/file.hpp"
+#include "system/util/hid.hpp"
+#include "system/util/httpc.hpp"
+#include "system/util/log.hpp"
+#include "system/util/util.hpp"
+
+//Include myself.
+#include "system/setting_menu.hpp"
+
 #ifdef DEF_ENABLE_BMARK
 #include "battery_mark.hpp"
 #endif
@@ -1604,10 +1624,10 @@ void Sem_encode_thread(void* arg)
 				sem_wait_request = false;
 			}
 			else
-				usleep(1000);
+				Util_sleep(1000);
 		}
 
-		usleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
+		Util_sleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
 	}
 
 	Util_log_save(DEF_SEM_ENCODE_THREAD_STR, "Thread exit.");
@@ -1800,11 +1820,11 @@ void Sem_record_thread(void* arg)
 				osTickCounterUpdate(&counter);
 				time = osTickCounterRead(&counter);
 				if(1000.0 / rec_framerate > time)
-					usleep(((1000.0 / rec_framerate) - time) * 1000);
+					Util_sleep(((1000.0 / rec_framerate) - time) * 1000);
 			}
 
 			while(sem_wait_request)
-				usleep(100000);
+				Util_sleep(100000);
 
 			Util_encoder_close_output_file(0);
 			Util_safe_linear_free(both_bgr);
@@ -1821,7 +1841,7 @@ void Sem_record_thread(void* arg)
 			APT_SetAppCpuTimeLimit(30);
 		}
 		else
-			usleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
+			Util_sleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
 	}
 
 	Util_log_save(DEF_SEM_RECORD_THREAD_STR, "Thread exit.");
@@ -2168,10 +2188,10 @@ void Sem_update_thread(void* arg)
 				sem_dl_file_request = false;
 		}
 		else
-			usleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
+			Util_sleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
 
 		while (sem_thread_suspend)
-			usleep(DEF_INACTIVE_THREAD_SLEEP_TIME);
+			Util_sleep(DEF_INACTIVE_THREAD_SLEEP_TIME);
 	}
 	Util_log_save(DEF_SEM_UPDATE_THREAD_STR, "Thread exit.");
 	threadExit(0);

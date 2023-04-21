@@ -1,4 +1,6 @@
-#pragma once
+#ifndef BMARK_HPP
+#define BMARK_HPP
+
 #include "system/types.hpp"
 
 bool Bmark_query_init_flag(void);
@@ -18,3 +20,5 @@ void Bmark_init(bool draw);
 void Bmark_exit(bool draw);
 
 void Bmark_main(void);
+
+#endif

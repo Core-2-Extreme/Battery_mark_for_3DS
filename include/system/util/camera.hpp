@@ -1,6 +1,8 @@
-#pragma once
+#ifndef CAMERA_HPP
+#define CAMERA_HPP
 
 #if DEF_ENABLE_CAM_API
+#include "system/types.hpp"
 
 /**
  * @brief Initialize a camera.
@@ -115,5 +117,7 @@ void Util_cam_exit(void);
 #define Util_cam_set_exposure(...) Util_return_result_with_string(var_disabled_result)
 #define Util_cam_set_noise_filter(...) Util_return_result_with_string(var_disabled_result)
 #define Util_cam_exit()
+
+#endif
 
 #endif

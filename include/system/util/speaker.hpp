@@ -1,6 +1,8 @@
-#pragma once
+#ifndef SPEAKER_HPP
+#define SPEAKER_HPP
 
 #if DEF_ENABLE_SPEAKER_API
+#include "system/types.hpp"
 
 /**
  * @brief Initialize a speaker.
@@ -113,5 +115,7 @@ void Util_speaker_exit(void);
 #define Util_speaker_is_paused(...) Util_return_bool(false)
 #define Util_speaker_is_playing(...) Util_return_bool(false)
 #define Util_speaker_exit()
+
+#endif
 
 #endif

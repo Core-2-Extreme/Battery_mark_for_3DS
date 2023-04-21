@@ -1,4 +1,16 @@
-#include "system/headers.hpp"
+#include <malloc.h>
+#include <unistd.h>
+
+#include "definitions.hpp"
+#include "system/types.hpp"
+
+#include "system/variables.hpp"
+
+//Include myself.
+#include "system/util/fake_pthread.hpp"
+
+extern "C"
+{
 
 int util_fake_pthread_core_offset = 0;
 int util_fake_pthread_enabled_core_list[4] = { 0, 1, -3, -3, };
@@ -27,6 +39,11 @@ void Util_fake_pthread_set_enabled_core(bool enabled_core[4])
     util_fake_pthread_core_offset = 0;
 }
 
+int	pthread_mutex_init(pthread_mutex_t* __mutex, const pthread_mutexattr_t* __attr)
+{
+    return svcCreateMutex((Handle*)__mutex, false);
+}
+
 int	pthread_mutex_lock(pthread_mutex_t* __mutex)
 {
     uint result = 0;
@@ -51,11 +68,6 @@ int	pthread_mutex_unlock(pthread_mutex_t* __mutex)
     return svcReleaseMutex(*(Handle*)__mutex);
 }
 
-int	pthread_mutex_init(pthread_mutex_t* __mutex, const pthread_mutexattr_t* __attr)
-{
-    return svcCreateMutex((Handle*)__mutex, false);
-}
-
 int	pthread_mutex_destroy(pthread_mutex_t* __mutex)
 {
     return svcCloseHandle(*(Handle*)__mutex);
@@ -77,6 +89,11 @@ int	pthread_once(pthread_once_t* __once_control, void (*__init_routine)(void))
     __init_routine();
 
     return 0;
+}
+
+int	pthread_cond_init(pthread_cond_t* __cond, const pthread_condattr_t* __attr)
+{
+    return svcCreateEvent((Handle*)__cond, RESET_ONESHOT);
 }
 
 int	pthread_cond_wait(pthread_cond_t* __cond, pthread_mutex_t* __mutex)
@@ -127,11 +144,6 @@ int	pthread_cond_broadcast(pthread_cond_t* __cond)
         if(result == 0)
             return 0;
     }
-}
-
-int	pthread_cond_init(pthread_cond_t* __cond, const pthread_condattr_t* __attr)
-{
-    return svcCreateEvent((Handle*)__cond, RESET_ONESHOT);
 }
 
 int	pthread_cond_destroy(pthread_cond_t* __mutex)
@@ -232,4 +244,6 @@ long sysconf(int name)
     }
     else
         return -1;
+}
+
 }

@@ -1,6 +1,8 @@
-#pragma once
+#ifndef MUXER_HPP
+#define MUXER_HPP
 
 #if DEF_ENABLE_MUXER_API
+#include "system/types.hpp"
 
 /**
  * @brief Open the audio file.
@@ -47,5 +49,7 @@ void Util_muxer_close(int session);
 #define Util_muxer_open_video_file(...) Util_return_result_with_string(var_disabled_result)
 #define Util_muxer_mux(...) Util_return_result_with_string(var_disabled_result)
 #define Util_muxer_close(...)
+
+#endif
 
 #endif

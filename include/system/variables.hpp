@@ -1,4 +1,7 @@
-#pragma once
+#ifndef VARIABLES_HPP
+#define VARIABLES_HPP
+
+#include "system/types.hpp"
 
 extern bool var_connect_test_succes;
 extern bool var_need_reflesh;
@@ -50,3 +53,5 @@ extern std::string var_debug_string[8];
 extern C2D_Image var_square_image[1];
 extern C2D_Image var_null_image;
 extern Result_with_string var_disabled_result;
+
+#endif

@@ -1,4 +1,8 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
+#include "system/types.hpp"
+
+//Include myself.
+#include "system/util/change_setting.hpp"
 
 Result_with_string Util_cset_set_screen_brightness(bool top_screen, bool bottom_screen, int brightness)
 {

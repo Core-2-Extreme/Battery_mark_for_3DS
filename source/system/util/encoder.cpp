@@ -1,5 +1,10 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
+#include "system/types.hpp"
 
+#include "system/util/util.hpp"
+
+//Include myself.
+#include "system/util/encoder.hpp"
 
 #if DEF_ENABLE_VIDEO_AUDIO_ENCODER_API
 

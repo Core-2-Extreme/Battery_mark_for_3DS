@@ -1,6 +1,21 @@
-﻿#include "system/headers.hpp"
+﻿#include "definitions.hpp"
 
 #if DEF_ENABLE_EXPL_API
+#include <algorithm>
+
+#include "system/types.hpp"
+
+#include "system/draw/draw.hpp"
+
+#include "system/menu.hpp"
+#include "system/variables.hpp"
+
+#include "system/util/file.hpp"
+#include "system/util/hid.hpp"
+#include "system/util/log.hpp"
+
+//Include myself.
+#include "system/util/explorer.hpp"
 
 void (*util_expl_callback)(std::string, std::string) = NULL;
 void (*util_expl_cancel_callback)(void) = NULL;

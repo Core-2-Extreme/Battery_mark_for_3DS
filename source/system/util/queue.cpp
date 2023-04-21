@@ -1,4 +1,10 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
+#include "system/types.hpp"
+
+#include "system/util/util.hpp"
+
+//Include myself.
+#include "system/util/queue.hpp"
 
 LightLock util_queue_mutex = 1;//Initially unlocked state.
 
@@ -320,7 +326,7 @@ void Util_queue_delete(Queue* queue)
 		LightLock_Unlock(&util_queue_mutex);
 		LightEvent_Signal(&queue->receive_wait_event);
 		LightEvent_Signal(&queue->send_wait_event);
-		usleep(1000);
+		Util_sleep(1000);
 		LightLock_Lock(&util_queue_mutex);
 	}
 

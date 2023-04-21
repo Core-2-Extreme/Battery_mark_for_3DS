@@ -1,4 +1,8 @@
-#include "system/headers.hpp"
+#include "system/types.hpp"
+#include "system/util/util.hpp"
+
+//Include myself.
+#include "system/variables.hpp"
 
 //set heap size, rest memory will be linear ram
 u32 __ctru_heap_size = 1024 * 1024 * 10;

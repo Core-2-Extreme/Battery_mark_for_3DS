@@ -1,11 +1,11 @@
-#pragma once
+#ifndef ENCODER_HPP
+#define ENCODER_HPP
+
+#if (defined(DEF_ENABLE_VIDEO_AUDIO_ENCODER_API) || defined(DEF_ENABLE_IMAGE_ENCODER_API))
+#include "system/types.hpp"
+#endif
 
 #if DEF_ENABLE_VIDEO_AUDIO_ENCODER_API
-
-extern "C" 
-{
-#include "libavcodec/avcodec.h"
-}
 
 /**
  * @brief Create the output file.
@@ -115,5 +115,7 @@ Result_with_string Util_image_encoder_encode(std::string file_path, u8* raw_data
 #else
 
 #define Util_image_encoder_encode(...) Util_return_result_with_string(var_disabled_result)
+
+#endif
 
 #endif

@@ -1,6 +1,8 @@
-#pragma once
+#ifndef MIC_HPP
+#define MIC_HPP
 
 #if DEF_ENABLE_MIC_API
+#include "system/types.hpp"
 
 /**
  * @brief Initialize a mic.
@@ -71,5 +73,7 @@ void Util_mic_exit(void);
 #define Util_mic_query_remaining_buffer_time() Util_return_int(0)
 #define Util_mic_get_audio_data(...) Util_return_result_with_string(var_disabled_result)
 #define Util_mic_exit()
+
+#endif
 
 #endif

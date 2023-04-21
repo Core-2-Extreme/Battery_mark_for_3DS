@@ -1,4 +1,10 @@
-#pragma once
+#ifndef CONVERTER_HPP
+#define CONVERTER_HPP
+
+#if (defined(DEF_ENABLE_SW_FFMPEG_COLOR_CONVERTER_API) || defined(DEF_ENABLE_SW_FFMPEG_AUDIO_CONVERTER_API) \
+|| defined(DEF_ENABLE_SW_CONVERTER_API) || defined(DEF_ENABLE_SW_ASM_CONVERTER_API) || defined(DEF_ENABLE_HW_CONVERTER_API))
+#include "system/types.hpp"
+#endif
 
 #if DEF_ENABLE_SW_FFMPEG_COLOR_CONVERTER_API
 
@@ -179,5 +185,7 @@ void Util_converter_y2r_exit(void);
 #define Util_converter_y2r_init() Util_return_result_with_string(var_disabled_result)
 #define Util_converter_y2r_yuv420p_to_rgb565le(...) Util_return_result_with_string(var_disabled_result)
 #define Util_converter_y2r_exit()
+
+#endif
 
 #endif

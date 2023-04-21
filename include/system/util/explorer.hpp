@@ -1,6 +1,8 @@
-﻿#pragma once
+﻿#ifndef EXPLORER_HPP
+#define EXPLORER_HPP
 
 #if DEF_ENABLE_EXPL_API
+#include "system/types.hpp"
 
 /**
  * @brief Initialize a explorer api.
@@ -139,5 +141,7 @@ void Util_expl_main(Hid_info key);
 #define Util_expl_set_show_flag(...)
 #define Util_expl_draw()
 #define Util_expl_main(...)
+
+#endif
 
 #endif

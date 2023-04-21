@@ -1,6 +1,12 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
 
 #if DEF_ENABLE_CAM_API
+#include "system/types.hpp"
+
+#include "system/util/util.hpp"
+
+//Include myself.
+#include "system/util/camera.hpp"
 
 bool util_cam_init = false;
 u32 util_cam_buffer_size = 0;

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SYSTEM_DEFINITIONS_HPP
+#define SYSTEM_DEFINITIONS_HPP
+
 
 //menu
 #define DEF_MENU_NUM_OF_MSG 5
@@ -308,3 +310,5 @@
 
 #define DEF_SYSTEM_THREAD_PRIORITY_IDLE     0x3F//Lowest priority for system thread, user thread must not use this priority.
 #define DEF_SYSTEM_THREAD_PRIORITY_REALTIME 0x18//Highest priority for system thread, user thread must not use this priority.
+
+#endif

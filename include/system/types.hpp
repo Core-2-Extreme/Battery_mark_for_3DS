@@ -1,5 +1,12 @@
-#pragma once
+#ifndef TYPES_HPP
+#define TYPES_HPP
+
 #include <string>
+
+#include <3ds.h>
+#include <citro2d.h>
+
+#include "system_definitions.hpp"
 
 //These definitions are based on (stolen from) library\ffmpeg\include\libavutil\pixfmt.h see it for more information.
 enum Pixel_format
@@ -541,7 +548,7 @@ struct Subtitle_data
 
 struct Image_data
 {
-	C2D_Image c2d = { .tex = NULL, };
+	C2D_Image c2d = { .tex = NULL, .subtex = NULL, };
 	Tex3DS_SubTexture* subtex = NULL;
 	bool selected = false;
 	double x = -1;
@@ -645,3 +652,5 @@ struct Queue
 	LightEvent receive_wait_event;
 	LightEvent send_wait_event;
 };
+
+#endif

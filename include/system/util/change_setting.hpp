@@ -1,4 +1,7 @@
-#pragma once
+#ifndef CHANGE_SETTING_HPP
+#define CHANGE_SETTING_HPP
+
+#include "system/types.hpp"
 
 /**
  * @brief Set screen brightness.
@@ -40,3 +43,5 @@ Result_with_string Util_cset_set_screen_state(bool top_screen, bool bottom_scree
  * @warning Thread dangerous (untested)
 */
 Result_with_string Util_cset_sleep_system(Wake_up_event wake_up_events);
+
+#endif

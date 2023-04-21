@@ -1,4 +1,9 @@
-#pragma once
+#ifndef DECODER_HPP
+#define DECODER_HPP
+
+#if (defined(DEF_ENABLE_VIDEO_AUDIO_DECODER_API) || defined(DEF_ENABLE_IMAGE_DECODER_API))
+#include "system/types.hpp"
+#endif
 
 #if DEF_ENABLE_VIDEO_AUDIO_DECODER_API
 
@@ -461,5 +466,7 @@ Result_with_string Util_image_decoder_decode(u8* compressed_data, int compressed
 #else
 
 #define Util_image_decoder_decode(...) Util_return_result_with_string(var_disabled_result)
+
+#endif
 
 #endif

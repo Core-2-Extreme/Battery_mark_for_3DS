@@ -1,4 +1,7 @@
-#pragma once
+#ifndef DRAW_HPP
+#define DRAW_HPP
+
+#include "system/types.hpp"
 
 /**
  * @brief Initialize a draw api.
@@ -436,3 +439,5 @@ void Draw_screen_ready(Screen screen, int abgr8888);
  * @warning Call it from only drawing thread.
 */
 void Draw_apply_draw(void);
+
+#endif

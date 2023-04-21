@@ -1,6 +1,10 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
 
 #if DEF_ENABLE_SWKBD_API
+#include "system/types.hpp"
+
+//Include myself.
+#include "system/util/swkbd.hpp"
 
 bool util_swkbd_init = false;
 int util_swkbd_max_length = 0;

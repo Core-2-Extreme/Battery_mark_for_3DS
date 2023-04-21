@@ -1,4 +1,7 @@
-#pragma once
+#ifndef FILE_HPP
+#define FILE_HPP
+
+#include "system/types.hpp"
 
 /**
  * @brief Save data to a file.
@@ -126,3 +129,5 @@ Result_with_string Util_file_check_file_exist(std::string file_name, std::string
  * @note Thread safe
 */
 Result_with_string Util_file_read_dir(std::string dir_path, int* detected, std::string file_name[], File_type type[], int array_length);
+
+#endif

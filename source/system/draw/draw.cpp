@@ -1,4 +1,16 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
+#include "system/types.hpp"
+
+#include "system/variables.hpp"
+
+#include "system/draw/external_font.hpp"
+
+#include "system/util/cpu_usage.hpp"
+#include "system/util/hid.hpp"
+#include "system/util/util.hpp"
+
+//Include myself.
+#include "system/draw/draw.hpp"
 
 bool util_draw_init = false;
 bool util_draw_sheet_texture_free[DEF_DRAW_MAX_NUM_OF_SPRITE_SHEETS];

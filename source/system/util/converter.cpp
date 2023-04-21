@@ -1,12 +1,18 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
 
 #if DEF_ENABLE_SW_FFMPEG_COLOR_CONVERTER_API
+#include "system/types.hpp"
+
+#include "system/util/util.hpp"
 
 extern "C" 
 {
 #include "libswscale/swscale.h"
 #include "libavutil/imgutils.h"
 }
+
+//Include myself.
+#include "system/util/converter.hpp"
 
 //Translation table for Pixel_format -> AVPixelFormat.
 AVPixelFormat util_converter_pixel_format_table[PIXEL_FORMAT_MAX] = 
@@ -776,7 +782,7 @@ Result_with_string Util_converter_y2r_yuv420p_to_rgb565le(u8* yuv420p, u8** rgb5
 			result.error_description = "[Error] Y2RU_IsDoneReceiving() failed. ";
 			goto nintendo_api_failed;
 		}
-		usleep(500);
+		Util_sleep(500);
 	}
 
 	return result;

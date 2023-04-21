@@ -1,4 +1,10 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
+#include "system/types.hpp"
+
+#include "system/util/util.hpp"
+
+//Include myself.
+#include "system/util/file.hpp"
 
 Result_with_string Util_file_save_to_file(std::string file_name, std::string dir_path, u8* write_data, int size, bool delete_old_file)
 {

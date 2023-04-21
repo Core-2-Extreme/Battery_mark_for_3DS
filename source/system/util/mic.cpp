@@ -1,6 +1,12 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
 
 #if DEF_ENABLE_MIC_API
+#include "system/types.hpp"
+
+#include "system/util/util.hpp"
+
+//Include myself.
+#include "system/util/mic.hpp"
 
 bool util_mic_init = false;
 u8* util_mic_buffer = NULL;

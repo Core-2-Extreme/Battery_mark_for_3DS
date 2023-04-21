@@ -1,6 +1,12 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
 
 #if DEF_ENABLE_SPEAKER_API
+#include "system/types.hpp"
+
+#include "system/util/util.hpp"
+
+//Include myself.
+#include "system/util/speaker.hpp"
 
 bool util_speaker_init = false;
 int util_speaker_music_ch[24];

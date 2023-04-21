@@ -1,5 +1,12 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
+#include "system/types.hpp"
+
+#include "system/util/file.hpp"
+
 #include "base64/base64.h"
+
+//Include myself.
+#include "system/util/util.hpp"
 
 bool util_safe_linear_alloc_init = false, util_init = false;
 int util_draw_num_of_watch_bool = 0, util_draw_num_of_watch_int = 0, util_draw_num_of_watch_double = 0, util_draw_num_of_watch_string = 0;
@@ -787,6 +794,11 @@ u32 Util_check_free_ram(void)
 u32 Util_get_core_1_max(void)
 {
 	return util_max_core_1;
+}
+
+void Util_sleep(s64 ns)
+{
+	svcSleepThread(ns);
 }
 
 bool Util_return_bool(bool value)
