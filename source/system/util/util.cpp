@@ -796,9 +796,9 @@ u32 Util_get_core_1_max(void)
 	return util_max_core_1;
 }
 
-void Util_sleep(s64 ns)
+void Util_sleep(s64 us)
 {
-	svcSleepThread(ns);
+	svcSleepThread(us * 1000);
 }
 
 bool Util_return_bool(bool value)

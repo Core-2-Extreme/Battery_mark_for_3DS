@@ -253,10 +253,10 @@ u32 Util_get_core_1_max(void);
 
 /**
  * @brief Sleep thread.
- * @param ns (in) Time to sleep in ns.
+ * @param ns (in) Time to sleep in us.
  * @note Thread safe
 */
-void Util_sleep(s64 ns);
+void Util_sleep(s64 us);
 
 /**
  * @brief To prevent 'statement has no effect' warning in unused functions.
