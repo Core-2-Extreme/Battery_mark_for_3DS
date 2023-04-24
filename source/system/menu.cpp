@@ -1350,13 +1350,14 @@ void Menu_worker_thread(void* arg)
 			count = 0;
 		}
 
-		if(var_afk_time > var_time_to_turn_off_lcd)
+		//If var_time_to_turn_off_lcd < 0, it means turn off LCD settings has been disabled.
+		if(var_time_to_turn_off_lcd > 0 && var_afk_time > var_time_to_turn_off_lcd)
 		{
 			result = Util_cset_set_screen_state(true, true, false);
 			if(result.code != 0)
 				Util_log_save(DEF_MENU_WORKER_THREAD_STR, "Util_cset_set_screen_state()..." + result.string + result.error_description, result.code);
 		}
-		else if(var_afk_time > (var_time_to_turn_off_lcd - 10))
+		else if(var_time_to_turn_off_lcd > 0 &&var_afk_time > (var_time_to_turn_off_lcd - 10))
 		{
 			result = Util_cset_set_screen_brightness(true, true, 10);
 			if(result.code != 0)

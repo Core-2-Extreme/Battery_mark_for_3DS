@@ -210,14 +210,21 @@ void Sem_init(void)
 			if(var_lang != "jp" && var_lang != "en" && var_lang != "hu" && var_lang != "zh-cn" && var_lang != "it"
 			&& var_lang != "es" && var_lang != "ro" && var_lang != "pl" && var_lang != "ryu")
 				var_lang = "en";
+
 			if(var_lcd_brightness < 0 || var_lcd_brightness > 180)
 				var_lcd_brightness = 100;
-			if(var_time_to_turn_off_lcd < 10 || var_time_to_turn_off_lcd > 310)
+
+			if(var_time_to_turn_off_lcd < 0)
+				var_time_to_turn_off_lcd = -1;
+			else if(var_time_to_turn_off_lcd < 20 || var_time_to_turn_off_lcd > 600)
 				var_time_to_turn_off_lcd = 150;
-			if(var_scroll_speed < 0.033 || var_scroll_speed > 1.030)
+
+			if(var_scroll_speed < 0.05 || var_scroll_speed > 2)
 				var_scroll_speed = 0.5;
+
 			if(var_num_of_app_start < 0)
 				var_num_of_app_start = 0;
+
 			if(var_screen_mode > DEF_SEM_SCREEN_3D)
 				var_screen_mode = DEF_SEM_SCREEN_AUTO;
 
@@ -817,6 +824,7 @@ void Sem_main(void)
 		}
 		else if (sem_selected_menu_mode == DEF_SEM_MENU_LCD)
 		{
+			double bar_pos = 0;
 
 #if (DEF_ENABLE_VIDEO_AUDIO_ENCODER_API && DEF_ENABLE_SW_CONVERTER_API && DEF_SEM_ENABLE_SCREEN_RECORDER)
 			if(sem_record_request && var_night_mode)
@@ -864,16 +872,28 @@ void Sem_main(void)
 			BACKGROUND_ENTIRE_BOX, &sem_flash_mode_button, sem_flash_mode_button.selected ? DEF_DRAW_RED : DEF_DRAW_WEAK_RED);
 
 			//Screen brightness
+			bar_pos = 10 + (290 * (var_lcd_brightness / 180.0));
 			Draw(sem_msg[DEF_SEM_BRIGHTNESS_MSG] + std::to_string(var_lcd_brightness), 0, 95, 0.5, 0.5, color);
 			//Bar
-			Draw_texture(&sem_screen_brightness_slider, DEF_DRAW_WEAK_RED, 10, 117.5, 300, 5);
-			Draw_texture(&sem_screen_brightness_bar, sem_screen_brightness_bar.selected ? DEF_DRAW_GREEN : DEF_DRAW_WEAK_GREEN, 300 * ((double)(var_lcd_brightness) / 180) + 10, 110, 4, 20);
+			Draw_texture(&sem_screen_brightness_slider, DEF_DRAW_WEAK_RED, 10, 116.5, 300, 7);
+			Draw_texture(&sem_screen_brightness_bar, sem_screen_brightness_bar.selected ? DEF_DRAW_GREEN : DEF_DRAW_WEAK_GREEN, bar_pos, 110, 10, 20);
 
 			//Time to turn off LCDs
-			Draw(sem_msg[DEF_SEM_LCD_OFF_TIME_0_MSG] + std::to_string(var_time_to_turn_off_lcd) + sem_msg[DEF_SEM_LCD_OFF_TIME_1_MSG], 0, 135, 0.5, 0.5, color);
+			if(var_time_to_turn_off_lcd > 0)
+			{
+				bar_pos = 10 + (290 * ((var_time_to_turn_off_lcd - 20) / 580.0));
+				Draw(sem_msg[DEF_SEM_LCD_OFF_TIME_0_MSG] + std::to_string(var_time_to_turn_off_lcd) + sem_msg[DEF_SEM_LCD_OFF_TIME_1_MSG], 0, 135, 0.5, 0.5, color);
+			}
+			else
+			{
+				//Never turn off LCD automatically.
+				bar_pos = 300;
+				Draw(sem_msg[DEF_SEM_LCD_OFF_TIME_0_MSG] + sem_msg[DEF_SEM_OFF_MSG], 0, 135, 0.5, 0.5, color);
+			}
+
 			//Bar
-			Draw_texture(&sem_screen_off_time_slider, DEF_DRAW_WEAK_RED, 10, 157.5, 300, 5);
-			Draw_texture(&sem_screen_off_time_bar, sem_screen_off_time_bar.selected ? DEF_DRAW_GREEN : DEF_DRAW_WEAK_GREEN, (var_time_to_turn_off_lcd), 150, 4, 20);
+			Draw_texture(&sem_screen_off_time_slider, DEF_DRAW_WEAK_RED, 10, 156.5, 300, 7);
+			Draw_texture(&sem_screen_off_time_bar, sem_screen_off_time_bar.selected ? DEF_DRAW_GREEN : DEF_DRAW_WEAK_GREEN, bar_pos, 150, 10, 20);
 
 			//Screen mode
 			Draw(sem_msg[DEF_SEM_LCD_MODE_MSG], 0, 175, 0.5, 0.5, color);
@@ -893,10 +913,11 @@ void Sem_main(void)
 		else if (sem_selected_menu_mode == DEF_SEM_MENU_CONTROL)
 		{
 			//Scroll speed
+			double bar_pos = 10 + (290 * ((var_scroll_speed - 0.05) / 1.95));
 			Draw(sem_msg[DEF_SEM_SCROLL_SPEED_MSG] + std::to_string(var_scroll_speed), 0, 25, 0.5, 0.5, color);
 			//Bar
-			Draw_texture(&sem_scroll_speed_slider, DEF_DRAW_WEAK_RED, 10, 47.5, 300, 5);
-			Draw_texture(&sem_scroll_speed_bar, sem_scroll_speed_bar.selected ? DEF_DRAW_GREEN : DEF_DRAW_WEAK_GREEN, (var_scroll_speed * 300), 40, 4, 20);
+			Draw_texture(&sem_scroll_speed_slider, DEF_DRAW_WEAK_RED, 10, 46.5, 300, 7);
+			Draw_texture(&sem_scroll_speed_bar, sem_scroll_speed_bar.selected ? DEF_DRAW_GREEN : DEF_DRAW_WEAK_GREEN, bar_pos, 40, 10, 20);
 		}
 		else if (sem_selected_menu_mode == DEF_SEM_MENU_FONT)
 		{
@@ -1279,30 +1300,39 @@ void Sem_hid(Hid_info key)
 					sem_flash_mode_button.selected = true;
 				else if(Util_hid_is_released(key, sem_flash_mode_button) && sem_flash_mode_button.selected)
 					var_flash_mode = !var_flash_mode;
-				else if(Util_hid_is_pressed(key, sem_screen_brightness_bar) || Util_hid_is_pressed(key, sem_screen_brightness_slider))
+				else if(Util_hid_is_pressed(key, sem_screen_brightness_bar) || Util_hid_is_pressed(key, sem_screen_brightness_slider)
+				|| (key.h_touch && sem_screen_brightness_bar.selected))
 				{
-					var_lcd_brightness = 180 * ((double)(key.touch_x - 10) / 300);
-					//var_lcd_brightness = (key.touch_x / 2) + 10;
+					//Update screen brightness.
+					int new_brightness = 180 * ((key.touch_x - 15) / 290.0);
+
+					if(new_brightness < 0)
+						new_brightness = 0;
+					else if(new_brightness > 180)
+						new_brightness = 180;
+
+					var_lcd_brightness = new_brightness;
 					var_top_lcd_brightness = var_lcd_brightness;
 					var_bottom_lcd_brightness = var_lcd_brightness;
 					sem_change_brightness_request = true;
+
 					sem_screen_brightness_bar.selected = true;
 				}
-				else if (key.h_touch && key.touch_x >= 10 && key.touch_x <= 310 && sem_screen_brightness_bar.selected)
+				else if(Util_hid_is_pressed(key, sem_screen_off_time_bar) || Util_hid_is_pressed(key, sem_screen_off_time_slider)
+				|| (key.h_touch && sem_screen_off_time_bar.selected))
 				{
-					var_lcd_brightness = 180 * ((double)(key.touch_x - 10) / 300);
-					//var_lcd_brightness = (key.touch_x / 2) + 10;
-					var_top_lcd_brightness = var_lcd_brightness;
-					var_bottom_lcd_brightness = var_lcd_brightness;
-					sem_change_brightness_request = true;
-				}
-				else if(Util_hid_is_pressed(key, sem_screen_off_time_bar) || Util_hid_is_pressed(key, sem_screen_off_time_slider))
-				{
-					var_time_to_turn_off_lcd = key.touch_x;
+					//Update time to turn off LCD.
+					int new_time = (580 * ((key.touch_x - 15) / 290.0)) + 20;
+
+					if(new_time < 20)
+						new_time = 20;
+					else if(new_time > 600)
+						new_time = -1;//Never turn off.
+
+					var_time_to_turn_off_lcd = new_time;
+
 					sem_screen_off_time_bar.selected = true;
 				}
-				else if (key.h_touch && key.touch_x >= 10 && key.touch_x <= 309 && sem_screen_off_time_bar.selected)
-					var_time_to_turn_off_lcd = key.touch_x;
 				else if (Util_hid_is_pressed(key, sem_800px_mode_button) && !record_request && var_model != CFG_MODEL_2DS)
 					sem_800px_mode_button.selected = true;
 				else if (Util_hid_is_released(key, sem_800px_mode_button) && !record_request && var_model != CFG_MODEL_2DS && sem_800px_mode_button.selected)
@@ -1322,11 +1352,18 @@ void Sem_hid(Hid_info key)
 			}
 			else if (sem_selected_menu_mode == DEF_SEM_MENU_CONTROL)//Scroll speed
 			{
-				if (key.h_touch && key.touch_x >= 10 && key.touch_x <= 309 && sem_scroll_speed_bar.selected)
-					var_scroll_speed = (double)key.touch_x / 300;
-				else if (Util_hid_is_pressed(key, sem_scroll_speed_slider) || Util_hid_is_pressed(key, sem_scroll_speed_bar))
+				if (Util_hid_is_pressed(key, sem_scroll_speed_slider) || Util_hid_is_pressed(key, sem_scroll_speed_bar)
+				|| (key.h_touch && sem_scroll_speed_bar.selected))
 				{
-					var_scroll_speed = (double)key.touch_x / 300;
+					//Update time to turn off LCD.
+					double new_speed = (1.95 * ((key.touch_x - 15) / 290.0)) + 0.05;
+
+					if(new_speed < 0.05)
+						new_speed = 0.05;
+					else if(new_speed > 2)
+						new_speed = 2;
+
+					var_scroll_speed = new_speed;
 					sem_scroll_speed_bar.selected = true;
 				}
 			}
