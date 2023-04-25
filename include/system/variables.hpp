@@ -38,6 +38,7 @@ extern int var_lcd_brightness;
 extern int var_top_lcd_brightness;
 extern int var_bottom_lcd_brightness;
 extern int var_time_to_turn_off_lcd;
+extern int var_time_to_enter_sleep;
 extern int var_num_of_app_start;
 extern int var_system_region;
 extern int var_debug_int[8];

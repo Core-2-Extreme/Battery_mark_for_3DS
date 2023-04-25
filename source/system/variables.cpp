@@ -44,6 +44,7 @@ int var_lcd_brightness = 100;
 int var_top_lcd_brightness = 100;
 int var_bottom_lcd_brightness = 100;
 int var_time_to_turn_off_lcd = 150;
+int var_time_to_enter_sleep = 175;
 int var_num_of_app_start = 0;
 int var_system_region = 0;
 int var_debug_int[8] = { 0, 0, 0, 0, 0, 0, 0, 0, };

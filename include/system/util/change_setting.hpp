@@ -36,7 +36,7 @@ Result_with_string Util_cset_set_screen_state(bool top_screen, bool bottom_scree
 
 /**
  * @brief Sleep the system.
- * If sleep is not allowed and parameter is valid, system won't sleep but this function still returns DEF_SUCCESS.
+ * If sleep is not allowed this function will fail with DEF_ERR_OTHER.
  * @param wakeup_event (in) Wakeup events.
  * @return On success DEF_SUCCESS, 
  * on failure DEF_ERR_* or Nintendo API's error.

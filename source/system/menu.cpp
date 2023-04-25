@@ -1390,6 +1390,18 @@ void Menu_worker_thread(void* arg)
 			}
 		}
 
+		if(var_time_to_enter_sleep > 0 && var_afk_time > var_time_to_enter_sleep)
+		{
+			result = Util_cset_sleep_system((Wake_up_event)(WAKE_UP_EVENT_OPEN_SHELL | WAKE_UP_EVENT_PRESS_HOME_BUTTON));
+			if(result.code == 0)
+			{
+				//We woke up from sleep.
+				var_afk_time = 0;
+			}
+			else
+				Util_log_save(DEF_MENU_WORKER_THREAD_STR, "Util_cset_sleep_system()..." + result.string + result.error_description, result.code);
+		}
+
 		LightLock_Lock(&menu_callback_mutex);
 
 		//Call callback functions.
