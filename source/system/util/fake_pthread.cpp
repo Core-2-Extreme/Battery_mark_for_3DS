@@ -76,17 +76,19 @@ int	pthread_mutex_destroy(pthread_mutex_t* __mutex)
 int	pthread_once(pthread_once_t* __once_control, void (*__init_routine)(void))
 {
     LightLock_Lock(&util_fake_pthread_mutex);
-    if(__once_control->init_executed != 0)
+    if(__once_control->status != 0)
     {
         LightLock_Unlock(&util_fake_pthread_mutex);
         return 0;
     }
 
-    __once_control->is_initialized = 1;
-    __once_control->init_executed = 1;
+    __once_control->status = 1;
     LightLock_Unlock(&util_fake_pthread_mutex);
 
     __init_routine();
+
+    //Only 1 thread can reach here, so we don't need to lock mutex.
+    __once_control->status = 2;
 
     return 0;
 }
@@ -158,7 +160,7 @@ int	pthread_create(pthread_t* __pthread, const pthread_attr_t * __attr, void* (*
     if(util_fake_pthread_enabled_cores == 0)
         return -1;
 
-    if(__attr && __attr->is_initialized)
+    if(__attr)
         handle = threadCreate((ThreadFunc)__start_routine, __arg, __attr->stacksize, DEF_THREAD_PRIORITY_BELOW_NORMAL, util_fake_pthread_enabled_core_list[util_fake_pthread_core_offset], true);
     else
         handle = threadCreate((ThreadFunc)__start_routine, __arg, DEF_STACKSIZE, DEF_THREAD_PRIORITY_BELOW_NORMAL, util_fake_pthread_enabled_core_list[util_fake_pthread_core_offset], true);
