@@ -4,15 +4,15 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/Core-2-Extreme/Battery_mark_for_3DS?color=darkgreen&style=flat-square)
 
 ## Index
-* [Screenshots](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Screenshots)
-* [Ranking server](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Ranking-server)
-* [Supported languages](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Supported-languages)
-* [Links](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Links)
-* [Build](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Build)
-* [Patch note](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Patch-note)
-* [License](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#License)
-* [Credits](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Credits)
-* [Donation](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Donation)
+* [Screenshots](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#screenshots)
+* [Ranking server](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#ranking-server)
+* [Supported languages](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#supported-languages)
+* [Links](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#links)
+* [Build](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#build)
+* [Patch note](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#patch-note)
+* [License](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#license)
+* [Credits](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#credits)
+* [Donation](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#donation)
 
 ## Screenshots
 **Compare your battery with others.** \
