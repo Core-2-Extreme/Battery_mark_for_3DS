@@ -5,6 +5,7 @@
 
 ## Index
 * [Screenshots](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Screenshots)
+* [Ranking server](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Ranking-server)
 * [Supported languages](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Supported-languages)
 * [Links](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Links)
 * [Build](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#Build)
@@ -17,6 +18,9 @@
 **Compare your battery with others.** \
 <img src="https://user-images.githubusercontent.com/45873899/157168071-f21d8af2-51ed-4793-98ec-4c3943988a70.png" width="400" height="480"> \
 <img src="https://user-images.githubusercontent.com/45873899/157168078-01f94697-6226-42f3-974f-bff92cd78b45.png" width="400" height="480">
+
+## Ranking server
+You can check ranking in battery mark app or [here](https://core-2-extreme.github.io/Battery_mark_for_3DS/ranking_viewer.html).
 
 ## Supported languages
 * English
