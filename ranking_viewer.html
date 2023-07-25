@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en-US">
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta charset="utf-8">
+		<title>☣☢Battery mark for 3DS ranking viewer☣☢</title>
+	</head>
+	<body>
+		<fieldset>
+			<p>This is a ranking viewer for <strong><a href="https://github.com/Core-2-Extreme/Battery_mark_for_3DS" target="_blank">Battery mark for 3DS</a></strong></p>
+
+			<!-- Model selection -->
+			<input type="radio" name="model" id="all" checked>
+			<label for="all">ALL models</label>
+			<input type="radio" name="model" id="new_3ds">
+			<label for="new_3ds">NEW 3DS</label>
+			<input type="radio" name="model" id="old_3ds">
+			<label for="old_3ds">OLD 3DS</label>
+			<input type="radio" name="model" id="old_3ds_xl">
+			<label for="old_3ds_xl">OLD 3DS XL</label>
+			<input type="radio" name="model" id="old_2ds">
+			<label for="old_2ds">OLD 2DS</label>
+			<input type="radio" name="model" id="new_3ds_xl">
+			<label for="new_3ds_xl">NEW 3DS XL</label>
+			<input type="radio" name="model" id="new_2ds_xl">
+			<label for="new_2ds_xl">NEW 2DS XL</label><br>
+
+			<!-- Total time filter -->
+			<label for="total_min_filter" id="total_time_filter_label">Total time filter : No filters ~ No filters</label>
+			<input type="range" id="total_min_filter" value="0" min="0" max="192" onmousemove="Update_slider_bar(this);" onchange="Update_slider_bar(this);">
+			<input type="range" id="total_max_filter" value="192" min="0" max="192" onmousemove="Update_slider_bar(this);" onchange="Update_slider_bar(this);">
+
+			<!-- Name filter -->
+			<label for="name_filter">User name filter (regexp) : </label>
+			<input type="text" id="name_filter">
+
+			<button id="refresh_button" onclick="Refresh_result(this);">☢Refresh☣</button>
+
+			<p id="viewer_version">Ranking viewer v1.0.0</p>
+		</fieldset>
+
+		<!-- Ranking table -->
+		<div id="result_div">
+			<table>
+				<tbody id="result">
+					<tr>
+						<th>Ranking</th>
+						<th>Time</th>
+						<th>App ver</th>
+						<th>System ver</th>
+						<th>Model</th>
+						<th>User name</th>
+						<th>Average</th>
+						<th>Min</th>
+						<th>Max</th>
+						<th>Total</th>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</body>
+	<style>
+		fieldset
+		{
+			margin: 0px;
+		}
+
+		body
+		{
+			max-width: 960px;
+			margin-left: auto;
+			margin-right: auto;
+			padding: 2px;
+		}
+
+		table
+		{
+			width: 100%;
+			margin-left: auto;
+			margin-right: auto;
+			border-collapse: collapse;
+			white-space: nowrap;
+		}
+
+		#result_div
+		{
+			overflow-x: auto;
+		}
+
+		td, th
+		{
+			padding-left: 5px;
+			padding-right: 5px;
+			border: 1px solid #000000;
+		}
+
+		#total_min_filter, #total_max_filter, #refresh_button, #name_filter
+		{
+			width: 100%;
+		}
+
+		#refresh_button, #name_filter
+		{
+			margin-top: 1px;
+			margin-bottom: 1px;
+		}
+
+		#viewer_version
+		{
+			display: inline;
+			font-style: italic;
+		}
+	</style>
+	<script>
+		"use strict"
+		let time_filter_min = "No filters";
+		let time_filter_max = "No filters";
+
+		function Try_disable_or_enable_control(id, enable)
+		{
+			let object = document.getElementById(id);
+			if(object !== null)
+				object.disabled = !enable;
+		}
+
+		function Change_ui_state(enable)
+		{
+			Try_disable_or_enable_control("all", enable);
+			Try_disable_or_enable_control("new_3ds", enable);
+			Try_disable_or_enable_control("old_3ds", enable);
+			Try_disable_or_enable_control("old_3ds_xl", enable);
+			Try_disable_or_enable_control("old_2ds", enable);
+			Try_disable_or_enable_control("new_3ds_xl", enable);
+			Try_disable_or_enable_control("new_2ds_xl", enable);
+			Try_disable_or_enable_control("total_min_filter", enable);
+			Try_disable_or_enable_control("total_max_filter", enable);
+			Try_disable_or_enable_control("name_filter", enable);
+			Try_disable_or_enable_control("refresh_button", enable);
+		}
+
+		function Get_model_id()
+		{
+			const model_list = [ "old_3ds", "old_3ds_xl", "new_3ds", "old_2ds", "new_3ds_xl", "new_2ds_xl", "all", ];
+
+			for(let i = 0; i < model_list.length; i++)
+			{
+				let radio_button = document.getElementById(model_list[i]);
+				if(radio_button !== null && radio_button.checked)
+					return i;
+			}
+
+			return model_list.length - 1;
+		}
+
+		function Get_time_ms(slider_bar)
+		{
+			return slider_bar.value * 5 * 60 * 1000;
+		}
+
+		function Get_time_m(slider_bar)
+		{
+			return slider_bar.value * 5;
+		}
+
+		function Update_slider_bar(slider_bar)
+		{
+			let label = document.getElementById("total_time_filter_label");
+			if(label !== null)
+			{
+				let date = new Date(Get_time_ms(slider_bar));
+				let hours = date.getUTCHours();
+				let minutes = date.getUTCMinutes();
+				let seconds = date.getSeconds();
+				let time = hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+
+				if(slider_bar.id === "total_min_filter")
+				{
+					if(slider_bar.value === slider_bar.min)
+						time_filter_min = "No filters";
+					else
+						time_filter_min = time;
+				}
+				else if(slider_bar.id === "total_max_filter")
+				{
+					if(slider_bar.value === slider_bar.max)
+						time_filter_max = "No filters";
+					else
+						time_filter_max = time;
+				}
+
+				label.textContent = "Total time filter : " + time_filter_min + " ~ " + time_filter_max;
+			}
+		}
+
+		async function Refresh_result(button)
+		{
+			Change_ui_state(false);
+
+			let total_time_min_filter = document.getElementById("total_min_filter");
+			let total_time_max_filter = document.getElementById("total_max_filter");
+			let name_filter = document.getElementById("name_filter");
+			let radio_button = null;
+			let model_id = Get_model_id();
+			let response = undefined;
+			let response_data = undefined;
+			let dynamic_elements = undefined;
+			let number_of_elements = undefined;
+			let result_table = undefined;
+			let index = undefined;
+
+			if(total_time_min_filter !== null)
+				total_time_min_filter = Get_time_m(total_time_min_filter);
+			if(total_time_max_filter !== null)
+				total_time_max_filter = Get_time_m(total_time_max_filter);
+			if(name_filter !== null)
+				name_filter = name_filter.value;
+
+			//Download data from the ranking server.
+			try
+			{
+				response = await fetch("https://script.google.com/macros/s/AKfycbxo4iwCbxtI2ZuYQP7bKveRdHx6kPTH4rZ8Pg8nUguIq_7zcoooEUszJQ/exec?mode=" + model_id + "&start_pos=1&logs=2000&name_filter=" + name_filter + "&graph=0&total_min=" + (total_time_min_filter * 60) + "&total_max=" + (total_time_max_filter * 60) + "&ver=2065");
+				response_data = (await response.text()).split(",");
+			}
+			catch
+			{
+				alert("Failed to download the ranking data!!!!!\nMake sure you are online and try again.")
+				Change_ui_state(true);
+				return;
+			}
+
+			if(response_data === undefined || response_data[0] !== "Success")
+			{
+				alert("Ranking server returned an error!!!!!\n" + response_data[0]);
+				Change_ui_state(true);
+				return;
+			}
+
+			//Delete old data if exists.
+			dynamic_elements = document.getElementsByClassName("dynamic_element");
+			number_of_elements = dynamic_elements.length;
+			for(let i = 0; i < number_of_elements; i++)
+				dynamic_elements[0].remove();
+
+			result_table = document.getElementById("result");
+			index = 0;
+
+			//Parser and append ranking data to the table.
+			while(true)
+			{
+				let base_index = (index * 10) + 1;
+				let table_row = undefined;
+
+				if(base_index + 10 >= response_data.length)
+					break;
+
+				table_row = document.createElement("tr");
+				table_row.className = "dynamic_element";
+
+				for(let i = 0; i < 10; i++)
+				{
+					let table_data = document.createElement("td");
+
+					if(i >= 6)
+					{
+						let date = new Date(response_data[base_index + i] * 1000);
+						let hours = date.getUTCHours();
+						let minutes = date.getUTCMinutes();
+						let seconds = date.getSeconds();
+						let time = hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+
+						table_data.textContent = time;
+					}
+					else
+						table_data.textContent = response_data[base_index + i];
+
+					table_row.appendChild(table_data);
+				}
+
+				result_table.appendChild(table_row);
+
+				index++;
+			}
+
+			Change_ui_state(true);
+		}
+	</script>
+</html>
