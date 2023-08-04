@@ -10,6 +10,7 @@
 * [Links](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#links)
 * [Build](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#build)
 * [Patch note](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#patch-note)
+* [Ranking viewer patch note](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#ranking-viewer-patch-note)
 * [License](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#license)
 * [Credits](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#credits)
 * [Donation](https://github.com/Core-2-Extreme/Battery_mark_for_3DS#donation)
@@ -74,6 +75,13 @@ If you have older devkitpro, update it or compilation will fail.
 * Added battery mark ranking
 * Test result will be saved to notification list and sdmc:/Battery_mark/result/{date}.csv
 * Changed battery mark test(test result is not compatible with older version)
+
+## Ranking viewer patch note
+### ver1.0.1
+* Min and Max column switching has been fixed
+
+### ver1.0.0
+* Initial release
 
 ## License
 This software is licensed as GNU General Public License v3.0.
