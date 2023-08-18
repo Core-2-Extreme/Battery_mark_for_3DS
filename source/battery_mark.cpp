@@ -1,4 +1,25 @@
-#include "system/headers.hpp"
+#include "definitions.hpp"
+#include "system/types.hpp"
+
+#include "system/menu.hpp"
+#include "system/variables.hpp"
+
+#include "system/draw/draw.hpp"
+
+#include "system/util/change_setting.hpp"
+#include "system/util/converter.hpp"
+#include "system/util/decoder.hpp"
+#include "system/util/encoder.hpp"
+#include "system/util/error.hpp"
+#include "system/util/file.hpp"
+#include "system/util/hid.hpp"
+#include "system/util/httpc.hpp"
+#include "system/util/log.hpp"
+#include "system/util/swkbd.hpp"
+#include "system/util/util.hpp"
+
+//Include myself.
+#include "battery_mark.hpp"
 
 u8 bmark_battery_level_history[DEF_BMARK_BMR_NUM_OF_HISTORY];
 u8 bmark_battery_temp_history[DEF_BMARK_BMR_NUM_OF_HISTORY];
@@ -87,7 +108,7 @@ void Bmark_check_thread(void* arg)
 	osTickCounterStart(&elapsed_time_stop_watch);
 	u16_title = (u16*)malloc(0x100);
 	u16_message = (u16*)malloc(0x1000);
-	
+
 	while (bmark_thread_run)
 	{
 		if(bmark_start_mark_request)
@@ -172,13 +193,13 @@ void Bmark_check_thread(void* arg)
 						pre_battery_level = battery_level;
 						break;
 					}
-					
+
 					if(bmark_stop_mark_request)
 						break;
 
-					usleep(10000);
+					Util_sleep(10000);
 				}
-				
+
 				osTickCounterUpdate(&stop_watch);
 				osTickCounterUpdate(&elapsed_time_stop_watch);
 				while(true)
@@ -217,14 +238,14 @@ void Bmark_check_thread(void* arg)
 						pre_battery_level = battery_level;
 						if(bmark_remain_test < 0)
 							bmark_remain_test = 0;
-						
+
 						if(bmark_max_time < time || bmark_max_time == -1)
 							bmark_max_time = time;//set max time
 
 						if(bmark_min_time > time || bmark_min_time == -1)
 							bmark_min_time = time;//set min time
-						
-	
+
+
 						bmark_avg_time = bmark_total_elapsed_time / (test_amount - bmark_remain_test); //calc avg battery time
 						bmark_remain_time = bmark_avg_time * bmark_remain_test;//calc remain time
 
@@ -242,9 +263,9 @@ void Bmark_check_thread(void* arg)
 							bmark_stop_mark_request = true;
 							//save result
 							save_data = bmark_msg[DEF_BMARK_TIME_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_MSG] + "," + bmark_msg[DEF_BMARK_BATTERY_TIME_MSG]
-							+ "," + bmark_msg[DEF_BMARK_BATTERY_VOLTAGE_MSG] + "\n"+ DEF_BMARK_VER + "\n" + time_data + 
+							+ "," + bmark_msg[DEF_BMARK_BATTERY_VOLTAGE_MSG] + "\n"+ DEF_BMARK_VER + "\n" + time_data +
 							"\n" + std::to_string(bmark_initial_battery) + "% -> " + std::to_string(bmark_final_battery) + "%\n"
-							+ bmark_msg[DEF_BMARK_BATTERY_TIME_MAX_MSG] + Util_convert_seconds_to_time(bmark_max_time) + "\n" 
+							+ bmark_msg[DEF_BMARK_BATTERY_TIME_MAX_MSG] + Util_convert_seconds_to_time(bmark_max_time) + "\n"
 							+ bmark_msg[DEF_BMARK_BATTERY_TIME_AVG_MSG] + Util_convert_seconds_to_time(bmark_avg_time) + "\n"
 							+ bmark_msg[DEF_BMARK_BATTERY_TIME_MIN_MSG] + Util_convert_seconds_to_time(bmark_min_time) + "\n"
 							+ bmark_msg[DEF_BMARK_TOTAL_ELAPSED_TIME_MSG] + Util_convert_seconds_to_time(bmark_total_elapsed_time);
@@ -256,7 +277,7 @@ void Bmark_check_thread(void* arg)
 							memset(u16_message, 0x0, 0x1000);
 							title = bmark_msg[DEF_BMARK_RESULT_TITLE_MSG];
 							message = DEF_BMARK_VER + "\n" + time_data + "\n" + std::to_string(bmark_initial_battery) + "% -> " + std::to_string(bmark_final_battery) + "%\n"
-							+ bmark_msg[DEF_BMARK_BATTERY_TIME_MAX_MSG] + Util_convert_seconds_to_time(bmark_max_time) + "\n" 
+							+ bmark_msg[DEF_BMARK_BATTERY_TIME_MAX_MSG] + Util_convert_seconds_to_time(bmark_max_time) + "\n"
 							+ bmark_msg[DEF_BMARK_BATTERY_TIME_AVG_MSG] + Util_convert_seconds_to_time(bmark_avg_time) + "\n"
 							+ bmark_msg[DEF_BMARK_BATTERY_TIME_MIN_MSG] + Util_convert_seconds_to_time(bmark_min_time) + "\n"
 							+ bmark_msg[DEF_BMARK_TOTAL_ELAPSED_TIME_MSG] + Util_convert_seconds_to_time(bmark_total_elapsed_time);;
@@ -271,7 +292,7 @@ void Bmark_check_thread(void* arg)
 								Util_log_save(DEF_BMARK_WATCH_THREAD_STR, "NEWS_AddNotification()...", result.code);
 							}
 							newsExit();
-							
+
 							if(result.code != 0)
 							{
 								Util_err_set_error_message(result.string, result.error_description, DEF_BMARK_WATCH_THREAD_STR, result.code);
@@ -287,7 +308,7 @@ void Bmark_check_thread(void* arg)
 								if(result.code == 0)
 								{
 									Util_converter_rgb888be_to_rgb888le(graph_buffer, rotated_screen_width, rotated_screen_height);
-									result = Util_image_encoder_encode(DEF_MAIN_DIR + "result/" + file_name + "_graph.jpg", graph_buffer, rotated_screen_width, rotated_screen_height, DEF_ENCODER_IMAGE_CODEC_JPG, 85);
+									result = Util_image_encoder_encode(DEF_MAIN_DIR + "result/" + file_name + "_graph.jpg", graph_buffer, rotated_screen_width, rotated_screen_height, IMAGE_CODEC_JPG, 85);
 									Util_log_save(DEF_BMARK_WATCH_THREAD_STR, "Util_image_encoder_encode()...", result.code);
 								}
 								Util_safe_linear_free(graph_buffer);
@@ -329,11 +350,11 @@ void Bmark_check_thread(void* arg)
 							bmark_sending_data = false;
 						}
 					}
-					
+
 					if(bmark_stop_mark_request)
 						break;
 
-					usleep(10000);
+					Util_sleep(10000);
 				}
 			}
 
@@ -347,13 +368,13 @@ void Bmark_check_thread(void* arg)
 			bmark_start_mark_request = false;
 			bmark_stop_check_request = false;
 
-			usleep(500000);
+			Util_sleep(500000);
 		}
 		else
-			usleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
+			Util_sleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
 
 		while (bmark_thread_suspend)
-			usleep(DEF_INACTIVE_THREAD_SLEEP_TIME);		
+			Util_sleep(DEF_INACTIVE_THREAD_SLEEP_TIME);
 	}
 
 	free(u16_title);
@@ -370,7 +391,6 @@ void Bmark_video_thread(void* arg)
 	Util_log_save(DEF_BMARK_VIDEO_THREAD_STR, "Thread started.");
 	bool key_frame = false;
 	bool error = false;
-	int packet_type = DEF_DECODER_PACKET_TYPE_UNKNOWN;
 	int packet_index = 0;
 	int audio_tracks = 0;
 	int video_tracks = 0;
@@ -382,7 +402,8 @@ void Bmark_video_thread(void* arg)
 	u32 read_size = 0;
 	Result_with_string result;
 	Video_info video_info;
-	
+	Packet_type packet_type = PACKET_TYPE_UNKNOWN;
+
 	while (bmark_thread_run)
 	{
 		if(bmark_start_mark_request)
@@ -391,7 +412,7 @@ void Bmark_video_thread(void* arg)
 			error = false;
 			bmark_cache_fps = 0;
 			APT_SetAppCpuTimeLimit(80);
-			
+
 			if(Util_file_check_file_exist("sample_video.mp4", DEF_MAIN_DIR).code != 0)
 			{
 				result = Util_file_load_from_rom("sample_video.mp4", "romfs:/gfx/", &cache, 0x40000, &read_size);
@@ -415,14 +436,14 @@ void Bmark_video_thread(void* arg)
 
 			if(!error)
 			{
-				result = Util_video_decoder_init(0, video_tracks, 1, DEF_DECODER_THREAD_TYPE_NONE, 0);
+				result = Util_video_decoder_init(0, video_tracks, 1, THREAD_TYPE_NONE, 0);
 				Util_log_save(DEF_BMARK_VIDEO_THREAD_STR, "Util_video_decoder_init()..." + result.string, result.code);
 				if(result.code != 0)
 					error = true;
 				else
 					Util_video_decoder_get_info(&video_info, 0, 0);
 			}
-			
+
 			if(!error)
 			{
 				while(true)
@@ -430,11 +451,11 @@ void Bmark_video_thread(void* arg)
 					var_afk_time = 0;
 					result = Util_decoder_read_packet(0);
 					if(result.code != 0)
-						Util_decoder_seek(0, DEF_DECODER_SEEK_FLAG_BACKWARD, 0);
+						Util_decoder_seek(0, SEEK_FLAG_BACKWARD, 0);
 					else
 					{
 						Util_decoder_parse_packet(&packet_type, &packet_index, &key_frame, 0);
-						if(packet_type == DEF_DECODER_PACKET_TYPE_VIDEO)
+						if(packet_type == PACKET_TYPE_VIDEO)
 						{
 							result = Util_decoder_ready_video_packet(packet_index, 0);
 							if(result.code != 0)
@@ -449,7 +470,7 @@ void Bmark_video_thread(void* arg)
 									result = Util_converter_yuv420p_to_rgb565le_asm(video_yuv_image, &video_rgb_image, video_info.width, video_info.height);
 									if(result.code == 0)
 									{
-										Draw_set_texture_data(&bmark_image, video_rgb_image, video_info.width, video_info.height, 256, 256, DEF_DRAW_FORMAT_RGB565);
+										Draw_set_texture_data(&bmark_image, video_rgb_image, video_info.width, video_info.height);
 										bmark_cache_fps++;
 										var_need_reflesh = true;
 									}
@@ -460,9 +481,9 @@ void Bmark_video_thread(void* arg)
 								video_rgb_image = NULL;
 							}
 						}
-						else if(DEF_DECODER_PACKET_TYPE_AUDIO)
+						else if(packet_type == PACKET_TYPE_AUDIO)
 							Util_decoder_skip_audio_packet(packet_index, 0);
-						else if(DEF_DECODER_PACKET_TYPE_SUBTITLE)
+						else if(packet_type == PACKET_TYPE_SUBTITLE)
 							Util_decoder_skip_subtitle_packet(packet_index, 0);
 					}
 
@@ -479,13 +500,13 @@ void Bmark_video_thread(void* arg)
 				Util_err_set_error_message(result.string, result.error_description, DEF_BMARK_VIDEO_THREAD_STR, result.code);
 				Util_err_set_error_show_flag(true);
 			}
-			usleep(500000);
+			Util_sleep(500000);
 		}
 		else
-			usleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
+			Util_sleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
 
 		while (bmark_thread_suspend)
-			usleep(DEF_INACTIVE_THREAD_SLEEP_TIME);
+			Util_sleep(DEF_INACTIVE_THREAD_SLEEP_TIME);
 	}
 	Util_log_save(DEF_BMARK_VIDEO_THREAD_STR, "Thread exit.");
 	threadExit(0);
@@ -525,13 +546,13 @@ void Bmark_copy_thread(void* arg)
 			Util_safe_linear_free(data[1]);
 			data[0] = NULL;
 			data[1] = NULL;
-			usleep(500000);
+			Util_sleep(500000);
 		}
 		else
-			usleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
+			Util_sleep(DEF_ACTIVE_THREAD_SLEEP_TIME);
 
 		while (bmark_thread_suspend)
-			usleep(DEF_INACTIVE_THREAD_SLEEP_TIME);		
+			Util_sleep(DEF_INACTIVE_THREAD_SLEEP_TIME);
 	}
 	Util_log_save(DEF_BMARK_COPY_THREAD_STR, "Thread exit.");
 	threadExit(0);
@@ -544,7 +565,7 @@ void Bmark_update_thread(void* arg)
 
 	while (bmark_thread_run)
 	{
-		usleep(50000);
+		Util_sleep(50000);
 		current_ts = osGetTime();
 
 		if(current_ts > performance_update_ts + 1000)
@@ -653,7 +674,7 @@ void Bmark_hid(Hid_info key)
 
 				//Wait user to complete typing
 				while(bmark_type_user_name_request)
-					usleep(100000);
+					Util_sleep(100000);
 
 				bmark_start_mark_request = true;
 				bmark_remain_test = 90;
@@ -724,7 +745,7 @@ void Bmark_init_thread(void* arg)
 	bmark_send_data_button.c2d = var_square_image[0];
 	bmark_yes_button.c2d = var_square_image[0];
 	bmark_no_button.c2d = var_square_image[0];
-	Draw_texture_init(&bmark_image, 256, 256, DEF_DRAW_FORMAT_RGB565);
+	Draw_texture_init(&bmark_image, 256, 256, PIXEL_FORMAT_BGR565LE);
 	Draw_set_texture_filter(&bmark_image, false);
 	Util_add_watch(&bmark_selected_graph_pos);
 	Util_add_watch(&bmark_graph_area.selected);
@@ -751,7 +772,7 @@ void Bmark_exit_thread(void* arg)
 	bmark_thread_run = false;
 
 	bmark_status = "Exiting threads...";
-	Util_log_save(DEF_BMARK_EXIT_STR, "threadJoin()...", threadJoin(bmark_video_thread, DEF_THREAD_WAIT_TIME));	
+	Util_log_save(DEF_BMARK_EXIT_STR, "threadJoin()...", threadJoin(bmark_video_thread, DEF_THREAD_WAIT_TIME));
 
 	bmark_status += ".";
 	Util_log_save(DEF_BMARK_EXIT_STR, "threadJoin()...", threadJoin(bmark_check_thread, DEF_THREAD_WAIT_TIME));
@@ -762,7 +783,7 @@ void Bmark_exit_thread(void* arg)
 	bmark_status += ".";
 	Util_log_save(DEF_BMARK_EXIT_STR, "threadJoin()...", threadJoin(bmark_update_thread, DEF_THREAD_WAIT_TIME));
 
-	bmark_status += "\nCleaning up...";	
+	bmark_status += "\nCleaning up...";
 	Draw_texture_free(&bmark_image);
 	Util_remove_watch(&bmark_selected_graph_pos);
 	Util_remove_watch(&bmark_graph_area.selected);
@@ -814,7 +835,7 @@ void Bmark_init(bool draw)
 			{
 				var_need_reflesh = false;
 				Draw_frame_ready();
-				Draw_screen_ready(0, back_color);
+				Draw_screen_ready(SCREEN_TOP_LEFT, back_color);
 				Draw_top_ui();
 				if(var_monitor_cpu_usage)
 					Draw_cpu_usage_info();
@@ -827,7 +848,7 @@ void Bmark_init(bool draw)
 				gspWaitForVBlank();
 		}
 		else
-			usleep(20000);
+			Util_sleep(20000);
 	}
 
 	if(!(var_model == CFG_MODEL_N2DSXL || var_model == CFG_MODEL_N3DSXL || var_model == CFG_MODEL_N3DS) || !var_core_2_available)
@@ -865,7 +886,7 @@ void Bmark_exit(bool draw)
 			{
 				var_need_reflesh = false;
 				Draw_frame_ready();
-				Draw_screen_ready(0, back_color);
+				Draw_screen_ready(SCREEN_TOP_LEFT, back_color);
 				Draw_top_ui();
 				if(var_monitor_cpu_usage)
 					Draw_cpu_usage_info();
@@ -878,10 +899,10 @@ void Bmark_exit(bool draw)
 				gspWaitForVBlank();
 		}
 		else
-			usleep(20000);
+			Util_sleep(20000);
 	}
 
-	Util_log_save(DEF_BMARK_EXIT_STR, "threadJoin()...", threadJoin(bmark_exit_thread, DEF_THREAD_WAIT_TIME));	
+	Util_log_save(DEF_BMARK_EXIT_STR, "threadJoin()...", threadJoin(bmark_exit_thread, DEF_THREAD_WAIT_TIME));
 	threadFree(bmark_exit_thread);
 	Util_remove_watch(&bmark_status);
 	var_need_reflesh = true;
@@ -909,7 +930,7 @@ void Bmark_main(void)
 
 		if(var_turn_on_top_lcd)
 		{
-			Draw_screen_ready(0, back_color);
+			Draw_screen_ready(SCREEN_TOP_LEFT, back_color);
 
 			Draw_texture(&bmark_image, 0, 15, 256, 144);
 			Draw(std::to_string(bmark_initial_battery) + "% -> " + std::to_string(bmark_final_battery) + "%", 0, 160, 0.425, 0.425, color);
@@ -941,9 +962,9 @@ void Bmark_main(void)
 			if(var_monitor_cpu_usage)
 				Draw_cpu_usage_info();
 
-			if(var_3d_mode)
+			if(Draw_is_3d_mode())
 			{
-				Draw_screen_ready(2, back_color);
+				Draw_screen_ready(SCREEN_TOP_RIGHT, back_color);
 
 				if(Util_log_query_log_show_flag())
 					Util_log_draw();
@@ -957,20 +978,20 @@ void Bmark_main(void)
 
 		if(var_turn_on_bottom_lcd)
 		{
-			Draw_screen_ready(1, back_color);
+			Draw_screen_ready(SCREEN_BOTTOM, back_color);
 
 			Draw(DEF_BMARK_VER, 0, 0, 0.4, 0.4, DEF_DRAW_GREEN);
 
 			//Graph for battery level/temp/voltage
 			Draw_texture(&bmark_graph_area, DEF_DRAW_WEAK_AQUA, 20, 30, DEF_BMARK_BMR_NUM_OF_HISTORY, 100);
 			Draw_texture(var_square_image[0], DEF_DRAW_WEAK_AQUA, 20, 130, DEF_BMARK_BMR_NUM_OF_HISTORY, 30);
-			Draw("(V)", 0, 10, 0.45, 0.45, 0xFF00A0FF, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_TOP, 20, 20);
+			Draw("(V)", 0, 10, 0.45, 0.45, 0xFF00A0FF, X_ALIGN_RIGHT, Y_ALIGN_TOP, 20, 20);
 			Draw("(%)", 275, 10, 0.45, 0.45, DEF_DRAW_RED);
 			Draw("(゜C)", 295, 10, 0.45, 0.45, 0xFF00A000);
 			for(int i = 0; i < 6; i++)
 			{
 				Draw_line(20, 130 - (i * 20), weak_color, 300, 130 - (i * 20), weak_color, 1);
-				Draw(std::to_string(i * 0.25 + 3).substr(0, 4), 0, 125 - (i * 20), 0.4, 0.4, color, DEF_DRAW_X_ALIGN_RIGHT, DEF_DRAW_Y_ALIGN_TOP, 20, 20);
+				Draw(std::to_string(i * 0.25 + 3).substr(0, 4), 0, 125 - (i * 20), 0.4, 0.4, color, X_ALIGN_RIGHT, Y_ALIGN_TOP, 20, 20);
 				Draw(std::to_string(i * 20), 300, 125 - (i * 20), 0.45, 0.45, color);
 			}
 			Draw_line(bmark_selected_graph_pos + 20, 130, DEF_DRAW_BLACK, bmark_selected_graph_pos + 20, 30, DEF_DRAW_BLACK, 1);
@@ -982,29 +1003,29 @@ void Bmark_main(void)
 				i + 21, 130 - (bmark_battery_voltage_history[i + 1] == 0 ? 0 : (bmark_battery_voltage_history[i + 1] - 3) * 80), 0xFF00A0FF, 1);
 			}
 			Draw(bmark_msg[DEF_BMARK_GRAPH_BATTERY_LEVEL_MSG] + std::to_string(bmark_battery_level_history[bmark_selected_graph_pos]) + "%",
-			20, 130, 0.5, 0.5, DEF_DRAW_RED, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
+			20, 130, 0.5, 0.5, DEF_DRAW_RED, X_ALIGN_CENTER, Y_ALIGN_CENTER, 140, 15);
 			Draw(bmark_msg[DEF_BMARK_GRAPH_BATTERY_TEMP_MSG] + std::to_string(bmark_battery_temp_history[bmark_selected_graph_pos]) + "゜C",
-			160, 130, 0.5, 0.5, 0xFF00A000, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 140, 15);
+			160, 130, 0.5, 0.5, 0xFF00A000, X_ALIGN_CENTER, Y_ALIGN_CENTER, 140, 15);
 			Draw(bmark_msg[DEF_BMARK_GRAPH_BATTERY_VOLTAGE_MSG] + std::to_string(bmark_battery_voltage_history[bmark_selected_graph_pos]).substr(0, 5) + "V",
-			20, 145, 0.5, 0.5, 0xFF00A0FF, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 280, 15);
+			20, 145, 0.5, 0.5, 0xFF00A0FF, X_ALIGN_CENTER, Y_ALIGN_CENTER, 280, 15);
 
 			//start, stop and option button
-			Draw(bmark_msg[DEF_BMARK_START_MSG], 20, 175, 0.425, 0.425, bmark_start_mark_request ? weak_color : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 135, 15,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmark_start_button, bmark_start_button.selected ?  DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
-			Draw(bmark_msg[DEF_BMARK_STOP_MSG], 165, 175, 0.425, 0.425, bmark_start_mark_request ? color : weak_color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 135, 15,
-			DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmark_stop_button, bmark_stop_button.selected ?  DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
-			Draw(bmark_msg[DEF_BMARK_SEND_DATA_MSG] + bmark_msg[DEF_BMARK_OFF_MSG + bmark_send_data], 20, 200, 0.425, 0.425, bmark_start_mark_request ? weak_color : color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER,
-			280, 15, DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmark_send_data_button, bmark_send_data_button.selected ?  DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(bmark_msg[DEF_BMARK_START_MSG], 20, 175, 0.425, 0.425, bmark_start_mark_request ? weak_color : color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 135, 15,
+			BACKGROUND_ENTIRE_BOX, &bmark_start_button, bmark_start_button.selected ?  DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(bmark_msg[DEF_BMARK_STOP_MSG], 165, 175, 0.425, 0.425, bmark_start_mark_request ? color : weak_color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 135, 15,
+			BACKGROUND_ENTIRE_BOX, &bmark_stop_button, bmark_stop_button.selected ?  DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
+			Draw(bmark_msg[DEF_BMARK_SEND_DATA_MSG] + bmark_msg[DEF_BMARK_OFF_MSG + bmark_send_data], 20, 200, 0.425, 0.425, bmark_start_mark_request ? weak_color : color, X_ALIGN_CENTER, Y_ALIGN_CENTER,
+			280, 15, BACKGROUND_ENTIRE_BOX, &bmark_send_data_button, bmark_send_data_button.selected ?  DEF_DRAW_AQUA : DEF_DRAW_WEAK_AQUA);
 
 			if(bmark_stop_check_request)
 			{
 				//Stop benchmark confirmation dialog
 				Draw_texture(var_square_image[0], DEF_DRAW_AQUA, 40, 100, 240, 60);
-				Draw(bmark_msg[DEF_BMARK_ABORT_CONFIRMATION_MSG], 40, 100, 0.45, 0.45, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_TOP, 240, 20);
-				Draw(bmark_msg[DEF_BMARK_YES_MSG], 40, 140, 0.45, 0.45, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 110, 20,
-				DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmark_yes_button, bmark_yes_button.selected ? DEF_DRAW_YELLOW : DEF_DRAW_WEAK_YELLOW);
-				Draw(bmark_msg[DEF_BMARK_NO_MSG], 170, 140, 0.45, 0.45, color, DEF_DRAW_X_ALIGN_CENTER, DEF_DRAW_Y_ALIGN_CENTER, 110, 20,
-				DEF_DRAW_BACKGROUND_ENTIRE_BOX, &bmark_no_button, bmark_no_button.selected ? DEF_DRAW_YELLOW : DEF_DRAW_WEAK_YELLOW);
+				Draw(bmark_msg[DEF_BMARK_ABORT_CONFIRMATION_MSG], 40, 100, 0.45, 0.45, color, X_ALIGN_CENTER, Y_ALIGN_TOP, 240, 20);
+				Draw(bmark_msg[DEF_BMARK_YES_MSG], 40, 140, 0.45, 0.45, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 110, 20,
+				BACKGROUND_ENTIRE_BOX, &bmark_yes_button, bmark_yes_button.selected ? DEF_DRAW_YELLOW : DEF_DRAW_WEAK_YELLOW);
+				Draw(bmark_msg[DEF_BMARK_NO_MSG], 170, 140, 0.45, 0.45, color, X_ALIGN_CENTER, Y_ALIGN_CENTER, 110, 20,
+				BACKGROUND_ENTIRE_BOX, &bmark_no_button, bmark_no_button.selected ? DEF_DRAW_YELLOW : DEF_DRAW_WEAK_YELLOW);
 			}
 
 			if(Util_err_query_error_show_flag())
