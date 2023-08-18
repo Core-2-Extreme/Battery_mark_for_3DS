@@ -10,6 +10,7 @@ TitleInfo:
   Category                : Application
   UniqueId                : $(APP_UNIQUE_ID)
 
+
 Option:
   UseOnSD                 : true # true if App is to be installed to SD
   FreeProductCode         : true # Removes limitations on ProductCode
@@ -25,7 +26,7 @@ AccessControlInfo:
   
   # Minimum Required Kernel Version (below is for 4.5.0)
   ReleaseKernelMajor            : "02"
-  ReleaseKernelMinor            : "33" 
+  ReleaseKernelMinor            : "44"
 
   # ExtData
   UseExtSaveData                : false # enables ExtData       
@@ -80,11 +81,11 @@ AccessControlInfo:
   CanUseNonAlphabetAndNumber    : true
   PermitMainFunctionArgument    : true
   CanShareDeviceMemory          : true
-  RunnableOnSleep               : true
+  RunnableOnSleep               : false
   SpecialMemoryArrange          : true
 
   # New3DS Exclusive Process Settings
-  SystemModeExt                 : Legacy # Legacy(Default)/124MB/178MB  Legacy:Use Old3DS SystemMode
+  SystemModeExt                 : 124MB # Legacy(Default)/124MB/178MB  Legacy:Use Old3DS SystemMode
   CpuSpeed                      : 804MHz # 268MHz(Default)/804MHz
   EnableL2Cache                 : true # false(default)/true
   CanAccessCore2                : true 
@@ -229,6 +230,7 @@ AccessControlInfo:
    - ir:USER
    - mic:u
    - mcu::HWC
+   - mvd:STD
    - ndm:u
    - news:s
    - nwm::EXT
@@ -270,6 +272,7 @@ SystemControlInfo:
     ir: 0x0004013000003302
     mcu: 0x0004013000001f02
     mic: 0x0004013000002002
+    mvd: 0x0004013020004102
     ndm: 0x0004013000002b02
     news: 0x0004013000003502
     #nfc: 0x0004013000004002

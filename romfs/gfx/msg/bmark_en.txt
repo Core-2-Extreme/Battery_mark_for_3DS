@@ -1,4 +1,4 @@
-﻿<0>Battery </0>
+<0>Battery </0>
 <1>Battery time (per 1%) </1>
 <2>Do not charge!!!!!</2>
 <3>The test was aborted!!!!!</3>

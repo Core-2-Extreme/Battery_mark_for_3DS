@@ -1,4 +1,4 @@
-﻿#include "definitions.hpp"
+#include "definitions.hpp"
 #include "system/types.hpp"
 
 #include "system/setting_menu.hpp"
@@ -198,7 +198,7 @@ void Menu_init(void)
 
 	result = Util_init();
 	Util_log_save(DEF_MENU_INIT_STR, "Util_init()...", result.code);
-	
+
 	Sem_init();
 
 	Sem_suspend();
@@ -277,12 +277,12 @@ void Menu_init(void)
 			threadJoin(core_3, U64_MAX);
 			var_core_3_available = true;
 		}
-		
+
 		threadFree(core_2);
 		threadFree(core_3);
 	}
 
-#if (DEF_ENABLE_CURL_API || DEF_ENABLE_HTTPC_API)	
+#if (DEF_ENABLE_CURL_API || DEF_ENABLE_HTTPC_API)
 	if (var_allow_send_app_info)
 		menu_send_app_info_thread = threadCreate(Menu_send_app_info_thread, (void*)(""), DEF_STACKSIZE, DEF_THREAD_PRIORITY_LOW, 1, true);
 #endif
@@ -361,7 +361,7 @@ void Menu_init(void)
 		Util_add_watch(&menu_sapp_button[i].selected);
 		Util_add_watch(&menu_sapp_close_button[i].selected);
 	}
-	
+
 	Menu_get_system_info();
 
 	Menu_resume();
@@ -591,7 +591,7 @@ void Menu_main(void)
 
 			if(Util_log_query_log_show_flag())
 				Util_log_draw();
-	
+
 			Draw_top_ui();
 
 			if(var_monitor_cpu_usage)
@@ -1180,7 +1180,7 @@ void Menu_get_system_info(void)
 	{
 		MCUHWC_GetBatteryVoltage(&battery_voltage);
 		MCUHWC_ReadRegister(0x0A, &battery_temp, 1);
-		var_battery_voltage = 5.0 * (battery_voltage / 256.0); 
+		var_battery_voltage = 5.0 * (battery_voltage / 256.0);
 		var_battery_level_raw = battery_level;
 		var_battery_temp = battery_temp;
 	}
@@ -1333,17 +1333,30 @@ void Menu_worker_thread(void* arg)
 {
 	Util_log_save(DEF_MENU_WORKER_THREAD_STR, "Thread started.");
 	int count = 0;
+	u64 previous_ts = 0;
 	Result_with_string result;
 
 	while (menu_thread_run)
 	{
-		usleep(49000);
-		count++;
+		if(previous_ts + 50 <= osGetTime())
+		{
+			if(var_flash_mode)
+			{
+				var_night_mode = !var_night_mode;
+				var_need_reflesh = true;
+			}
+			count++;
+
+			if(previous_ts + 100 >= osGetTime())
+				previous_ts += 50;
+			else
+				previous_ts = osGetTime();
+		}
 
 		if(count % 5 == 0)
 			Menu_get_system_info();
 
-		if (count >= 20)
+		if(count >= 20)
 		{
 			var_need_reflesh = true;
 			var_afk_time++;
@@ -1372,7 +1385,7 @@ void Menu_worker_thread(void* arg)
 			result = Util_cset_set_screen_state(false, true, var_turn_on_bottom_lcd);
 			if(result.code != 0)
 				Util_log_save(DEF_MENU_WORKER_THREAD_STR, "Util_cset_set_screen_state()..." + result.string + result.error_description, result.code);
-			
+
 			if(var_top_lcd_brightness == var_lcd_brightness && var_bottom_lcd_brightness == var_lcd_brightness)
 			{
 				result = Util_cset_set_screen_brightness(true, true, var_lcd_brightness);
@@ -1413,11 +1426,7 @@ void Menu_worker_thread(void* arg)
 
 		LightLock_Unlock(&menu_callback_mutex);
 
-		if (var_flash_mode)
-		{
-			var_night_mode = !var_night_mode;
-			var_need_reflesh = true;
-		}
+		gspWaitForVBlank();
 	}
 	Util_log_save(DEF_MENU_WORKER_THREAD_STR, "Thread exit.");
 	threadExit(0);
