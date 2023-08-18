@@ -9,7 +9,7 @@
 #define DEF_SEND_APP_INFO_URL (std::string)"https://script.google.com/macros/s/AKfycbyn_blFyKWXCgJr6NIF8x6ETs7CHRN5FXKYEAAIrzV6jPYcCkI/exec"
 #define DEF_CHECK_UPDATE_URL (std::string)"https://script.google.com/macros/s/AKfycbz8Nsobjwc9IslWkIEB_2gyc76bTyJFwod2SZJbeVuhu_HbfQiszty8/exec"
 #define DEF_HTTP_USER_AGENT (std::string)"battery mark for 3ds " + DEF_CURRENT_APP_VER
-#define DEF_CURRENT_APP_VER (std::string)"v2.1.0"
+#define DEF_CURRENT_APP_VER (std::string)"v2.1.1 (nightly build)"
 #define DEF_CURRENT_APP_VER_INT 2064
 #define DEF_ENABLE_BMARK
 #define DEF_ENABLE_BMR
@@ -67,7 +67,7 @@
 #define DEF_BMARK_ENABLE_NAME
 #define DEF_BMARK_ICON_PATH (std::string)"romfs:/"
 #define DEF_BMARK_NAME (std::string)"Battery\nmark"
-#define DEF_BMARK_VER (std::string)"v2.1.0"
+#define DEF_BMARK_VER (std::string)"v2.1.1 (nightly build)"
 #define DEF_BMARK_MAIN_STR (std::string)"Bmark/Main"
 #define DEF_BMARK_INIT_STR (std::string)"Bmark/Init"
 #define DEF_BMARK_EXIT_STR (std::string)"Bmark/Exit"
