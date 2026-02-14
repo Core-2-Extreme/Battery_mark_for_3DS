@@ -78,11 +78,14 @@ If you have older devkitpro, update it or compilation will fail.
 * Changed battery mark test(test result is not compatible with older version)
 
 ## Ranking viewer patch note
+### ver1.0.2
+* Avg and Max column switching has been fixed.
+
 ### ver1.0.1
-* Min and Max column switching has been fixed
+* Min and Max column switching has been fixed.
 
 ### ver1.0.0
-* Initial release
+* Initial release.
 
 ## License
 This software is licensed as GNU General Public License v3.0.
